@@ -19,7 +19,7 @@ const getIdentity = async (emailAndDeviceType) => {
     },
     KeyConditionExpression: "emailAndDeviceType = :emailAndDeviceType",
     IndexName: "byEmailAndDeviceType",
-    TableName: tableNames.identifyTable,
+    TableName: tableNames.identityTable,
   };
 
   const resp = await dynamodb.query(params).promise();
@@ -44,7 +44,7 @@ const identifyApi = async (props) => {
     });
 
     const updatedStepParams = constructParams({
-      tableName: tableNames.identifyTable,
+      tableName: tableNames.identityTable,
       attributes: params,
     });
 
@@ -59,7 +59,7 @@ const identifyApi = async (props) => {
 
   const inputParams = {
     Item: params,
-    TableName: tableNames.identifyTable,
+    TableName: tableNames.identityTable,
   };
 
   await dynamodb.put(inputParams).promise();

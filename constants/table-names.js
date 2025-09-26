@@ -6,7 +6,7 @@ const tableNames = {
   userPreferenceTable: process.env.USER_PREFERENCE_TABLE,
   analyticsTable: process.env.ANALYTICS_TABLE,
   featureFlagsTable: process.env.FEATURE_FLAGS_TABLE,
-  identifyTable: process.env.IDENTIFY_TABLE,
+  identityTable: process.env.IDENTITY_TABLE,
 };
 
 module.exports = {

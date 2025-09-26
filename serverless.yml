@@ -96,7 +96,7 @@ functions:
           #   type: COGNITO_USER_POOLS
           #   arn: !GetAtt CognitoUserPool.Arn
     environment:
-      IDENTIFY_TABLE: !Ref IdentifyTableV2
+      IDENTITY_TABLE: !Ref IdentityTable
   add-events:
     handler: functions/analytics/add-events.handler
     events:
@@ -235,7 +235,7 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: users-table
-    IdentifyTableV2:
+    IdentityTable:
       Type: AWS::DynamoDB::Table
       Properties:
         BillingMode: PAY_PER_REQUEST
@@ -283,7 +283,7 @@ resources:
           - Key: Environment
             Value: ${self:custom.stage}
           - Key: Name
-            Value: identify-table
+            Value: identity-table
     AnalyticsTableV2:
       Type: AWS::DynamoDB::Table
       Properties:

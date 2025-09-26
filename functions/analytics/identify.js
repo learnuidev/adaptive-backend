@@ -26,12 +26,14 @@ module.exports.handler = middy(async (event) => {
     const device = `${uaResult.device?.model || ""}_${uaResult.device?.vendor || ""}`;
     const browser = `${uaResult.browser?.name || ""}_${uaResult.browser?.version || ""}`;
 
-    const deviceType = `${JSON.stringify(uaResult.browser)}#${os}#${device}#${browser}`;
+    const deviceType = `${os}#${device}#${browser}`;
 
-    const emailAndDeviceType = `${rawParams.email}#${deviceType}`;
+    const emailAndDeviceType = `${rawParams.email}#${deviceType}#${rawParams.websiteId}`;
 
     const newIdentify = await identifyApi({
       ipAddress,
+      email: rawParams.email,
+      websiteId: rawParams.websiteId,
       emailAndDeviceType,
       userAgentInfo: {
         browser: uaResult.browser,
