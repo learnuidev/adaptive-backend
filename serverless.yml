@@ -96,7 +96,7 @@ functions:
           #   type: COGNITO_USER_POOLS
           #   arn: !GetAtt CognitoUserPool.Arn
     environment:
-      IDENTIFY_TABLE: !Ref AnalyticsTableV3
+      IDENTIFY_TABLE: !Ref IdentifyTableV3
   add-events:
     handler: functions/analytics/add-events.handler
     events:
@@ -109,7 +109,7 @@ functions:
           #   type: COGNITO_USER_POOLS
           #   arn: !GetAtt CognitoUserPool.Arn
     environment:
-      ANALYTICS_TABLE: !Ref AnalyticsTableV3
+      ANALYTICS_TABLE: !Ref AnalyticsTableV2
   add-feature-flag:
     handler: functions/analytics/add-feature-flag.handler
     events:
@@ -235,7 +235,7 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: users-table
-    IdentifyTable:
+    IdentifyTableV3:
       Type: AWS::DynamoDB::Table
       Properties:
         BillingMode: PAY_PER_REQUEST
@@ -247,7 +247,7 @@ resources:
             AttributeType: S
           - AttributeName: email
             AttributeType: S
-          - AttributeName: websiteId
+          - AttributeName: emailAndDeviceType
             AttributeType: S
         GlobalSecondaryIndexes:
           - IndexName: byEmail
@@ -258,9 +258,9 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-          - IndexName: byWebsiteId
+          - IndexName: byEmailAndDeviceType
             KeySchema:
-              - AttributeName: websiteId
+              - AttributeName: emailAndDeviceType
                 KeyType: HASH
               - AttributeName: id
                 KeyType: RANGE
@@ -274,7 +274,7 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: identify-table
-    AnalyticsTableV3:
+    AnalyticsTableV2:
       Type: AWS::DynamoDB::Table
       Properties:
         BillingMode: PAY_PER_REQUEST

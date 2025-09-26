@@ -7,34 +7,50 @@ module.exports.handler = middy(async (event) => {
   const ipAddress = event.requestContext.identity.sourceIp;
 
   try {
-    // Extract the User-Agent header from the event headers
+    const rawParams = JSON.parse(event.body);
+
+    if (!rawParams.email) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: "Email not provided! Not tracked" }),
+      };
+    }
+
     const userAgentString =
       event.headers["User-Agent"] || event.headers["user-agent"];
 
-    // Parse the User-Agent string
     const parser = new UAParser(userAgentString);
     const uaResult = parser.getResult();
 
-    const rawParams = JSON.parse(event.body);
+    const os = `${uaResult.os?.name || ""}_${uaResult.os?.version || ""}`;
+    const device = `${uaResult.device?.model || ""}_${uaResult.device?.vendor || ""}`;
+    const browser = `${uaResult.browser?.name || ""}_${uaResult.browser?.version || ""}`;
+
+    const deviceType = `${JSON.stringify(uaResult.browser)}#${os}#${device}#${browser}`;
+
+    const emailAndDeviceType = `${rawParams.email}#${deviceType}`;
 
     const newIdentify = await identifyApi({
       ...rawParams,
       ipAddress,
-      userAgentInfo: uaResult,
+      emailAndDeviceType,
+      userAgentInfo: {
+        browser: uaResult.browser,
+        device: uaResult.device,
+        os: uaResult.os,
+      },
     });
 
-    const response = {
+    return {
       statusCode: 200,
       body: JSON.stringify(newIdentify),
     };
-    return response;
   } catch (err) {
-    const response = {
+    return {
       statusCode: 400,
       body: JSON.stringify({
         message: err.message,
       }),
     };
-    return response;
   }
 }).use(cors());
