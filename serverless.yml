@@ -29,8 +29,6 @@ provider:
   versionFunctions: false
   region: us-east-1
   memorySize: 512
-  eventBridge:
-    useCloudFormation: true
   environment:
     REGION: ${self:provider.region}
     STAGE: ${self:provider.stage}
