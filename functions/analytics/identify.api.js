@@ -1,61 +1,70 @@
 const AWS = require("aws-sdk");
+const ulid = require("ulid");
 
 const { removeNull } = require("../../utils/remove-null");
 const { tableNames } = require("../../constants/table-names");
 const { apiConfig } = require("../../constants/api-config");
+
+const { constructParams } = require("../../utils/construct-params");
 
 const dynamodb = new AWS.DynamoDB.DocumentClient({
   apiVersion: "2012-08-10",
   region: apiConfig.region,
 });
 
+const getIdentity = async (emailAndDeviceType) => {
+  const params = {
+    ExpressionAttributeValues: {
+      ":emailAndDeviceType": emailAndDeviceType,
+    },
+    KeyConditionExpression: "emailAndDeviceType = :emailAndDeviceType",
+    IndexName: "byEmailAndDeviceType",
+    TableName: tableNames.identifyTable,
+  };
+
+  const resp = await dynamodb.query(params).promise();
+
+  return resp.Items[0];
+};
+
 const identifyApi = async (props) => {
   // Using emailAndDeviceType as the primary key to upsert
   const { emailAndDeviceType, ...rest } = props;
 
-  // current timestamp
-  const now = Date.now();
+  const identity = await getIdentity(emailAndDeviceType);
 
-  // Remove null or undefined from props except createdAt and updatedAt
-  const cleanProps = removeNull(rest);
+  if (identity) {
+    const params = removeNull({
+      ...identity,
+      ...rest,
+      updatedAt: Date.now(),
+      // data_version: "2023-10-07",
+      // status,
+      // next_review_date,
+    });
 
-  // Build UpdateExpression and ExpressionAttributeValues dynamically
-  let updateExpression = "SET updatedAt = :updatedAt";
-  const expressionAttributeValues = {
-    ":updatedAt": now,
-  };
-  const expressionAttributeNames = {};
+    const updatedStepParams = constructParams({
+      tableName: tableNames.identifyTable,
+      attributes: params,
+    });
 
-  // Include all properties from cleanProps in update expression
-  Object.keys(cleanProps).forEach((key, idx) => {
-    const attrNameKey = `#attr${idx}`;
-    const attrValueKey = `:val${idx}`;
-    updateExpression += `, ${attrNameKey} = ${attrValueKey}`;
-    expressionAttributeNames[attrNameKey] = key;
-    expressionAttributeValues[attrValueKey] = cleanProps[key];
-  });
+    await dynamodb.update(updatedStepParams).promise();
 
-  // Conditionally set createdAt only if attribute_not_exists
-  updateExpression += " ADD createdAt :createdAt";
-  // Instead of ADD which is for numeric, we use SET with if_not_exists function:
-  // Correct approach (replace ADD line):
-  updateExpression = updateExpression.replace(
-    "ADD createdAt :createdAt",
-    "SET createdAt = if_not_exists(createdAt, :createdAt)"
-  );
-  expressionAttributeValues[":createdAt"] = now;
+    return params;
+  }
 
-  const params = {
+  const id = ulid.ulid();
+
+  const params = removeNull({ id, ...props, createdAt: Date.now() });
+
+  const inputParams = {
+    Item: params,
     TableName: tableNames.identifyTable,
-    Key: { emailAndDeviceType },
-    UpdateExpression: updateExpression,
-    ExpressionAttributeNames: expressionAttributeNames,
-    ExpressionAttributeValues: expressionAttributeValues,
-    ReturnValues: "ALL_NEW",
   };
 
-  const result = await dynamodb.update(params).promise();
-  return result.Attributes;
+  await dynamodb.put(inputParams).promise();
+
+  return params;
 };
 
 module.exports = {

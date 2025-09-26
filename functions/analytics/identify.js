@@ -31,7 +31,6 @@ module.exports.handler = middy(async (event) => {
     const emailAndDeviceType = `${rawParams.email}#${deviceType}`;
 
     const newIdentify = await identifyApi({
-      ...rawParams,
       ipAddress,
       emailAndDeviceType,
       userAgentInfo: {

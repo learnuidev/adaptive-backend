@@ -96,7 +96,7 @@ functions:
           #   type: COGNITO_USER_POOLS
           #   arn: !GetAtt CognitoUserPool.Arn
     environment:
-      IDENTIFY_TABLE: !Ref IdentifyTableV3
+      IDENTIFY_TABLE: !Ref IdentifyTableV2
   add-events:
     handler: functions/analytics/add-events.handler
     events:
@@ -235,7 +235,7 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: users-table
-    IdentifyTableV3:
+    IdentifyTableV2:
       Type: AWS::DynamoDB::Table
       Properties:
         BillingMode: PAY_PER_REQUEST
@@ -249,7 +249,17 @@ resources:
             AttributeType: S
           - AttributeName: emailAndDeviceType
             AttributeType: S
+          - AttributeName: websiteId
+            AttributeType: S
         GlobalSecondaryIndexes:
+          - IndexName: byWebsiteId
+            KeySchema:
+              - AttributeName: websiteId
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
           - IndexName: byEmail
             KeySchema:
               - AttributeName: email
