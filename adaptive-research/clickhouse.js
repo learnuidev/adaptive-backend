@@ -564,6 +564,16 @@ const cleanEventTable = async (clickHouseClient) => {
   return resp;
 };
 
+const deleteEventTable = async (clickHouseClient) => {
+  console.log(`Deleting event table`);
+  const resp = await clickHouseClient.query({
+    query: `DROP TABLE IF EXISTS event`,
+  });
+
+  console.log(`Event table deleted`);
+  return resp;
+};
+
 const listEventsByWebsiteId = async (clickHouseClient, websiteId) => {
   console.log(`Listing events for websiteId: ${websiteId}`);
   const resp = await clickHouseClient.query({
@@ -708,6 +718,16 @@ const cleanIdentityTable = async (clickHouseClient) => {
   });
 
   console.log(`Identity table cleaned`);
+  return resp;
+};
+
+const deleteIdentityTable = async (clickHouseClient) => {
+  console.log(`Deleting identity table`);
+  const resp = await clickHouseClient.query({
+    query: `DROP TABLE IF EXISTS identity`,
+  });
+
+  console.log(`Identity table deleted`);
   return resp;
 };
 
@@ -1009,6 +1029,7 @@ const clickhouse = async (params) => {
     ingestDDBIdentity,
     mapDDBIdentity,
     cleanIdentityTable,
+    deleteIdentityTable,
     listIdentitiesByWebsiteId,
     listIdentitiesByEmail,
     // Event
@@ -1017,6 +1038,7 @@ const clickhouse = async (params) => {
     ingestDDBEvent,
     mapDDBEvent,
     cleanEventTable,
+    deleteEventTable,
     listEventsByWebsiteId,
     listEventByEmail,
     // Query Functions
@@ -1042,6 +1064,8 @@ clickhouse(params).then(async (resp) => {
     cleanIdentityTable,
     ingestDDBEvents,
     cleanEventTable,
+    deleteIdentityTable,
+    deleteEventTable,
   } = resp;
 
   // await ingestDDBIdentities(client, mockIdentities);
@@ -1087,4 +1111,7 @@ clickhouse(params).then(async (resp) => {
   // Errors out
   // const geoVisits = await getTotalVisitorsByGeo(client, "mando-prod", "month");
   // console.log("geoVisits", geoVisits);
+
+  await deleteIdentityTable(client);
+  await deleteEventTable(client);
 });
