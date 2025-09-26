@@ -1069,10 +1069,22 @@ clickhouse(params).then(async (resp) => {
   // const learnuiEvents = await listEventByEmail(client, "learnuidev@gmail.com");
   // console.log("learnuiEvents", learnuiEvents);
 
-  const totalViews = await getTotalViewsByWebsiteId(
-    client,
-    "mando-prod",
-    "last24h"
-  );
-  console.log("totalViews", totalViews);
+  // const totalViews = await getTotalViewsByWebsiteId(
+  //   client,
+  //   "mando-prod",
+  //   "year"
+  // );
+  //   console.log("totalViews", totalViews);
+
+  // const totalPageVisits = await getTotalPageVisitsByWebsiteId(
+  //   client,
+  //   "mando-prod",
+  //   "month"
+  // );
+
+  // console.log("total page visits", totalPageVisits);
+
+  // Errors out
+  // const geoVisits = await getTotalVisitorsByGeo(client, "mando-prod", "month");
+  // console.log("geoVisits", geoVisits);
 });

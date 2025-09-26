@@ -1,30 +1,39 @@
-const AWS = require("aws-sdk");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const {
+  QueryCommand,
+  PutCommand,
+  UpdateCommand,
+  DynamoDBDocumentClient,
+} = require("@aws-sdk/lib-dynamodb");
 const ulid = require("ulid");
 
 const { removeNull } = require("../../utils/remove-null");
 const { tableNames } = require("../../constants/table-names");
 const { apiConfig } = require("../../constants/api-config");
-
 const { constructParams } = require("../../utils/construct-params");
 
-const dynamodb = new AWS.DynamoDB.DocumentClient({
-  apiVersion: "2012-08-10",
+// Create low-level DynamoDB client (singleton)
+const ddbClient = new DynamoDBClient({
   region: apiConfig.region,
+  apiVersion: "2012-08-10",
 });
+
+// Wrap with high-level DocumentClient
+const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
 const getIdentity = async (emailAndDeviceType) => {
   const params = {
+    TableName: tableNames.identityTable,
+    IndexName: "byEmailAndDeviceType",
+    KeyConditionExpression: "emailAndDeviceType = :emailAndDeviceType",
     ExpressionAttributeValues: {
       ":emailAndDeviceType": emailAndDeviceType,
     },
-    KeyConditionExpression: "emailAndDeviceType = :emailAndDeviceType",
-    IndexName: "byEmailAndDeviceType",
-    TableName: tableNames.identityTable,
   };
 
-  const resp = await dynamodb.query(params).promise();
+  const resp = await dynamodb.send(new QueryCommand(params));
 
-  return resp.Items[0];
+  return resp.Items?.[0];
 };
 
 const identifyApi = async (props) => {
@@ -38,9 +47,6 @@ const identifyApi = async (props) => {
       ...identity,
       ...rest,
       updatedAt: Date.now(),
-      // data_version: "2023-10-07",
-      // status,
-      // next_review_date,
     });
 
     const updatedStepParams = constructParams({
@@ -48,7 +54,8 @@ const identifyApi = async (props) => {
       attributes: params,
     });
 
-    await dynamodb.update(updatedStepParams).promise();
+    // Use UpdateCommand for update
+    await dynamodb.send(new UpdateCommand(updatedStepParams));
 
     return params;
   }
@@ -58,11 +65,11 @@ const identifyApi = async (props) => {
   const params = removeNull({ id, ...props, createdAt: Date.now() });
 
   const inputParams = {
-    Item: params,
     TableName: tableNames.identityTable,
+    Item: params,
   };
 
-  await dynamodb.put(inputParams).promise();
+  await dynamodb.send(new PutCommand(inputParams));
 
   return params;
 };

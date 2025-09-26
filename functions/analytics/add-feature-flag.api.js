@@ -1,26 +1,32 @@
-const AWS = require("aws-sdk");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const { PutCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 const ulid = require("ulid");
 
 const { removeNull } = require("../../utils/remove-null");
 const { apiConfig } = require("../../constants/api-config");
 const { tableNames } = require("../../constants/table-names");
 
-const addFeatureFlagsApi = async (props) => {
-  const dynamodb = new AWS.DynamoDB.DocumentClient({
-    apiVersion: "2012-08-10",
-    region: apiConfig.region,
-  });
+// Create low-level DynamoDB client once
+const ddbClient = new DynamoDBClient({
+  region: apiConfig.region,
+  apiVersion: "2012-08-10",
+});
 
+// Wrap with DocumentClient for convenience
+const dynamodb = DynamoDBDocumentClient.from(ddbClient);
+
+const addFeatureFlagsApi = async (props) => {
   const id = ulid.ulid();
 
   const params = removeNull({ id, ...props, createdAt: Date.now() });
 
   const inputParams = {
-    Item: params,
     TableName: tableNames.featureFlagsTable,
+    Item: params,
   };
 
-  await dynamodb.put(inputParams).promise();
+  // Equivalent to .put(...).promise()
+  await dynamodb.send(new PutCommand(inputParams));
 
   return params;
 };
