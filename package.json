@@ -49,6 +49,7 @@
     "pinyin-pro": "^3.26.0",
     "prettier": "^3.4.2",
     "ramda": "^0.29.1",
+    "ua-parser-js": "^2.0.5",
     "ulid": "^2.3.0",
     "webvtt-parser": "^2.2.0",
     "x-ray": "^2.3.4",

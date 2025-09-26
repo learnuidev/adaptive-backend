@@ -84,6 +84,19 @@ functions:
     environment:
       USERS_TABLE: !Ref UsersTable
       USER_PREFERENCE_TABLE: !Ref UserPreferenceTable
+  identify:
+    handler: functions/analytics/identify.handler
+    events:
+      - http:
+          path: /v1/analytics/identify
+          method: POST
+          cors: true
+          # authorizer:
+          #   name: CognitoAuthorizer
+          #   type: COGNITO_USER_POOLS
+          #   arn: !GetAtt CognitoUserPool.Arn
+    environment:
+      IDENTIFY_TABLE: !Ref AnalyticsTableV3
   add-events:
     handler: functions/analytics/add-events.handler
     events:
@@ -222,6 +235,45 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: users-table
+    IdentifyTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+          - AttributeName: websiteId
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byEmail
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: byWebsiteId
+            KeySchema:
+              - AttributeName: websiteId
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        Tags:
+          # To keep track of user table for diffeent environment
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: identify-table
     AnalyticsTableV3:
       Type: AWS::DynamoDB::Table
       Properties:
