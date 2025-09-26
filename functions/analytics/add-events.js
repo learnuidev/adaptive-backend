@@ -3,6 +3,7 @@ const cors = require("@middy/http-cors");
 const { addEventsApi } = require("./add-events.api");
 
 const { extractLocationInfo } = require("../../utils/extract-location-info");
+const { extractDeviceInfo } = require("../../utils/extract-device-info");
 
 module.exports.handler = middy(async (event) => {
   const ipAddress = event.requestContext.identity.sourceIp;
@@ -10,9 +11,20 @@ module.exports.handler = middy(async (event) => {
   try {
     const rawParams = JSON.parse(event.body);
 
+    const userAgentString =
+      event.headers["User-Agent"] || event.headers["user-agent"];
+
+    // eslint-disable-next-line no-unused-vars
+    const { deviceType, ...rest } = extractDeviceInfo(userAgentString);
+
     const location = extractLocationInfo(ipAddress);
 
-    await addEventsApi({ ...rawParams, ipAddress, location });
+    await addEventsApi({
+      ...rawParams,
+      ipAddress,
+      ...location,
+      ...rest,
+    });
 
     const response = {
       statusCode: 200,
