@@ -2,7 +2,7 @@ const middy = require("@middy/core");
 const cors = require("@middy/http-cors");
 const UAParser = require("ua-parser-js");
 const { identifyApi } = require("./identify.api");
-const geoip = require("geoip-lite");
+const { extractLocationInfo } = require("../../utils/extract-location-info");
 
 module.exports.handler = middy(async (event) => {
   const ipAddress = event.requestContext.identity.sourceIp;
@@ -29,11 +29,11 @@ module.exports.handler = middy(async (event) => {
 
     const deviceType = `${os}#${device}#${browser}`;
 
-    const emailAndDeviceType = `${rawParams.email}#${deviceType}#${rawParams.websiteId}`;
+    const emailAndDeviceType = `${rawParams?.email}#${deviceType}#${rawParams?.websiteId}`;
 
-    const location = geoip.lookup(ipAddress);
+    const location = extractLocationInfo(ipAddress);
 
-    const newIdentify = await identifyApi({
+    const params = {
       ipAddress,
       email: rawParams.email,
       websiteId: rawParams.websiteId,
@@ -44,11 +44,13 @@ module.exports.handler = middy(async (event) => {
         device: uaResult.device,
         os: uaResult.os,
       },
-    });
+    };
+
+    const newIdentity = await identifyApi(params);
 
     return {
       statusCode: 200,
-      body: JSON.stringify(newIdentify),
+      body: JSON.stringify(newIdentity),
     };
   } catch (err) {
     return {

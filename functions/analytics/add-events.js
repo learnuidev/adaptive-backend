@@ -1,14 +1,16 @@
 const middy = require("@middy/core");
 const cors = require("@middy/http-cors");
 const { addEventsApi } = require("./add-events.api");
-const geoip = require("geoip-lite");
+
+const { extractLocationInfo } = require("../../utils/extract-location-info");
 
 module.exports.handler = middy(async (event) => {
   const ipAddress = event.requestContext.identity.sourceIp;
 
   try {
     const rawParams = JSON.parse(event.body);
-    const location = geoip.lookup(ipAddress);
+
+    const location = extractLocationInfo(ipAddress);
 
     await addEventsApi({ ...rawParams, ipAddress, location });
 

@@ -20,7 +20,7 @@ const addEventsApi = async (props) => {
   const params = removeNull({ id, ...props, createdAt: Date.now() });
 
   const inputParams = {
-    TableName: tableNames.analyticsTable,
+    TableName: tableNames.eventsTable,
     Item: params,
   };
 
