@@ -96,7 +96,7 @@ functions:
           #   type: COGNITO_USER_POOLS
           #   arn: !GetAtt CognitoUserPool.Arn
     environment:
-      IDENTITY_TABLE: !Ref IdentityTable
+      IDENTITY_TABLE: !Ref IdentityTableV2
   add-events:
     handler: functions/analytics/add-events.handler
     events:
@@ -109,7 +109,7 @@ functions:
           #   type: COGNITO_USER_POOLS
           #   arn: !GetAtt CognitoUserPool.Arn
     environment:
-      EVENTS_TABLE: !Ref EventsTable
+      EVENTS_TABLE: !Ref EventsTableV2
   add-feature-flag:
     handler: functions/analytics/add-feature-flag.handler
     events:
@@ -235,7 +235,7 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: users-table
-    IdentityTable:
+    IdentityTableV2:
       Type: AWS::DynamoDB::Table
       Properties:
         BillingMode: PAY_PER_REQUEST
@@ -284,7 +284,7 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: identity-table
-    EventsTable:
+    EventsTableV2:
       Type: AWS::DynamoDB::Table
       Properties:
         BillingMode: PAY_PER_REQUEST
