@@ -1,6 +1,12 @@
 // adaptive.js - Simplified identity module with IP tracking and location data
-export const Adaptive = function ({ apiKey, origins = ["*"] }) {
-  let currentIdentity = null;
+export const Adaptive = function ({
+  apiKey,
+  origins = ["*"],
+}: {
+  apiKey: string;
+  origins?: string[];
+}) {
+  let currentIdentity: any = null;
   const storageKey = "adaptive_identity";
 
   // Check if origin is allowed
@@ -140,7 +146,7 @@ export const Adaptive = function ({ apiKey, origins = ["*"] }) {
     }
   };
 
-  const saveIdentity = (identity) => {
+  const saveIdentity = (identity: any) => {
     // Only save if origin is allowed
     if (!isOriginAllowed()) {
       console.warn("Adaptive: Origin not allowed - identity not saved");
@@ -298,7 +304,7 @@ export const Adaptive = function ({ apiKey, origins = ["*"] }) {
   };
 
   // Method to calculate distance between current location and coordinates
-  const calculateDistance = (lat2, lon2, unit = "km") => {
+  const calculateDistance = (lat2: any, lon2: any, unit = "km") => {
     if (
       !currentIdentity ||
       !currentIdentity.location ||

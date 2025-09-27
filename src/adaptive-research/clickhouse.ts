@@ -32,9 +32,9 @@ import {
   deleteIdentityTable,
   listIdentitiesByWebsiteId,
   listIdentitiesByEmail,
-} from "./identity";
+} from "./identity.js";
 
-export const clickhouse = (params) => {
+export const clickhouse = (params: any) => {
   const client = createClient(params);
 
   return {

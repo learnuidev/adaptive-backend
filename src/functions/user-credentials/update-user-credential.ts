@@ -2,7 +2,7 @@ import middy from "@middy/core";
 import cors from "@middy/http-cors";
 import { updateUserCredentialApi } from "./update-user-credential.api.js";
 
-export const handler = middy(async (event) => {
+export const handler = middy(async (event: any) => {
   const { id, title, description, scopes, permissionType } = JSON.parse(
     event.body
   );

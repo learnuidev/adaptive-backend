@@ -1,4 +1,4 @@
-import { buildDateRange } from "./utils";
+import { buildDateRange } from "./utils.js";
 
 /* eslint-disable no-unused-vars */
 const sample_events = {
@@ -35,7 +35,7 @@ const sample_events = {
     height: 859,
   },
 };
-export function mapDDBEvent(event) {
+export function mapDDBEvent(event: any) {
   return {
     id: event.id,
     visitor_id: event.visitorId,
@@ -70,7 +70,7 @@ export function mapDDBEvent(event) {
   };
 }
 
-export const createEventTable = async (clickHouseClient) => {
+export const createEventTable = async (clickHouseClient: any) => {
   console.log(`Creating event table if not exists`);
   const resp = await clickHouseClient.query({
     query: `
@@ -269,7 +269,7 @@ export const getFunnelData = async (
   };
 };
 
-export function addParamToRoutes(routes) {
+export function addParamToRoutes(routes: any) {
   function extractPattern(route) {
     // Match something like /section/value, return /section/[param]
     const match = route.match(/^\/([^/]+)\/[^/]+$/);
@@ -330,7 +330,10 @@ export const getTotalPageVisitsByWebsiteId = async (
   };
 };
 
-export const listPagesByWebsiteId = async (clickHouseClient, websiteId) => {
+export const listPagesByWebsiteId = async (
+  clickHouseClient: any,
+  websiteId: string
+) => {
   console.log(`Listing pages for websiteId: ${websiteId}`);
   const resp = await clickHouseClient.query({
     query: `

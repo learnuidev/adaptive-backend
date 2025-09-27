@@ -1,4 +1,4 @@
-import { getUserCredentialById } from "../../user-credentials/get-user-credential-by-id.api";
+import { getUserCredentialById } from "../../user-credentials/get-user-credential-by-id.api.js";
 
 const withUserCredentialMiddleware = async (event, context, next) => {
   try {

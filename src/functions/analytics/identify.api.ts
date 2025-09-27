@@ -37,7 +37,7 @@ const translateConfig = {
 // Wrap with high-level DocumentClient
 const dynamodb = DynamoDBDocumentClient.from(ddbClient, translateConfig);
 
-const getIdentity = async (emailAndDeviceType) => {
+const getIdentity = async (emailAndDeviceType: string) => {
   const params = {
     TableName: tableNames.identityTable,
     IndexName: "byEmailAndDeviceType",
@@ -52,7 +52,7 @@ const getIdentity = async (emailAndDeviceType) => {
   return resp.Items?.[0];
 };
 
-export const identifyApi = async (props) => {
+export const identifyApi = async (props: any) => {
   // Using emailAndDeviceType as the primary key to upsert
   const { emailAndDeviceType, ...rest } = props;
 

@@ -80,15 +80,15 @@ provider:
 
 functions:
   public-authorizer:
-    handler: src/functions/auth/public-authorizer.handler
+    handler: dist/functions/auth/public-authorizer.handler
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   authorizer:
-    handler: src/functions/auth/authorizer.handler
+    handler: dist/functions/auth/authorizer.handler
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   list-user-credentials:
-    handler: src/functions/user-credentials/list-user-credentials.handler
+    handler: dist/functions/user-credentials/list-user-credentials.handler
     events:
       - http:
           path: /v1/list-user-credentials
@@ -101,7 +101,7 @@ functions:
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   add-user-credential:
-    handler: src/functions/user-credentials/add-user-credential.handler
+    handler: dist/functions/user-credentials/add-user-credential.handler
     events:
       - http:
           path: /v1/add-user-credential
@@ -114,7 +114,7 @@ functions:
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   update-user-credential:
-    handler: src/functions/user-credentials/update-user-credential.handler
+    handler: dist/functions/user-credentials/update-user-credential.handler
     events:
       - http:
           path: /v1/update-user-credential
@@ -127,7 +127,7 @@ functions:
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   delete-user-credential:
-    handler: src/functions/user-credentials/delete-user-credential.handler
+    handler: dist/functions/user-credentials/delete-user-credential.handler
     events:
       - http:
           path: /v1/delete-user-credential
@@ -140,12 +140,12 @@ functions:
     environment:
       user_credentials_table: !Ref UserCredentialsTable
   confirmUserSignup:
-    handler: src/functions/user/confirm-user-signup.handler
+    handler: dist/functions/user/confirm-user-signup.handler
     environment:
       USERS_TABLE: !Ref UsersTable
       USER_PREFERENCE_TABLE: !Ref UserPreferenceTable
   identify:
-    handler: src/functions/analytics/identify.handler
+    handler: dist/functions/analytics/identify.handler
     events:
       - http:
           path: /v1/analytics/identify
@@ -158,7 +158,7 @@ functions:
     environment:
       IDENTITY_TABLE: !Ref IdentityTableV2
   add-events:
-    handler: src/functions/analytics/add-events.handler
+    handler: dist/functions/analytics/add-events.handler
     events:
       - http:
           path: /v1/analytics/add-events
@@ -171,7 +171,7 @@ functions:
     environment:
       EVENTS_TABLE: !Ref EventsTableV2
   add-feature-flag:
-    handler: src/functions/analytics/add-feature-flag.handler
+    handler: dist/functions/analytics/add-feature-flag.handler
     events:
       - http:
           path: /v1/analytics/add-feature-flag
@@ -184,7 +184,7 @@ functions:
     environment:
       FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
   remove-feature-flag:
-    handler: src/functions/analytics/remove-feature-flag.handler
+    handler: dist/functions/analytics/remove-feature-flag.handler
     events:
       - http:
           path: /v1/analytics/remove-feature-flag
@@ -197,7 +197,7 @@ functions:
     environment:
       FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
   list-feature-flags:
-    handler: src/functions/analytics/list-feature-flags.handler
+    handler: dist/functions/analytics/list-feature-flags.handler
     events:
       - http:
           path: /v1/analytics/list-feature-flags

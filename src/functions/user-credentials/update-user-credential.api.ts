@@ -20,6 +20,13 @@ export const updateUserCredentialApi = async ({
   scopes,
   permissionType,
   userId,
+}: {
+  id: string;
+  title: string;
+  description: string;
+  scopes: string[];
+  permissionType: string;
+  userId: string;
 }) => {
   // Retrieve existing item
   const getParams = {
