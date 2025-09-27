@@ -78,6 +78,7 @@ const addUserCredentialApi = async ({
     permissionType,
     previewApiSecret: `${credentialsPrefix}${prefix}...${suffix}`,
     createdAt,
+    urlEndpoint: apiConfig.urlEndpoint,
     ...rest,
   };
 
