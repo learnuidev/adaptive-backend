@@ -1,12 +1,10 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import crypto from "crypto";
 import { ulid } from "ulid";
 
 import {
-  KmsKeyringNode,
   buildClient,
   CommitmentPolicy,
+  KmsKeyringNode,
 } from "@aws-crypto/client-node";
 import { apiConfig } from "../constants/api-config.js";
 
@@ -36,10 +34,6 @@ export const cryptoV2 = ({ keyArn }: { keyArn: string }) => {
   const keyIds = [keyArn];
 
   const keyring = new KmsKeyringNode({ generatorKeyId, keyIds });
-
-  // DynamoDB v3 client setup
-  const ddbClient = new DynamoDBClient({ region: apiConfig.region });
-  const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
   return {
     encrypt: async (secretAccessKey: string) => {
