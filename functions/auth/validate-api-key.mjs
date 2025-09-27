@@ -1,7 +1,7 @@
 import { apiConfig } from "../../constants/api-config.mjs";
-import { cryptoV2 } from "../../lib/crypto-v2";
-import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api";
-import { credentialsPrefix } from "../user-credentials/user-credentials.constants";
+import { cryptoV2 } from "../../lib/crypto-v2.mjs";
+import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api.mjs";
+import { credentialsPrefix } from "../user-credentials/user-credentials.constants.mjs";
 // import { getUserCredentialById } from "./user-credential/get-user-credential-by-id";
 
 export async function validateApiKey(apiKeyWithMando) {
@@ -30,3 +30,5 @@ export async function validateApiKey(apiKeyWithMando) {
 
   return false;
 }
+
+// yo

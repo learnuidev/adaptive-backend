@@ -5,25 +5,44 @@ plugins:
   - serverless-iam-roles-per-function
   - serverless-step-functions
   - serverless-export-env
-  - serverless-esbuild
+  - serverless-bundle
+  # - serverless-esbuild
 
 package:
-  exclude:
-    - package-lock.json
-    - package.json
+  individually: false
+  patterns:
+    - "package.json"
+    - "!node_modules/**"
+    - "!tests/**"
+    - "!.**"
+    - "!.git/**"
 
 custom:
-  esbuild:
-    bundle: true
-    minify: true
-    sourcemap: true
-    target: node18
-    platform: node
-    format: esm
-    mainFields: ["module", "main"]
-    resolveExtensions: [".mjs", ".js", ".ts"]
-    external:
-      - "@aws-sdk/*"
+  bundle:
+    esbuild: true
+    sourcemaps: true
+    caching: true
+    forceExclude:
+      - aws-sdk
+    packagerOptions:
+      scripts:
+        - npm install --production
+  # esbuild:
+  #   bundle: true
+  #   minify: true
+  #   sourcemap: true
+  #   target: node20 # Change from node18 to node20
+  #   platform: node
+  #   format: esm # This is correct
+  #   mainFields: ["module", "main"]
+  #   resolveExtensions: [".mjs", ".js", ".ts"]
+  #   external:
+  #     - "@aws-sdk/*"
+  #   # Add these new settings:
+  #   packager: npm # Important for ESM
+  #   keepOutputDirectory: true # For debugging
+  #   concurrency: 5
+
   name: vishal
   stage: ${opt:stage, self:provider.stage}
   logRetentionInDays: 30
@@ -48,7 +67,7 @@ provider:
     REGION: ${self:provider.region}
     STAGE: ${self:provider.stage}
     LOG_LEVEL: ${self:custom.logLevel.${self:provider.stage}, self:custom.logLevel.default}
-    NODE_OPTIONS: --enable-source-maps
+    # NODE_OPTIONS: --enable-source-maps
   iamRoleStatements:
     - Effect: Allow
       Action:
