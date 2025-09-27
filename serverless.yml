@@ -5,6 +5,7 @@ plugins:
   - serverless-iam-roles-per-function
   - serverless-step-functions
   - serverless-export-env
+  - serverless-esbuild
 
 package:
   exclude:
@@ -12,6 +13,13 @@ package:
     - package.json
 
 custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    target: node20
+    platform: node
+    format: esm
   name: vishal
   stage: ${opt:stage, self:provider.stage}
   logRetentionInDays: 30
@@ -25,6 +33,7 @@ custom:
 provider:
   name: aws
   runtime: nodejs20.x
+  architecture: arm64 # Optional: for better performance
   stage: ${opt:stage, 'dev'}
   versionFunctions: false
   region: us-east-1
@@ -35,6 +44,7 @@ provider:
     REGION: ${self:provider.region}
     STAGE: ${self:provider.stage}
     LOG_LEVEL: ${self:custom.logLevel.${self:provider.stage}, self:custom.logLevel.default}
+    NODE_OPTIONS: --enable-source-maps
   iamRoleStatements:
     - Effect: Allow
       Action:

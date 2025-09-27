@@ -1,4 +1,4 @@
-const funnels = [
+export const funnels = [
   {
     websiteId: "68d4c2a24b0000c1caa0dde9",
     name: "Landing Funnel Page",
@@ -28,7 +28,7 @@ const funnels = [
   },
 ];
 
-const output = {
+export const output = {
   funnel: {
     id: "68d736c1e5cddd8ba71b401a",
     name: "Landing Funnel Page",

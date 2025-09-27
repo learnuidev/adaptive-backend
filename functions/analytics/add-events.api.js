@@ -1,13 +1,13 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { PutCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
-const ulid = require("ulid");
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import ulid from "ulid";
 
-const { removeNull } = require("../../utils/remove-null");
-const { tableNames } = require("../../constants/table-names");
-const { apiConfig } = require("../../constants/api-config");
-const { clickhouseClient } = require("../../lib/clickhouse-client");
+import { removeNull } from "../../utils/remove-null.js";
+import { tableNames } from "../../constants/table-names.js";
+import { apiConfig } from "../../constants/api-config.js";
+import { clickhouseClient } from "../../lib/clickhouse-client.js";
 
-const addEventsApi = async (props) => {
+export const addEventsApi = async (props) => {
   // Create low-level DynamoDB client
   const ddbClient = new DynamoDBClient({
     region: apiConfig.region,
@@ -33,8 +33,4 @@ const addEventsApi = async (props) => {
   }
 
   return params;
-};
-
-module.exports = {
-  addEventsApi,
 };

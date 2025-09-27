@@ -1,8 +1,8 @@
-const middy = require("@middy/core");
-const cors = require("@middy/http-cors");
-const { updateUserCredentialApi } = require("./update-user-credential.api");
+import middy from "@middy/core";
+import cors from "@middy/http-cors";
+import { updateUserCredentialApi } from "./update-user-credential.api";
 
-module.exports.handler = middy(async (event) => {
+export const handler = middy(async (event) => {
   const { id, title, description, scopes, permissionType } = JSON.parse(
     event.body
   );

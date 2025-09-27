@@ -1,6 +1,6 @@
-const geoip = require("geoip-lite");
+import geoip from "geoip-lite";
 
-const extractLocationInfo = (ipAddress) => {
+export const extractLocationInfo = (ipAddress) => {
   const sample = {
     // eu: "0",
     // ll: [39.018, -77.539],
@@ -25,8 +25,4 @@ const extractLocationInfo = (ipAddress) => {
     latitude: location?.ll?.[0],
     longitude: location?.ll?.[1],
   };
-};
-
-module.exports = {
-  extractLocationInfo,
 };

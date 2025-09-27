@@ -95,7 +95,4 @@ function buildDateRange(periodKey, from, to) {
   };
 }
 
-module.exports = {
-  buildDateRange,
-  period,
-};
+export { buildDateRange, period };

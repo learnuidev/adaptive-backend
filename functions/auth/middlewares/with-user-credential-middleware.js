@@ -1,10 +1,4 @@
-// const {
-//   getUserCredentialById,
-// } = require("../user-credential/get-user-credential-by-id");
-
-const {
-  getUserCredentialById,
-} = require("../../user-credentials/get-user-credential-by-id.api");
+import { getUserCredentialById } from "../../user-credentials/get-user-credential-by-id.api.js";
 
 const withUserCredentialMiddleware = async (event, context, next) => {
   try {
@@ -41,4 +35,4 @@ const withUserCredentialMiddleware = async (event, context, next) => {
   }
 };
 
-module.exports = { withUserCredentialMiddleware };
+export { withUserCredentialMiddleware };

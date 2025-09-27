@@ -1,4 +1,4 @@
-const withPermissionsMiddleware =
+export const withPermissionsMiddleware =
   (permissions) => async (event, context, next) => {
     try {
       const userCredential = event.userCredential;
@@ -33,5 +33,3 @@ const withPermissionsMiddleware =
       };
     }
   };
-
-module.exports = { withPermissionsMiddleware };

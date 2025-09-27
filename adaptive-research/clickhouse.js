@@ -1,7 +1,7 @@
-const { createClient } = require("@clickhouse/client");
+import { createClient } from "@clickhouse/client";
 
 // Event Stuff
-const {
+import {
   mapDDBEvent,
   createEventTable,
   cleanEventTable,
@@ -10,15 +10,17 @@ const {
   ingestDDBEvents,
   listEventsByWebsiteId,
   listEventByEmail,
+
+  // Queries
+  getTotalVisitorsByGeo,
   getTotalViewsByWebsiteId,
   getTotalPageVisitsByWebsiteId,
-  getTotalVisitorsByGeo,
   getFunnelData,
-  ...rest
-} = require("./events");
+  listPagesByWebsiteId,
+} from "./events.js";
 
 // IDentity Stuff
-const {
+import {
   createIdentityTable,
   ingestDDBIdentities,
   ingestDDBIdentity,
@@ -27,10 +29,10 @@ const {
   deleteIdentityTable,
   listIdentitiesByWebsiteId,
   listIdentitiesByEmail,
-} = require("./identity");
-require("dotenv").config();
+} from "./identity.js";
+import "dotenv/config";
 
-const clickhouse = (params) => {
+export const clickhouse = (params) => {
   const client = createClient(params);
 
   return {
@@ -58,10 +60,8 @@ const clickhouse = (params) => {
     getTotalPageVisitsByWebsiteId,
     getTotalVisitorsByGeo,
     getFunnelData,
-    ...rest,
+    listPagesByWebsiteId,
   };
 };
 
-module.exports = {
-  clickhouse,
-};
+export { clickhouse as default };

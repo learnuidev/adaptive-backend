@@ -1,13 +1,10 @@
-const { apiConfig } = require("../../constants/api-config");
-const { cryptoV2 } = require("../../lib/crypto-v2");
-const {
-  credentialsPrefix,
-} = require("../user-credentials/user-credentials.constants");
-const {
-  getUserCredentialById,
-} = require("./user-credential/get-user-credential-by-id");
+import { apiConfig } from "../../constants/api-config";
+import { cryptoV2 } from "../../lib/crypto-v2";
+import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api";
+import { credentialsPrefix } from "../user-credentials/user-credentials.constants";
+// import { getUserCredentialById } from "./user-credential/get-user-credential-by-id";
 
-async function validateApiKey(apiKeyWithMando) {
+export async function validateApiKey(apiKeyWithMando) {
   // Implement your API key validation logic here
   // This could involve checking against a database or external service
 
@@ -33,7 +30,3 @@ async function validateApiKey(apiKeyWithMando) {
 
   return false;
 }
-
-module.exports = {
-  validateApiKey,
-};

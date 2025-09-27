@@ -1,7 +1,6 @@
-require("dotenv").config();
-
+import "dotenv/config";
 /* eslint-disable no-undef */
-const tableNames = {
+export const tableNames = {
   usersTable: process.env.USERS_TABLE,
   userPreferenceTable: process.env.USER_PREFERENCE_TABLE,
   eventsTable: process.env.EVENTS_TABLE,
@@ -10,6 +9,6 @@ const tableNames = {
   userCredentialsTable: process.env.USER_CREDENTIALS_TABLE,
 };
 
-module.exports = {
+export default {
   tableNames,
 };

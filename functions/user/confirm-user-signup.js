@@ -1,6 +1,6 @@
-const { confirmUserSignuApi } = require("./confirm-user-signup.api");
+import { confirmUserSignuApi } from "./confirm-user-signup.api";
 
-module.exports.handler = async (event) => {
+export const handler = async (event) => {
   if (event.triggerSource === "PostConfirmation_ConfirmSignUp") {
     const { email } = event.request.userAttributes;
 

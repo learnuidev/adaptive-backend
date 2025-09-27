@@ -1,10 +1,10 @@
-const middy = require("@middy/core");
-const cors = require("@middy/http-cors");
-const { identifyApi } = require("./identify.api");
-const { extractLocationInfo } = require("../../utils/extract-location-info");
-const { extractDeviceInfo } = require("../../utils/extract-device-info");
+import middy from "@middy/core";
+import cors from "@middy/http-cors";
+import { identifyApi } from "./identify.api.js";
+import { extractLocationInfo } from "../../utils/extract-location-info.js";
+import { extractDeviceInfo } from "../../utils/extract-device-info.js";
 
-module.exports.handler = middy(async (event) => {
+export const handler = middy(async (event) => {
   const ipAddress = event.requestContext.identity.sourceIp;
 
   try {

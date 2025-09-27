@@ -1,9 +1,7 @@
-const {
-  getUserCredentialById,
-} = require("../user-credentials/get-user-credential-by-id.api");
-const { generatePolicy } = require("./generate-policy");
+import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api";
+import { generatePolicy } from "./generate-policy";
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   const websiteId = JSON.parse(event.body)?.websiteId;
 
   if (!websiteId) {

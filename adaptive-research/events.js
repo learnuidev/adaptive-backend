@@ -1,4 +1,4 @@
-const { buildDateRange } = require("./utils");
+import { buildDateRange } from "./utils.js";
 
 /* eslint-disable no-unused-vars */
 const sample_events = {
@@ -35,7 +35,7 @@ const sample_events = {
     height: 859,
   },
 };
-function mapDDBEvent(event) {
+export function mapDDBEvent(event) {
   return {
     id: event.id,
     visitor_id: event.visitorId,
@@ -70,7 +70,7 @@ function mapDDBEvent(event) {
   };
 }
 
-const createEventTable = async (clickHouseClient) => {
+export const createEventTable = async (clickHouseClient) => {
   console.log(`Creating event table if not exists`);
   const resp = await clickHouseClient.query({
     query: `
@@ -114,7 +114,7 @@ ORDER BY (website_id, created_at);
   return resp;
 };
 
-const getTotalVisitorsByGeo = async (
+export const getTotalVisitorsByGeo = async (
   clickHouseClient,
   websiteId,
   period,
@@ -170,7 +170,7 @@ const getTotalVisitorsByGeo = async (
  * @param {Date} [to] - End date for custom period
  * @returns {Promise<Object>} Funnel output object matching the expected structure
  */
-const getFunnelData = async (
+export const getFunnelData = async (
   clickHouseClient,
   funnelInput,
   websiteId,
@@ -269,7 +269,7 @@ const getFunnelData = async (
   };
 };
 
-function addParamToRoutes(routes) {
+export function addParamToRoutes(routes) {
   function extractPattern(route) {
     // Match something like /section/value, return /section/[param]
     const match = route.match(/^\/([^/]+)\/[^/]+$/);
@@ -289,7 +289,7 @@ function addParamToRoutes(routes) {
   return extended;
 }
 
-const getTotalPageVisitsByWebsiteId = async (
+export const getTotalPageVisitsByWebsiteId = async (
   clickHouseClient,
   websiteId,
   period,
@@ -330,7 +330,7 @@ const getTotalPageVisitsByWebsiteId = async (
   };
 };
 
-const listPagesByWebsiteId = async (clickHouseClient, websiteId) => {
+export const listPagesByWebsiteId = async (clickHouseClient, websiteId) => {
   console.log(`Listing pages for websiteId: ${websiteId}`);
   const resp = await clickHouseClient.query({
     query: `
@@ -346,7 +346,7 @@ const listPagesByWebsiteId = async (clickHouseClient, websiteId) => {
 
   return addParamToRoutes(routes);
 };
-const getTotalViewsByWebsiteId = async (
+export const getTotalViewsByWebsiteId = async (
   clickHouseClient,
   websiteId,
   period,
@@ -456,7 +456,7 @@ const getTotalViewsByWebsiteId = async (
   };
 };
 
-const cleanEventTable = async (clickHouseClient) => {
+export const cleanEventTable = async (clickHouseClient) => {
   console.log(`Cleaning all items from event table`);
   const resp = await clickHouseClient.query({
     query: `ALTER TABLE event DELETE WHERE 1=1`,
@@ -466,7 +466,7 @@ const cleanEventTable = async (clickHouseClient) => {
   return resp;
 };
 
-const deleteEventTable = async (clickHouseClient) => {
+export const deleteEventTable = async (clickHouseClient) => {
   console.log(`Deleting event table`);
   const resp = await clickHouseClient.query({
     query: `DROP TABLE IF EXISTS event`,
@@ -476,7 +476,7 @@ const deleteEventTable = async (clickHouseClient) => {
   return resp;
 };
 
-const ingestDDBEvent = async (clickHouseClient, ddbEvent) => {
+export const ingestDDBEvent = async (clickHouseClient, ddbEvent) => {
   console.log(`Ingesting single event record`);
   const row = mapDDBEvent(ddbEvent);
 
@@ -502,7 +502,7 @@ const ingestDDBEvent = async (clickHouseClient, ddbEvent) => {
   return resp;
 };
 
-const ingestDDBEvents = async (clickHouseClient, dDBEvents) => {
+export const ingestDDBEvents = async (clickHouseClient, dDBEvents) => {
   console.log(`Ingesting ${dDBEvents.length} event records`);
   const rows = dDBEvents.map(mapDDBEvent);
 
@@ -533,7 +533,7 @@ const ingestDDBEvents = async (clickHouseClient, dDBEvents) => {
   return resp;
 };
 
-const listEventsByWebsiteId = async (clickHouseClient, websiteId) => {
+export const listEventsByWebsiteId = async (clickHouseClient, websiteId) => {
   console.log(`Listing events for websiteId: ${websiteId}`);
   const resp = await clickHouseClient.query({
     query: `SELECT * FROM event WHERE website_id = '${websiteId}' ORDER BY created_at DESC`,
@@ -542,28 +542,11 @@ const listEventsByWebsiteId = async (clickHouseClient, websiteId) => {
   return await resp.json();
 };
 
-const listEventByEmail = async (clickHouseClient, email) => {
+export const listEventByEmail = async (clickHouseClient, email) => {
   console.log(`Listing events for email: ${email}`);
   const resp = await clickHouseClient.query({
     query: `SELECT * FROM event WHERE email = '${email}' ORDER BY created_at DESC`,
     format: "JSONEachRow",
   });
   return await resp.json();
-};
-module.exports = {
-  mapDDBEvent,
-  createEventTable,
-  cleanEventTable,
-  deleteEventTable,
-  ingestDDBEvent,
-  ingestDDBEvents,
-  listEventsByWebsiteId,
-  listEventByEmail,
-
-  // Queries
-  getTotalVisitorsByGeo,
-  getTotalViewsByWebsiteId,
-  getTotalPageVisitsByWebsiteId,
-  getFunnelData,
-  listPagesByWebsiteId,
 };

@@ -1,7 +1,8 @@
-const { clickhouseClient } = require("../lib/clickhouse-client");
-const { period } = require("./utils");
+import { clickhouseClient } from "../lib/clickhouse-client.js";
+import { period } from "./utils.js";
 
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
 const mock_events = [
   {

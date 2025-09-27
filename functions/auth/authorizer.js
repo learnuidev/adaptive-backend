@@ -1,7 +1,7 @@
-const { generatePolicy } = require("./generate-policy");
-const { validateApiKey } = require("./validate-api-key");
+import { generatePolicy } from "./generate-policy.js";
+import { validateApiKey } from "./validate-api-key.js";
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   const token = event.authorizationToken;
   const websiteId = JSON.parse(event.body)?.websiteId;
 

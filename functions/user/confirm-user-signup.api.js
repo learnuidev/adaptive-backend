@@ -1,46 +1,44 @@
-const AWS = require("aws-sdk");
-const ulid = require("ulid");
+import { ulid } from "ulid";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 
-const { tableNames } = require("../../constants/table-names");
-const { apiConfig } = require("../../constants/api-config");
+import { tableNames } from "../../constants/table-names.js";
+import { apiConfig } from "../../constants/api-config.js";
 
-const dynamodb = new AWS.DynamoDB.DocumentClient({
-  apiVersion: "2012-08-10",
+const ddbClient = new DynamoDBClient({
   region: apiConfig.region,
 });
 
-const confirmUserSignuApi = async ({ email }) => {
-  const userId = ulid.ulid();
+const dynamodb = DynamoDBDocumentClient.from(ddbClient);
+
+export const confirmUserSignuApi = async ({ email }) => {
+  const userId = ulid();
 
   const user = {
     email,
     id: userId,
     roles: ["roles/customer"],
-    createdAt: new Date().toJSON(),
+    createdAt: new Date().toISOString(),
   };
 
-  // create new user
-  await dynamodb
-    .put({
+  // Create new user with condition to avoid overwriting existing email
+  await dynamodb.send(
+    new PutCommand({
       TableName: tableNames.usersTable,
       Item: user,
       ConditionExpression: "attribute_not_exists(email)",
     })
-    .promise();
+  );
 
-  // create new user preference
-  await dynamodb
-    .put({
+  // Create new user preference with condition to avoid overwriting existing userId
+  await dynamodb.send(
+    new PutCommand({
       TableName: tableNames.userPreferenceTable,
       Item: {
         userId,
-        createdAt: new Date().toJSON(),
+        createdAt: new Date().toISOString(),
       },
       ConditionExpression: "attribute_not_exists(userId)",
     })
-    .promise();
-};
-
-module.exports = {
-  confirmUserSignuApi,
+  );
 };

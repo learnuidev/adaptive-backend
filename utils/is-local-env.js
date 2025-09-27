@@ -1,9 +1,5 @@
-const { env } = require("../constants/api-keys");
+import { env } from "../constants/api-keys.js";
 
-const isLocalEnv = () => {
+export const isLocalEnv = () => {
   return env === "local";
-};
-
-module.exports = {
-  isLocalEnv,
 };

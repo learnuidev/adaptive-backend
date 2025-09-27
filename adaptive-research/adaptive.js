@@ -1,5 +1,5 @@
 // adaptive.js - Simplified identity module with IP tracking and location data
-const Adaptive = function ({ apiKey, origins = ["*"] }) {
+export const Adaptive = function ({ apiKey, origins = ["*"] }) {
   let currentIdentity = null;
   const storageKey = "adaptive_identity";
 

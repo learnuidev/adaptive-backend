@@ -1,4 +1,4 @@
-const sample_identity = {
+export const sample_identity = {
   os_version: "10.15.7",
   ipAddress: "45.144.115.137",
   os_name: "macOS",
@@ -19,7 +19,7 @@ const sample_identity = {
   emailAndDeviceType:
     "learnuidev@gmail.com#macOS_10.15.7#Macintosh_Apple#Chrome_140.0.0.0#mando-prod",
 };
-function mapDDBIdentity(identity) {
+export function mapDDBIdentity(identity) {
   return {
     id: identity.id || "",
     email: identity.email || "",
@@ -45,7 +45,7 @@ function mapDDBIdentity(identity) {
 }
 
 // identity
-const createIdentityTable = async (clickHouseClient) => {
+export const createIdentityTable = async (clickHouseClient) => {
   console.log(`Creating identity table if not exists`);
   const resp = await clickHouseClient.query({
     query: `
@@ -87,7 +87,7 @@ const createIdentityTable = async (clickHouseClient) => {
   return resp;
 };
 
-const cleanIdentityTable = async (clickHouseClient) => {
+export const cleanIdentityTable = async (clickHouseClient) => {
   console.log(`Cleaning all items from identity table`);
   const resp = await clickHouseClient.query({
     query: `ALTER TABLE identity DELETE WHERE 1=1`,
@@ -97,7 +97,7 @@ const cleanIdentityTable = async (clickHouseClient) => {
   return resp;
 };
 
-const deleteIdentityTable = async (clickHouseClient) => {
+export const deleteIdentityTable = async (clickHouseClient) => {
   console.log(`Deleting identity table`);
   const resp = await clickHouseClient.query({
     query: `DROP TABLE IF EXISTS identity`,
@@ -107,7 +107,10 @@ const deleteIdentityTable = async (clickHouseClient) => {
   return resp;
 };
 
-const listIdentitiesByWebsiteId = async (clickHouseClient, websiteId) => {
+export const listIdentitiesByWebsiteId = async (
+  clickHouseClient,
+  websiteId
+) => {
   console.log(`Listing identities for websiteId: ${websiteId}`);
   const resp = await clickHouseClient.query({
     query: `SELECT * FROM identity WHERE website_id = '${websiteId}' ORDER BY created_at DESC`,
@@ -116,7 +119,7 @@ const listIdentitiesByWebsiteId = async (clickHouseClient, websiteId) => {
   return await resp.json();
 };
 
-const listIdentitiesByEmail = async (clickHouseClient, email) => {
+export const listIdentitiesByEmail = async (clickHouseClient, email) => {
   console.log(`Listing identities for email: ${email}`);
   const resp = await clickHouseClient.query({
     query: `SELECT * FROM identity WHERE email = '${email}' ORDER BY created_at DESC`,
@@ -125,7 +128,7 @@ const listIdentitiesByEmail = async (clickHouseClient, email) => {
   return await resp.json();
 };
 
-const ingestDDBIdentity = async (clickHouseClient, ddbIdentity) => {
+export const ingestDDBIdentity = async (clickHouseClient, ddbIdentity) => {
   console.log(`Ingesting single identity record`);
   const row = mapDDBIdentity(ddbIdentity);
 
@@ -151,7 +154,7 @@ const ingestDDBIdentity = async (clickHouseClient, ddbIdentity) => {
   return resp;
 };
 
-const ingestDDBIdentities = async (clickHouseClient, dDBIdentities) => {
+export const ingestDDBIdentities = async (clickHouseClient, dDBIdentities) => {
   console.log(`Ingesting ${dDBIdentities.length} identity records`);
   const rows = dDBIdentities.map(mapDDBIdentity);
 
@@ -180,15 +183,4 @@ const ingestDDBIdentities = async (clickHouseClient, dDBIdentities) => {
 
   console.log(`Ingested ${toInsert.length} new identities`, resp);
   return resp;
-};
-
-module.exports = {
-  mapDDBIdentity,
-  createIdentityTable,
-  cleanIdentityTable,
-  deleteIdentityTable,
-  listIdentitiesByWebsiteId,
-  listIdentitiesByEmail,
-  ingestDDBIdentities,
-  ingestDDBIdentity,
 };

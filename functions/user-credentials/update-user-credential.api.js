@@ -1,19 +1,19 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const {
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
   DynamoDBDocumentClient,
   GetCommand,
   UpdateCommand,
-} = require("@aws-sdk/lib-dynamodb");
+} from "@aws-sdk/lib-dynamodb";
 
-const { tableNames } = require("../../constants/table-names");
-const { removeNull } = require("../../utils/remove-null");
-const { constructParams } = require("../../utils/construct-params");
-const { apiConfig } = require("../../constants/api-config");
+import { tableNames } from "../../constants/table-names.js";
+import { removeNull } from "../../utils/remove-null.js";
+import { constructParams } from "../../utils/construct-params.js";
+import { apiConfig } from "../../constants/api-config.js";
 
 const ddbClient = new DynamoDBClient({ region: apiConfig.region });
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
-const updateUserCredentialApi = async ({
+export const updateUserCredentialApi = async ({
   id,
   title,
   description,
@@ -57,8 +57,4 @@ const updateUserCredentialApi = async ({
   await dynamodb.send(new UpdateCommand(updateParams));
 
   return params;
-};
-
-module.exports = {
-  updateUserCredentialApi,
 };

@@ -1,9 +1,9 @@
 // Middlewares
-const middy = require("@middy/core");
-const cors = require("@middy/http-cors");
-const { deleteUserCredentialApi } = require("./delete-user-credential.api");
+import middy from "@middy/core";
+import cors from "@middy/http-cors";
+import { deleteUserCredentialApi } from "./delete-user-credential.api.js";
 
-module.exports.handler = middy(async (event) => {
+export const handler = middy(async (event) => {
   try {
     const userId = event.requestContext.authorizer.claims.email;
     const { credentialId } = JSON.parse(event.body);
@@ -32,7 +32,7 @@ module.exports.handler = middy(async (event) => {
     return response;
   } catch (error) {
     return {
-      statusCode: error.stausCode,
+      statusCode: error.statusCode,
       body: JSON.stringify({ error }),
     };
   }

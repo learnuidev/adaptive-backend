@@ -1,4 +1,4 @@
-const geoip = require("geoip-lite");
+import geoip from "geoip-lite";
 
 const ip = "204.48.76.246";
 const resp = geoip.lookup(ip);

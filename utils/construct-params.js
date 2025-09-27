@@ -1,6 +1,6 @@
-const removeNull = require("./remove-null").removeNull;
+import { removeNull } from "./remove-null.js";
 
-const constructParams = ({ tableName, attributes }, props = {}) => {
+export const constructParams = ({ tableName, attributes }, props = {}) => {
   const { id, ...rest } = attributes;
   const filteredStep = removeNull(rest);
 
@@ -45,5 +45,3 @@ const constructParams = ({ tableName, attributes }, props = {}) => {
 
   return updatedStepParams;
 };
-
-module.exports = { constructParams };

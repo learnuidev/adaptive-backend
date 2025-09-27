@@ -1,13 +1,13 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { PutCommand, DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-const crypto = require("crypto");
+import crypto from "crypto";
 
-const { apiConfig } = require("../../constants/api-config");
-const { tableNames } = require("../../constants/table-names");
-const { removeNull } = require("../../utils/remove-null");
-const { credentialsPrefix } = require("./user-credentials.constants");
-const cryptoV2 = require("../../lib/crypto-v2").cryptoV2;
+import { apiConfig } from "../../constants/api-config.js";
+import { tableNames } from "../../constants/table-names.js";
+import { removeNull } from "../../utils/remove-null.js";
+import { credentialsPrefix } from "./user-credentials.constants.js";
+import { cryptoV2 } from "../../lib/crypto-v2.js";
 
 const ddbClient = new DynamoDBClient({
   region: apiConfig.region,
@@ -46,7 +46,7 @@ function generateApiSecret(size = 32) {
   return crypto.randomBytes(size).toString("hex");
 }
 
-const addUserCredentialApi = async ({
+export const addUserCredentialApi = async ({
   title,
   description,
   scopes,
@@ -97,8 +97,4 @@ const addUserCredentialApi = async ({
     apiSecret: `${credentialsPrefix}${apiKey}${apiSecret}`,
   };
   return response;
-};
-
-module.exports = {
-  addUserCredentialApi,
 };

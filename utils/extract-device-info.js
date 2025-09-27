@@ -1,6 +1,6 @@
-const UAParser = require("ua-parser-js");
+import { UAParser } from "ua-parser-js";
 
-const extractDeviceInfo = (userAgentString) => {
+export const extractDeviceInfo = (userAgentString) => {
   const parser = new UAParser(userAgentString);
   const uaResult = parser.getResult();
 
@@ -19,8 +19,4 @@ const extractDeviceInfo = (userAgentString) => {
     browser_version: uaResult.browser?.version,
     deviceType,
   };
-};
-
-module.exports = {
-  extractDeviceInfo,
 };

@@ -1,4 +1,4 @@
-function generatePolicy(principalId, effect, resource, userInfo) {
+export function generatePolicy(principalId, effect, resource, userInfo) {
   return {
     principalId: principalId,
     policyDocument: {
@@ -18,7 +18,3 @@ function generatePolicy(principalId, effect, resource, userInfo) {
     },
   };
 }
-
-module.exports = {
-  generatePolicy,
-};
