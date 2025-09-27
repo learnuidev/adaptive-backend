@@ -80,6 +80,10 @@ provider:
       Resource: "*"
 
 functions:
+  authorizer:
+    handler: functions/auth/authorizer.handler
+    environment:
+      USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   list-user-credentials:
     handler: functions/user-credentials/list-user-credentials.handler
     events:

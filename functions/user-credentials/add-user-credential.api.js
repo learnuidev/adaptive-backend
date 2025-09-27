@@ -6,12 +6,33 @@ const crypto = require("crypto");
 const { apiConfig } = require("../../constants/api-config");
 const { tableNames } = require("../../constants/table-names");
 const { removeNull } = require("../../utils/remove-null");
+const { credentialsPrefix } = require("./user-credentials.constants");
 const cryptoV2 = require("../../lib/crypto-v2").cryptoV2;
 
 const ddbClient = new DynamoDBClient({
   region: apiConfig.region,
   apiVersion: "2012-08-10",
 });
+
+const sample = {
+  apiSecret: "",
+  previewApiSecret: "mando-who...319c",
+  apiKey: "whowtlTBt+8C/XHCPH31K+vj8iflASMvb0BP+/EBqnI=",
+  userId: "learnuidev@gmail.com",
+  permissionType: "all",
+  createdAt: 1738206260327,
+  scopes: [
+    "component.write",
+    "character.write",
+    "content.write",
+    "ai.write",
+    "search.read",
+    "analytics.read",
+    "review.write",
+  ],
+  id: "whowtlTBt+8C/XHCPH31K+vj8iflASMvb0BP+/EBqnI=",
+  title: "my-first-api-key",
+};
 
 // Create high-level DocumentClient wrapper
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
@@ -53,7 +74,7 @@ const addUserCredentialApi = async ({
     apiKey,
     apiSecret: result,
     permissionType,
-    previewApiSecret: `adaptive-${prefix}...${suffix}`,
+    previewApiSecret: `${credentialsPrefix}${prefix}...${suffix}`,
     createdAt,
   };
 
@@ -69,7 +90,7 @@ const addUserCredentialApi = async ({
 
   const response = {
     ...credentialParams,
-    apiSecret: `adaptive-${apiKey}${apiSecret}`,
+    apiSecret: `${credentialsPrefix}${apiKey}${apiSecret}`,
   };
   return response;
 };
