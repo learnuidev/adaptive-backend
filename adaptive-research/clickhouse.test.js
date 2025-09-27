@@ -1065,39 +1065,6 @@ const clickhouseTest = async () => {
 // Manual Testing
 clickhouseTest().then(async (resp) => {
   const { client, ingestDDBEvents, getFunnelData } = resp;
-  // await ingestDDBIdentities(client, mockIdentities);
-  // await cleanIdentityTable(client);
-  // const identities = await listIdentitiesByWebsiteId(client, "mando-prod");
-  // console.log("identities", identities);
-  // const identities = await listIdentitiesByEmail(client, "learnuidev@gmail.com");
-  // console.log("identities", identities);
-  await ingestDDBEvents(client, mock_events);
-  // await cleanEventTable(client);
-  // const events = await listEventsByWebsiteId(client, "mando-prod");
-  // console.log("events", events);
-  // const events = await listEventByEmail(client, "learnuidev@gmail.com");
-  // console.log("events", events);
-  // console.log("client", client);
-  // await ingestDDBEvents(client, mockEvents);
-  // const learnuiEvents = await listEventByEmail(client, "learnuidev@gmail.com");
-  // console.log("learnuiEvents", learnuiEvents);
-  // const totalViews = await getTotalViewsByWebsiteId(
-  //   client,
-  //   "mando-prod",
-  //   "year"
-  // );
-  // console.log("totalViews", totalViews);
-  // const totalPageVisits = await getTotalPageVisitsByWebsiteId(
-  //   client,
-  //   "mando-prod",
-  //   "year"
-  // );
-  // console.log("total page visits", totalPageVisits);
-  // Errors out
-  // const geoVisits = await getTotalVisitorsByGeo(client, "mando-prod", "month");
-  // console.log("geoVisits", geoVisits);
-  // await deleteIdentityTable(client);
-  // await deleteEventTable(client);
 
   const exampleFunnel = {
     websiteId: "68d4c2a24b0000c1caa0dde9",
@@ -1131,7 +1098,7 @@ clickhouseTest().then(async (resp) => {
     client,
     exampleFunnel,
     "mando-prod",
-    "month"
+    "last24h"
   );
 
   console.log("Funnel Data", funnelData);
