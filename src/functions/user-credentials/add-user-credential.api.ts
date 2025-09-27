@@ -1,13 +1,15 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-import crypto from "crypto";
-
 import { apiConfig } from "../../constants/api-config.js";
 import { tableNames } from "../../constants/table-names.js";
 import { removeNull } from "../../utils/remove-null.js";
 import { credentialsPrefix } from "./user-credentials.constants.js";
-import { cryptoV2 } from "../../lib/crypto-v2.js";
+import {
+  cryptoV2,
+  generateApiKey,
+  generateApiSecret,
+} from "../../lib/crypto-v2.js";
 
 const ddbClient = new DynamoDBClient({
   region: apiConfig.region,
@@ -38,13 +40,13 @@ const sample = {
 // Create high-level DocumentClient wrapper
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
-function generateApiKey(size = 32) {
-  return crypto.randomBytes(size).toString("base64");
-}
+// function generateApiKey(size = 32) {
+//   return crypto.randomBytes(size).toString("base64");
+// }
 
-function generateApiSecret(size = 32) {
-  return crypto.randomBytes(size).toString("hex");
-}
+// function generateApiSecret(size = 32) {
+//   return crypto.randomBytes(size).toString("hex");
+// }
 
 export const addUserCredentialApi = async ({
   title,
@@ -53,6 +55,12 @@ export const addUserCredentialApi = async ({
   permissionType,
   userId,
   ...rest
+}: {
+  title: string;
+  description: string;
+  scopes: string[];
+  permissionType: string;
+  userId: string;
 }) => {
   const crypto = cryptoV2({ keyArn: apiConfig.kmsArn });
 
