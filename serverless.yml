@@ -151,6 +151,8 @@ functions:
     environment:
       USERS_TABLE: !Ref UsersTable
       USER_PREFERENCE_TABLE: !Ref UserPreferenceTable
+
+  # ============================== Analytics Routes ===============================
   identify:
     timeout: 30
     handler: dist/functions/analytics/identify.handler
@@ -222,7 +224,19 @@ functions:
 
     environment:
       FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
-
+  has-user-events:
+    timeout: 30
+    handler: dist/functions/analytics/has-user-events.handler
+    events:
+      - http:
+          path: /v1/analytics/has-user-events
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+  # ============================== Analytics Routes End ===============================
 resources:
   Resources:
     UserCredentialsTable:

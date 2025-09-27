@@ -289,6 +289,27 @@ export function addParamToRoutes(routes: any) {
   return extended;
 }
 
+/**
+ * Efficiently checks if any user events exist for a given websiteId.
+ * Uses LIMIT 1 for minimal data transfer.
+ */
+export const hasUserEvents = async (
+  clickHouseClient: any,
+  websiteId: string
+): Promise<boolean> => {
+  const resp = await clickHouseClient.query({
+    query: `
+      SELECT 1
+      FROM event
+      WHERE website_id = '${websiteId}'
+      LIMIT 1
+    `,
+    format: "JSONEachRow",
+  });
+  const rows = await resp.json();
+  return rows.length > 0;
+};
+
 export const getTotalPageVisitsByWebsiteId = async (
   clickHouseClient,
   websiteId,
@@ -329,7 +350,6 @@ export const getTotalPageVisitsByWebsiteId = async (
     previous: addParamToRoutes(await previous.json()),
   };
 };
-
 export const listPagesByWebsiteId = async (
   clickHouseClient: any,
   websiteId: string

@@ -1111,15 +1111,22 @@ clickhouseTest().then(async (resp) => {
 
   // console.log("Funnel Data", funnelData);
 
-  const totalPageVisits = await getTotalPageVisitsByWebsiteId(
-    client,
-    "mando-prod",
-    period.all
+  // const totalPageVisits = await getTotalPageVisitsByWebsiteId(
+  //   client,
+  //   "mando-prod",
+  //   period.all
+  // );
+
+  // console.log("total-page-visits", totalPageVisits);
+
+  // const totalRoutes = await listPagesByWebsiteId(client, "mando-prod");
+
+  // console.log("total-routes", totalPageVisits);
+
+  const hasUserEvents = await clickhouseClient.hasUserEvents(
+    clickhouseClient,
+    "mando-prod"
   );
 
-  console.log("total-page-visits", totalPageVisits);
-
-  const totalRoutes = await listPagesByWebsiteId(client, "mando-prod");
-
-  console.log("total-routes", totalPageVisits);
+  console.log("has-user-events", hasUserEvents);
 });

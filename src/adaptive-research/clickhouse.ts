@@ -17,6 +17,7 @@ import {
   getTotalPageVisitsByWebsiteId,
   getFunnelData,
   listPagesByWebsiteId,
+  hasUserEvents,
 } from "./events.js";
 
 import dotenv from "dotenv";
@@ -57,6 +58,7 @@ export const clickhouse = (params: any) => {
     deleteEventTable,
     listEventsByWebsiteId,
     listEventByEmail,
+    hasUserEvents,
     // Query Functions
     getTotalViewsByWebsiteId,
     getTotalPageVisitsByWebsiteId,
