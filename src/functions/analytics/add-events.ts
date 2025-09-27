@@ -5,7 +5,7 @@ import { addEventsApi } from "./add-events.api.js";
 import { extractLocationInfo } from "../../utils/extract-location-info.js";
 import { extractDeviceInfo } from "../../utils/extract-device-info.js";
 
-export const handler = middy(async (event) => {
+export const handler = middy(async (event: any) => {
   const ipAddress = event.requestContext.identity.sourceIp;
 
   try {
@@ -35,6 +35,7 @@ export const handler = middy(async (event) => {
     const response = {
       statusCode: 400,
       body: JSON.stringify({
+        // @ts-ignore
         message: err.message,
       }),
     };

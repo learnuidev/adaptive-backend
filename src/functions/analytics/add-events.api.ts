@@ -7,7 +7,7 @@ import { tableNames } from "../../constants/table-names.js";
 import { apiConfig } from "../../constants/api-config.js";
 import { clickhouseClient } from "../../lib/clickhouse-client.js";
 
-export const addEventsApi = async (props) => {
+export const addEventsApi = async (props: any) => {
   // Create low-level DynamoDB client
   const ddbClient = new DynamoDBClient({
     region: apiConfig.region,
@@ -17,7 +17,7 @@ export const addEventsApi = async (props) => {
   // Create high-level DocumentClient wrapper
   const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
-  const id = ulid.ulid();
+  const id = ulid();
   const params = removeNull({ id, ...props, createdAt: Date.now() });
 
   const inputParams = {
