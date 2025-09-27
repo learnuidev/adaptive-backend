@@ -1,0 +1,90 @@
+const funnels = [
+  {
+    websiteId: "68d4c2a24b0000c1caa0dde9",
+    name: "Landing Funnel Page",
+    slug: "landing-funnel-page",
+    steps: [
+      {
+        id: "_uQrghRE-pgLcFfkUgwPZ",
+        name: "Complete Mando",
+        type: "goal",
+        goalName: "mando",
+        goalCompletionType: "completed",
+        _id: "68d736c1e5cddd8ba71b401b",
+      },
+      {
+        id: "y8i4B-tNJ0GmAamF6sHmy",
+        name: "Complete Too",
+        type: "goal",
+        goalName: "too",
+        goalCompletionType: "completed",
+        _id: "68d736c1e5cddd8ba71b401c",
+      },
+    ],
+    isActive: true,
+    createdAt: "2025-09-27T00:58:41.701Z",
+    updatedAt: "2025-09-27T00:58:41.701Z",
+    id: "68d736c1e5cddd8ba71b401a",
+  },
+];
+
+const output = {
+  funnel: {
+    id: "68d736c1e5cddd8ba71b401a",
+    name: "Landing Funnel Page",
+    slug: "landing-funnel-page",
+    steps: [
+      {
+        id: "_uQrghRE-pgLcFfkUgwPZ",
+        name: "Complete Mando",
+        type: "goal",
+        goalName: "mando",
+        goalCompletionType: "completed",
+        _id: "68d736c1e5cddd8ba71b401b",
+      },
+      {
+        id: "y8i4B-tNJ0GmAamF6sHmy",
+        name: "Complete Too",
+        type: "goal",
+        goalName: "too",
+        goalCompletionType: "completed",
+        _id: "68d736c1e5cddd8ba71b401c",
+      },
+    ],
+  },
+  data: [
+    {
+      id: "step1",
+      label: "Step 1",
+      value: 0,
+      revenue: 0,
+      stepIndex: 0,
+      stepType: "goal",
+      conversionRate: 0,
+      dropoffFromPrevious: 0,
+      topReferrers: [],
+      topCountries: [],
+    },
+    {
+      id: "step2",
+      label: "Step 2",
+      value: 0,
+      revenue: 0,
+      stepIndex: 1,
+      stepType: "goal",
+      conversionRate: 0,
+      dropoffFromPrevious: null,
+      topReferrers: [],
+      topCountries: [],
+    },
+  ],
+  metrics: {
+    totalVisitors: 0,
+    completions: 0,
+    overallConversionRate: 0,
+    overallRevenuePerVisitor: 0,
+    period: "year",
+    timezone: "America/Toronto",
+    lastUpdated: "2025-09-27T01:02:15.202Z",
+  },
+};

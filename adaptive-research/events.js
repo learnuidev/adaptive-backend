@@ -160,6 +160,112 @@ const getTotalVisitorsByGeo = async (
   };
 };
 
+/**
+ * Compute funnel analytics for a given funnel definition.
+ * @param {Object} clickHouseClient - ClickHouse client instance
+ * @param {Object} funnelInput - Funnel definition object
+ * @param {string} websiteId - Website identifier
+ * @param {string} period - Time period (e.g., 'week', 'month', 'year', 'ytd', 'last24h', 'custom')
+ * @param {Date} [from] - Start date for custom period
+ * @param {Date} [to] - End date for custom period
+ * @returns {Promise<Object>} Funnel output object matching the expected structure
+ */
+const getFunnelData = async (
+  clickHouseClient,
+  funnelInput,
+  websiteId,
+  period,
+  from,
+  to
+) => {
+  const { start, end } = buildDateRange(period, from, to);
+  const steps = funnelInput.steps;
+
+  // Build and run step queries
+  const stepQueries = steps.map((step, index) => {
+    let condition = "";
+    if (step.type === "goal") {
+      condition = `event_name = '${step.goalName}'`;
+    } else if (step.type === "pageview") {
+      condition = `type = 'pageview' AND href = '${step.href}'`;
+    } else if (step.type === "custom") {
+      condition = `event_name = '${step.eventName}'`;
+    }
+
+    return `
+      SELECT
+        visitor_id,
+        session_id,
+        min(created_at) as ts
+      FROM event
+      WHERE website_id = '${websiteId}'
+        AND ${condition}
+        AND created_at >= '${start}'
+        ${period === "custom" ? `AND created_at <= '${end.toISOString()}'` : ""}
+      GROUP BY visitor_id, session_id
+    `;
+  });
+
+  // Execute each step query and collect counts
+  const stepResults = await Promise.all(
+    stepQueries.map((q) =>
+      clickHouseClient
+        .query({ query: q, format: "JSONEachRow" })
+        .then((r) => r.json())
+        .then((rows) => rows.length)
+    )
+  );
+
+  console.log("STEP RESULTS", stepResults);
+
+  // Build response with actual step counts
+  return {
+    funnel: {
+      id: funnelInput.id,
+      name: funnelInput.name,
+      slug: funnelInput.slug,
+      steps: steps.map((s) => ({
+        id: s.id,
+        name: s.name,
+        type: s.type,
+        goalName: s.goalName,
+        goalCompletionType: s.goalCompletionType,
+        _id: s._id,
+      })),
+    },
+    data: steps.map((step, index) => ({
+      id: step?.id,
+      name: step?.name,
+      value: stepResults[index],
+      revenue: 0,
+      stepIndex: index,
+      stepType: step.type,
+      conversionRate:
+        index === 0
+          ? 1
+          : stepResults[index] / Math.max(stepResults[index - 1], 1),
+      dropoffFromPrevious:
+        index === 0
+          ? 0
+          : Math.max(0, stepResults[index - 1] - stepResults[index]),
+      topReferrers: [],
+      topCountries: [],
+    })),
+    metrics: {
+      totalVisitors: stepResults[0] || 0,
+      completions: stepResults[stepResults.length - 1] || 0,
+      overallConversionRate:
+        stepResults.length > 1 && stepResults[0] > 0
+          ? stepResults[stepResults.length - 1] / stepResults[0]
+          : 0,
+      overallRevenuePerVisitor: 0,
+      period,
+      timezone: "UTC",
+      lastUpdated: new Date().toISOString(),
+    },
+  };
+};
+
 const getTotalPageVisitsByWebsiteId = async (
   clickHouseClient,
   websiteId,
@@ -417,4 +523,5 @@ module.exports = {
   getTotalVisitorsByGeo,
   getTotalViewsByWebsiteId,
   getTotalPageVisitsByWebsiteId,
+  getFunnelData,
 };
