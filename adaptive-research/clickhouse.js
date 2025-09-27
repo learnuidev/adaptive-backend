@@ -1,1015 +1,698 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 const { createClient } = require("@clickhouse/client");
+const {
+  mapDDBEvent,
+  createEventTable,
+  cleanEventTable,
+  deleteEventTable,
+  ingestDDBEvent,
+  ingestDDBEvents,
+  listEventsByWebsiteId,
+  listEventByEmail,
+  getTotalViewsByWebsiteId,
+  getTotalPageVisitsByWebsiteId,
+  getTotalVisitorsByGeo,
+} = require("./events");
+const { buildDateRange } = require("./utils");
+const {
+  createIdentityTable,
+  ingestDDBIdentities,
+  ingestDDBIdentity,
+  mapDDBIdentity,
+  cleanIdentityTable,
+  deleteIdentityTable,
+  listIdentitiesByWebsiteId,
+  listIdentitiesByEmail,
+} = require("./identity");
 require("dotenv").config();
 
-const mockIdentities = [
+const mock_events = [
   {
-    id: "01K62G9C3N08K319ERGX7G45J2",
-    email: "learnuidev@gmail.com",
-    ipAddress: "204.48.76.246",
-    os_name: "iOS",
-    os_version: "18.6.2",
-    device_type: "mobile",
-    device_model: "iPhone",
-    device_vendor: "Apple",
-    browser_name: "Mobile Safari",
-    browser_major: "18",
-    browser_version: "18.6",
-    websiteId: "mando-prod",
-    emailAndDeviceType:
-      "learnuidev@gmail.com#iOS_18.6.2#iPhone_Apple#Mobile Safari_18.6#mando-prod",
-    createdAt: "2025-09-26 07:55:01.109",
-    updatedAt: "2025-09-26 14:10:33.523",
-  },
-  {
-    id: "01K62G9PXWVAS1E2X75QY4S2JE",
-    email: "learnuidev@gmail.com",
-    ipAddress: "185.238.28.12",
-    os_name: "macOS",
     os_version: "10.15.7",
-    device_type: "",
+    ipAddress: "146.70.123.46",
+    os_name: "macOS",
     device_model: "Macintosh",
-    device_vendor: "Apple",
-    browser_name: "Chrome",
-    browser_major: "140",
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
     browser_version: "140.0.0.0",
-    websiteId: "mando-prod",
-    emailAndDeviceType:
-      "learnuidev@gmail.com#macOS_10.15.7#Macintosh_Apple#Chrome_140.0.0.0#mando-prod",
-    createdAt: "1970-01-01 00:00:00.000",
-    updatedAt: "1970-01-01 00:00:00.000",
-  },
-];
-
-const mockEvents = [
-  {
-    id: "01K63CA2QE67376J99FE41QKFA",
-    ipAddress: "192.226.184.176",
-    href: "https://www.adaptive.fyi/",
-    sessionId: "sea43d3cd-09f6-40a8-906a-8b40699168d6",
-    websiteId: "adaptive",
-    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
     email: "learnuidev@gmail.com",
-    viewportWidth: 1512,
-    viewportHeight: 945,
-    domain: "www.adaptive.fyi",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 16:04:44.398",
-  },
-  {
-    id: "01K635S0GY3BNXRVJN7HBVBPGH",
-    ipAddress: "204.48.76.246",
-    href: "https://www.mandarino.io/",
-    sessionId: "s383e9c87-f6b1-425c-ada9-eecc86c6bf67",
-    websiteId: "mando-prod",
-    visitorId: "a2acb54c-1686-4cd1-ad3e-8fd9eb0b4e8e",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 390,
-    viewportHeight: 663,
+    country: "BE",
+    city: "Brussels",
+    extraData: {
+      contentid: "b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+      eventName: "clicked-on-transcript",
+      input: "你也会爱上一个人付出很多很多",
+      transcriptid: "0e14fdd6-9cde-5e6d-9eb4-119b40eb183f",
+    },
+    href: "https://www.mandarino.io/convos/b3f8880b-def5-5ff7-97a0-cbab2b07b41d?start=34.008248127792356",
+    region: "BRU",
+    id: "01K649PX32ZD15GENNAHK16DDZ",
+    latitude: 50.8847,
     domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 14:10:33.631",
-  },
-  {
-    id: "01K634VVQAGJB0GCKSECZRTD7B",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/convos/b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
-    sessionId: "sd9130159-a125-400b-b138-a1691cabe4ce",
-    websiteId: "mando-prod",
     visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 1374,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "01K62G9PXWVAS1E2X75QY4S2JE",
-    extraData: "",
-    createdAt: "2025-09-26 13:54:38.442",
-  },
-  {
-    id: "01K634VV98HSW1GZYHYKRBGFSR",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/convos",
-    sessionId: "sd9130159-a125-400b-b138-a1691cabe4ce",
+    createdAt: 1758933513314,
+    sessionId: "sa8fcde73-7cd5-4641-aa93-e40f9c07bce2",
+    browser_name: "Chrome",
+    longitude: 4.5049,
     websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 1374,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
+    device_vendor: "Apple",
+    timezone: "Europe/Brussels",
     type: "custom",
-    identityId: "01K62G9PXWVAS1E2X75QY4S2JE",
-    extraData:
-      '{"contentid":"b3f8880b-def5-5ff7-97a0-cbab2b07b41d","eventName":"content-viewed","email":"learnuidev@gmail.com"}',
-    createdAt: "2025-09-26 13:54:37.992",
+    viewport: {
+      width: 1374,
+      height: 859,
+    },
   },
   {
-    id: "01K634VNNPJQBR1V7G6NNZ5B4G",
-    ipAddress: "185.238.28.12",
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    extraData: {
+      contentid: "b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+      eventName: "content-viewed",
+      email: "learnuidev@gmail.com",
+    },
     href: "https://www.mandarino.io/convos",
-    sessionId: "sd9130159-a125-400b-b138-a1691cabe4ce",
-    websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 1374,
-    viewportHeight: 859,
+    region: "VA",
+    id: "01K646STTAYEA10JXAQX8FZB2K",
+    latitude: 39.018,
     domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "01K62G9PXWVAS1E2X75QY4S2JE",
-    extraData: "",
-    createdAt: "2025-09-26 13:54:32.246",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758930463562,
+    sessionId: "sd54b5ada-f54b-46ba-89c9-7e820820ae65",
+    browser_name: "Chrome",
+    longitude: -77.539,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    type: "custom",
+    viewport: {
+      width: 342,
+      height: 859,
+    },
   },
   {
-    id: "01K634VNG43ZPXDXEEZ739G8MJ",
-    ipAddress: "185.238.28.12",
+    os_version: "10.15.7",
+    ipAddress: "146.70.123.46",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "BE",
+    city: "Brussels",
+    extraData: {
+      contentid: "b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+      eventName: "clicked-on-transcript",
+      input: "好多话想说给你听",
+      transcriptid: "136fdbf7-f350-5a81-8bd9-90ec24065fb7",
+    },
+    href: "https://www.mandarino.io/convos/b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+    region: "BRU",
+    id: "01K649PS7C8TF1445ZFN3XQYRP",
+    latitude: 50.8847,
+    domain: "www.mandarino.io",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758933509356,
+    sessionId: "sa8fcde73-7cd5-4641-aa93-e40f9c07bce2",
+    browser_name: "Chrome",
+    longitude: 4.5049,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "Europe/Brussels",
+    type: "custom",
+    viewport: {
+      width: 1374,
+      height: 859,
+    },
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "146.70.123.46",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758933500206,
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "BE",
+    city: "Brussels",
+    sessionId: "sa8fcde73-7cd5-4641-aa93-e40f9c07bce2",
+    href: "https://www.mandarino.io/convos/b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+    browser_name: "Chrome",
+    longitude: 4.5049,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "Europe/Brussels",
+    region: "BRU",
+    id: "01K649PG9EBCP76QPWKXHNDE35",
+    latitude: 50.8847,
+    type: "pageview",
+    viewport: {
+      width: 1374,
+      height: 859,
+    },
+    domain: "www.mandarino.io",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758930461539,
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "sd54b5ada-f54b-46ba-89c9-7e820820ae65",
     href: "https://www.mandarino.io/convos",
-    sessionId: "sd9130159-a125-400b-b138-a1691cabe4ce",
+    browser_name: "Chrome",
+    longitude: -77.539,
     websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 1374,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K646SRV3DH44H6RDDD83DHSV",
+    latitude: 39.018,
     type: "pageview",
-    identityId: "01K62G9PXWVAS1E2X75QY4S2JE",
-    extraData: "",
-    createdAt: "2025-09-26 13:54:32.068",
+    viewport: {
+      width: 342,
+      height: 859,
+    },
+    domain: "www.mandarino.io",
   },
   {
-    id: "01K634VNEAD95NRJPFZVY16VPP",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/",
-    sessionId: "sd9130159-a125-400b-b138-a1691cabe4ce",
-    websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 1374,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "01K62G9PXWVAS1E2X75QY4S2JE",
-    extraData: "",
-    createdAt: "2025-09-26 13:54:32.010",
-  },
-  {
-    id: "01K634VKJYJXDHTEMHGMK6NYG1",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/",
-    sessionId: "sd9130159-a125-400b-b138-a1691cabe4ce",
-    websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 1374,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 13:54:30.111",
-  },
-  {
-    id: "01K62H7D2W7KSVQMQEFQP3RXQ2",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/",
-    sessionId: "s4b0da34b-3aab-4f50-afb3-767179101e36",
-    websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 1374,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "01K62G9PXWVAS1E2X75QY4S2JE",
-    extraData: "",
-    createdAt: "2025-09-26 08:11:25.149",
-  },
-  {
-    id: "01K62G9PYCFX8T4ZSRCAB0ECRN",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/",
-    sessionId: "s4b0da34b-3aab-4f50-afb3-767179101e36",
-    websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 1374,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:55:12.204",
-  },
-  {
-    id: "01K62G9CFTPJ6HKVTFE4DP7JAH",
-    ipAddress: "192.226.184.176",
-    href: "https://www.mandarino.io/",
-    sessionId: "s329d3ae8-a573-4d01-ad28-d7e1e8840306",
-    websiteId: "mando-prod",
-    visitorId: "a2acb54c-1686-4cd1-ad3e-8fd9eb0b4e8e",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 390,
-    viewportHeight: 663,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:55:01.499",
-  },
-  {
-    id: "01K62G9BZRSG6PC0HM1ZMVJE3G",
-    ipAddress: "192.226.184.176",
-    href: "https://www.mandarino.io/",
-    sessionId: "s329d3ae8-a573-4d01-ad28-d7e1e8840306",
-    websiteId: "mando-prod",
-    visitorId: "a2acb54c-1686-4cd1-ad3e-8fd9eb0b4e8e",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 390,
-    viewportHeight: 663,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:55:00.984",
-  },
-  {
-    id: "01K62G874JN3PBPNB5NPH7WPX1",
-    ipAddress: "185.238.28.12",
-    href: "https://www.adaptive.fyi/",
-    sessionId: "s41d73f66-d747-4452-83eb-3aa129689f88",
-    websiteId: "adaptive",
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
     visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
+    createdAt: 1758933455515,
+    identityId: "01K649N2YEFRFKAZ9FBK4T5K0X",
+    browser_version: "140.0.0.0",
     email: "learnuidev@gmail.com",
-    viewportWidth: 376,
-    viewportHeight: 945,
-    domain: "www.adaptive.fyi",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:54:23.251",
-  },
-  {
-    id: "01K62G5A42P31J8TSHRXZ08D3M",
-    ipAddress: "185.238.28.12",
-    href: "https://www.adaptive.fyi/",
-    sessionId: "s41d73f66-d747-4452-83eb-3aa129689f88",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "scb614cb2-a487-41d4-8c94-bce50f862bab",
+    href: "https://www.adaptive.fyi/goals",
+    browser_name: "Chrome",
+    longitude: -77.539,
     websiteId: "adaptive",
-    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 376,
-    viewportHeight: 945,
-    domain: "www.adaptive.fyi",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K649N4MQMSB3XBVE0453FNQG",
+    latitude: 39.018,
     type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:52:48.002",
+    viewport: {
+      width: 1512,
+      height: 945,
+    },
+    domain: "www.adaptive.fyi",
   },
   {
-    id: "01K62G26R62C5762DM8A3JJXZM",
-    ipAddress: "185.238.28.12",
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
+    createdAt: 1758933453399,
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "scb614cb2-a487-41d4-8c94-bce50f862bab",
     href: "https://www.adaptive.fyi/",
-    sessionId: "s41d73f66-d747-4452-83eb-3aa129689f88",
+    browser_name: "Chrome",
+    longitude: -77.539,
     websiteId: "adaptive",
-    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 376,
-    viewportHeight: 945,
-    domain: "www.adaptive.fyi",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K649N2JPFNYQKE0K9GJQ3752",
+    latitude: 39.018,
     type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:51:06.247",
+    viewport: {
+      width: 1512,
+      height: 945,
+    },
+    domain: "www.adaptive.fyi",
   },
   {
-    id: "01K62FHR76G13DBWRRAS4DZ9SE",
-    ipAddress: "192.226.184.176",
+    os_version: "10.15.7",
+    ipAddress: "146.70.123.46",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "BE",
+    city: "Brussels",
+    extraData: {
+      contentid: "b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+      eventName: "clicked-on-transcript",
+      input: "好多话想说给你听",
+      transcriptid: "136fdbf7-f350-5a81-8bd9-90ec24065fb7",
+    },
+    href: "https://www.mandarino.io/convos/b3f8880b-def5-5ff7-97a0-cbab2b07b41d?start=34.008248127792356",
+    region: "BRU",
+    id: "01K649PTVX248C0794PF6M8F23",
+    latitude: 50.8847,
+    domain: "www.mandarino.io",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758933511037,
+    sessionId: "sa8fcde73-7cd5-4641-aa93-e40f9c07bce2",
+    browser_name: "Chrome",
+    longitude: 4.5049,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "Europe/Brussels",
+    type: "custom",
+    viewport: {
+      width: 1374,
+      height: 859,
+    },
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
+    createdAt: 1758933453734,
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "scb614cb2-a487-41d4-8c94-bce50f862bab",
+    href: "https://www.adaptive.fyi/performance",
+    browser_name: "Chrome",
+    longitude: -77.539,
+    websiteId: "adaptive",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K649N2X6K9FX7DZXY1XP0JWH",
+    latitude: 39.018,
+    type: "pageview",
+    viewport: {
+      width: 1512,
+      height: 945,
+    },
+    domain: "www.adaptive.fyi",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758930457962,
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "sd54b5ada-f54b-46ba-89c9-7e820820ae65",
     href: "https://www.mandarino.io/",
-    sessionId: "s329d3ae8-a573-4d01-ad28-d7e1e8840306",
+    browser_name: "Chrome",
+    longitude: -77.539,
     websiteId: "mando-prod",
-    visitorId: "a2acb54c-1686-4cd1-ad3e-8fd9eb0b4e8e",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 390,
-    viewportHeight: 663,
-    domain: "www.mandarino.io",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K646SNBAXDMKMGDZYQATPD8S",
+    latitude: 39.018,
     type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:42:07.079",
+    viewport: {
+      width: 342,
+      height: 859,
+    },
+    domain: "www.mandarino.io",
   },
   {
-    id: "01K62FHCC7ZSE8X5TZETACKT9M",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/apps",
-    sessionId: "s4b0da34b-3aab-4f50-afb3-767179101e36",
-    websiteId: "mando-prod",
+    os_version: "10.15.7",
+    ipAddress: "146.70.123.46",
+    os_name: "macOS",
+    device_model: "Macintosh",
     visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758933491017,
+    browser_version: "140.0.0.0",
     email: "learnuidev@gmail.com",
-    viewportWidth: 342,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:41:54.951",
-  },
-  {
-    id: "01K62FGWDMQJXMTTQ7AQ2E6V34",
-    ipAddress: "185.238.28.12",
-    href: "https://www.adaptive.fyi/",
-    sessionId: "s41d73f66-d747-4452-83eb-3aa129689f88",
-    websiteId: "adaptive",
-    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 376,
-    viewportHeight: 945,
-    domain: "www.adaptive.fyi",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:41:38.612",
-  },
-  {
-    id: "01K62F8QS4SZ3K3F9M00AFGC5F",
-    ipAddress: "192.226.184.176",
+    country: "BE",
+    city: "Brussels",
+    sessionId: "sa8fcde73-7cd5-4641-aa93-e40f9c07bce2",
     href: "https://www.mandarino.io/",
-    sessionId: "s329d3ae8-a573-4d01-ad28-d7e1e8840306",
+    browser_name: "Chrome",
+    longitude: 4.5049,
     websiteId: "mando-prod",
-    visitorId: "a2acb54c-1686-4cd1-ad3e-8fd9eb0b4e8e",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 390,
-    viewportHeight: 663,
-    domain: "www.mandarino.io",
+    device_vendor: "Apple",
+    timezone: "Europe/Brussels",
+    region: "BRU",
+    id: "01K649P7A99Y8F77BDRV82MZSE",
+    latitude: 50.8847,
     type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:37:11.716",
+    viewport: {
+      width: 1374,
+      height: 859,
+    },
+    domain: "www.mandarino.io",
   },
   {
-    id: "01K62F8KZXX1AR46FFT9ACDV57",
-    ipAddress: "192.226.184.176",
-    href: "https://www.mandarino.io/convos/dc218320-6f2f-5141-9869-64a11cf6d761",
-    sessionId: "s329d3ae8-a573-4d01-ad28-d7e1e8840306",
-    websiteId: "mando-prod",
-    visitorId: "a2acb54c-1686-4cd1-ad3e-8fd9eb0b4e8e",
+    os_version: "10.15.7",
+    ipAddress: "146.70.123.46",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
     email: "learnuidev@gmail.com",
-    viewportWidth: 390,
-    viewportHeight: 663,
+    country: "BE",
+    city: "Brussels",
+    extraData: {
+      contentid: "b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+      eventName: "content-viewed",
+      email: "learnuidev@gmail.com",
+    },
+    href: "https://www.mandarino.io/convos",
+    region: "BRU",
+    id: "01K649PFJQ10PQAV6A80HYCWR5",
+    latitude: 50.8847,
     domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "01K626J5XZ18BFSHNE6Z5J0JVM",
-    extraData: "",
-    createdAt: "2025-09-26 07:37:07.837",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758933499479,
+    sessionId: "sa8fcde73-7cd5-4641-aa93-e40f9c07bce2",
+    browser_name: "Chrome",
+    longitude: 4.5049,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "Europe/Brussels",
+    type: "custom",
+    viewport: {
+      width: 1374,
+      height: 859,
+    },
   },
   {
-    id: "01K62F7CGPJM4G19BMAB0DM6PX",
-    ipAddress: "185.238.28.12",
-    href: "https://www.adaptive.fyi/",
-    sessionId: "s41d73f66-d747-4452-83eb-3aa129689f88",
-    websiteId: "adaptive",
+    os_version: "10.15.7",
+    ipAddress: "146.70.123.46",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758933497877,
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "BE",
+    city: "Brussels",
+    sessionId: "sa8fcde73-7cd5-4641-aa93-e40f9c07bce2",
+    href: "https://www.mandarino.io/convos",
+    browser_name: "Chrome",
+    longitude: 4.5049,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "Europe/Brussels",
+    region: "BRU",
+    id: "01K649PE0N16FC7NY78NYPZEZF",
+    latitude: 50.8847,
+    type: "pageview",
+    viewport: {
+      width: 1374,
+      height: 859,
+    },
+    domain: "www.mandarino.io",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
     visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
+    createdAt: 1758933453747,
+    browser_version: "140.0.0.0",
     email: "learnuidev@gmail.com",
-    viewportWidth: 376,
-    viewportHeight: 945,
-    domain: "www.adaptive.fyi",
-    type: "pageview",
-    identityId: "01K62F4NNDDMKE4PGN0RZTHSW6",
-    extraData: "",
-    createdAt: "2025-09-26 07:36:27.414",
-  },
-  {
-    id: "01K62F6HE7ZAK3MVV6X6NXTBYQ",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/apps",
-    sessionId: "s4b0da34b-3aab-4f50-afb3-767179101e36",
-    websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 342,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "01K62F4NNDDMKE4PGN0RZTHSW6",
-    extraData: "",
-    createdAt: "2025-09-26 07:35:59.687",
-  },
-  {
-    id: "01K62F6HAQ9YXAM1BA9Y11GNKK",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/apps",
-    sessionId: "s4b0da34b-3aab-4f50-afb3-767179101e36",
-    websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 342,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "01K62F4NNDDMKE4PGN0RZTHSW6",
-    extraData: "",
-    createdAt: "2025-09-26 07:35:59.575",
-  },
-  {
-    id: "01K62F55W3GED70A4NXAVMSGRB",
-    ipAddress: "185.238.28.12",
-    href: "https://www.mandarino.io/",
-    sessionId: "s4b0da34b-3aab-4f50-afb3-767179101e36",
-    websiteId: "mando-prod",
-    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 342,
-    viewportHeight: 859,
-    domain: "www.mandarino.io",
-    type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:35:15.075",
-  },
-  {
-    id: "01K62F03F08RAAY2G30XJB3DKT",
-    ipAddress: "185.238.28.12",
-    href: "https://www.adaptive.fyi/",
-    sessionId: "s41d73f66-d747-4452-83eb-3aa129689f88",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "scb614cb2-a487-41d4-8c94-bce50f862bab",
+    href: "https://www.adaptive.fyi/analytics",
+    browser_name: "Chrome",
+    longitude: -77.539,
     websiteId: "adaptive",
-    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
-    email: "learnuidev@gmail.com",
-    viewportWidth: 376,
-    viewportHeight: 945,
-    domain: "www.adaptive.fyi",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K649N2XJH1KW7KMYH1M0F703",
+    latitude: 39.018,
     type: "pageview",
-    identityId: "",
-    extraData: "",
-    createdAt: "2025-09-26 07:32:28.769",
+    viewport: {
+      width: 1512,
+      height: 945,
+    },
+    domain: "www.adaptive.fyi",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758930471882,
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "sd54b5ada-f54b-46ba-89c9-7e820820ae65",
+    href: "https://www.mandarino.io/convos",
+    browser_name: "Chrome",
+    longitude: -77.539,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K646T2YAE53XRZKMT6ZXCE8C",
+    latitude: 39.018,
+    type: "pageview",
+    viewport: {
+      width: 342,
+      height: 859,
+    },
+    domain: "www.mandarino.io",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758930461671,
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "sd54b5ada-f54b-46ba-89c9-7e820820ae65",
+    href: "https://www.mandarino.io/convos",
+    browser_name: "Chrome",
+    longitude: -77.539,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K646SRZ6JEG9WR8HS1VMEAX4",
+    latitude: 39.018,
+    type: "pageview",
+    viewport: {
+      width: 342,
+      height: 859,
+    },
+    domain: "www.mandarino.io",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "146.70.123.46",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "BE",
+    city: "Brussels",
+    extraData: {
+      contentid: "b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+      eventName: "clicked-on-transcript",
+      input: "每天盼望从我掌心挣脱",
+      transcriptid: "dcb5f91e-b231-5e00-9ad5-f21664c4e2c5",
+    },
+    href: "https://www.mandarino.io/convos/b3f8880b-def5-5ff7-97a0-cbab2b07b41d?start=56.78274695613098",
+    region: "BRU",
+    id: "01K649Q0YXTRZWMPHQG0XRXR6D",
+    latitude: 50.8847,
+    domain: "www.mandarino.io",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758933517278,
+    sessionId: "sa8fcde73-7cd5-4641-aa93-e40f9c07bce2",
+    browser_name: "Chrome",
+    longitude: 4.5049,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "Europe/Brussels",
+    type: "custom",
+    viewport: {
+      width: 1374,
+      height: 859,
+    },
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758930464182,
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "sd54b5ada-f54b-46ba-89c9-7e820820ae65",
+    href: "https://www.mandarino.io/convos/b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+    browser_name: "Chrome",
+    longitude: -77.539,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K646SVDP3GTCWTCQPAE6GBAH",
+    latitude: 39.018,
+    type: "pageview",
+    viewport: {
+      width: 342,
+      height: 859,
+    },
+    domain: "www.mandarino.io",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
+    createdAt: 1758933455015,
+    identityId: "01K649N2YEFRFKAZ9FBK4T5K0X",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "scb614cb2-a487-41d4-8c94-bce50f862bab",
+    href: "https://www.adaptive.fyi/events",
+    browser_name: "Chrome",
+    longitude: -77.539,
+    websiteId: "adaptive",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K649N457GSMMQY74A53AK7Q2",
+    latitude: 39.018,
+    type: "pageview",
+    viewport: {
+      width: 1512,
+      height: 945,
+    },
+    domain: "www.adaptive.fyi",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
+    createdAt: 1758933454979,
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "scb614cb2-a487-41d4-8c94-bce50f862bab",
+    href: "https://www.adaptive.fyi/users",
+    browser_name: "Chrome",
+    longitude: -77.539,
+    websiteId: "adaptive",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K649N442J5VA5XWACDQV4NH2",
+    latitude: 39.018,
+    type: "pageview",
+    viewport: {
+      width: 1512,
+      height: 945,
+    },
+    domain: "www.adaptive.fyi",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "45.144.115.137",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aecd7b27-cf35-49ac-806b-29f035917dd0",
+    createdAt: 1758933454232,
+    identityId: "01K649N2YEFRFKAZ9FBK4T5K0X",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "US",
+    city: "Ashburn",
+    sessionId: "scb614cb2-a487-41d4-8c94-bce50f862bab",
+    href: "https://www.adaptive.fyi/feature-flags",
+    browser_name: "Chrome",
+    longitude: -77.539,
+    websiteId: "adaptive",
+    device_vendor: "Apple",
+    timezone: "America/New_York",
+    region: "VA",
+    id: "01K649N3CREKGFPX8THWCY1S46",
+    latitude: 39.018,
+    type: "pageview",
+    viewport: {
+      width: 1512,
+      height: 945,
+    },
+    domain: "www.adaptive.fyi",
+  },
+  {
+    os_version: "10.15.7",
+    ipAddress: "146.70.123.46",
+    os_name: "macOS",
+    device_model: "Macintosh",
+    visitorId: "aa0760f4-ff9f-47ea-a2cf-feb01b274f20",
+    createdAt: 1758933498042,
+    identityId: "01K646SNFB4JZSMBMR3QSJWVF6",
+    browser_version: "140.0.0.0",
+    email: "learnuidev@gmail.com",
+    country: "BE",
+    city: "Brussels",
+    sessionId: "sa8fcde73-7cd5-4641-aa93-e40f9c07bce2",
+    href: "https://www.mandarino.io/convos",
+    browser_name: "Chrome",
+    longitude: 4.5049,
+    websiteId: "mando-prod",
+    device_vendor: "Apple",
+    timezone: "Europe/Brussels",
+    region: "BRU",
+    id: "01K649PE5TZWWVW8CZ33NWNAJR",
+    latitude: 50.8847,
+    type: "pageview",
+    viewport: {
+      width: 1374,
+      height: 859,
+    },
+    domain: "www.mandarino.io",
   },
 ];
-
-// Helper to ingest event data into ClickHouse
-function mapDDBEvent(event) {
-  return {
-    id: event.id || "",
-    ipAddress: event.ipAddress || "",
-    href: event.href || "",
-    sessionId: event.sessionId || "",
-    websiteId: event.websiteId || "",
-    visitorId: event.visitorId || "",
-    email: event.email || "",
-    viewportWidth: event.viewport?.width || 0,
-    viewportHeight: event.viewport?.height || 0,
-    domain: event.domain || "",
-    type: event.type || "",
-    identityId: event.identityId || "",
-    extraData: event.extraData ? JSON.stringify(event.extraData) : "",
-    createdAt: event.createdAt,
-  };
-}
-
-const ingestDDBEvent = async (clickHouseClient, ddbEvent) => {
-  console.log(`Ingesting single event record`);
-  const row = mapDDBEvent(ddbEvent);
-
-  // Check if event already exists
-  const exists = await clickHouseClient.query({
-    query: `SELECT count() as c FROM event WHERE id = '${row.id}'`,
-    format: "JSONEachRow",
-  });
-
-  const result = await exists.json();
-  if (result[0].c > 0) {
-    console.log(`Event ${row.id} already exists, skipping insert`);
-    return { skipped: true };
-  }
-
-  const resp = await clickHouseClient.insert({
-    table: "event",
-    values: [row],
-    format: "JSONEachRow",
-  });
-
-  console.log(`Ingested event`, resp);
-  return resp;
-};
-
-const ingestDDBEvents = async (clickHouseClient, dDBEvents) => {
-  console.log(`Ingesting ${dDBEvents.length} event records`);
-  const rows = dDBEvents.map(mapDDBEvent);
-
-  // Fetch existing ids in one query
-  const ids = rows.map((r) => `'${r.id}'`).join(",");
-  const existingResp = await clickHouseClient.query({
-    query: `SELECT id FROM event WHERE id IN (${ids})`,
-    format: "JSONEachRow",
-  });
-
-  const existing = await existingResp.json();
-  const existingIds = new Set(existing.map((r) => r.id));
-
-  const toInsert = rows.filter((r) => !existingIds.has(r.id));
-
-  if (toInsert.length === 0) {
-    console.log(`All events already exist, skipping insert`);
-    return { skipped: true };
-  }
-
-  const resp = await clickHouseClient.insert({
-    table: "event",
-    values: toInsert,
-    format: "JSONEachRow",
-  });
-
-  console.log(`Ingested ${toInsert.length} new events`, resp);
-  return resp;
-};
-
-// event
-const createEventTable = async (clickHouseClient) => {
-  console.log(`Creating event table if not exists`);
-  const resp = await clickHouseClient.query({
-    query: `
-      CREATE TABLE IF NOT EXISTS event (
-        id String,
-        ipAddress IPv4,
-        href String,
-        sessionId String,
-        websiteId LowCardinality(String),
-        visitorId String,
-        email String,
-        viewportWidth UInt16,
-        viewportHeight UInt16,
-        domain String,
-        type LowCardinality(String),
-        identityId String,
-        extraData String,
-        createdAt DateTime64(3, 'UTC')
-      )
-      ENGINE = MergeTree
-      ORDER BY (websiteId, createdAt);
-    `,
-  });
-
-  console.log(`Event table created`);
-
-  return resp;
-};
-
-const cleanEventTable = async (clickHouseClient) => {
-  console.log(`Cleaning all items from event table`);
-  const resp = await clickHouseClient.query({
-    query: `ALTER TABLE event DELETE WHERE 1=1`,
-  });
-
-  console.log(`Event table cleaned`);
-  return resp;
-};
-
-const deleteEventTable = async (clickHouseClient) => {
-  console.log(`Deleting event table`);
-  const resp = await clickHouseClient.query({
-    query: `DROP TABLE IF EXISTS event`,
-  });
-
-  console.log(`Event table deleted`);
-  return resp;
-};
-
-const listEventsByWebsiteId = async (clickHouseClient, websiteId) => {
-  console.log(`Listing events for websiteId: ${websiteId}`);
-  const resp = await clickHouseClient.query({
-    query: `SELECT * FROM event WHERE websiteId = '${websiteId}' ORDER BY createdAt DESC`,
-    format: "JSONEachRow",
-  });
-  return await resp.json();
-};
-
-const listEventByEmail = async (clickHouseClient, email) => {
-  console.log(`Listing events for email: ${email}`);
-  const resp = await clickHouseClient.query({
-    query: `SELECT * FROM event WHERE email = '${email}' ORDER BY createdAt DESC`,
-    format: "JSONEachRow",
-  });
-  return await resp.json();
-};
-
-// Helper to ingest identity data into ClickHouse
-function mapDDBIdentity(identity) {
-  return {
-    id: identity.id || "",
-    email: identity.email || "",
-    ipAddress: identity.ipAddress || "",
-    os_name: identity.userAgentInfo.os.name || "",
-    os_version: identity.userAgentInfo.os.version || "",
-    device_type: identity.userAgentInfo.device.type || "",
-    device_model: identity.userAgentInfo.device.model || "",
-    device_vendor: identity.userAgentInfo.device.vendor || "",
-    browser_name: identity.userAgentInfo.browser.name || "",
-    browser_major: identity.userAgentInfo.browser.major || "",
-    browser_version: identity.userAgentInfo.browser.version || "",
-    websiteId: identity.websiteId || "",
-    emailAndDeviceType: identity.emailAndDeviceType,
-    createdAt: identity.createdAt,
-    updatedAt: identity.updatedAt,
-  };
-}
-
-const ingestDDBIdentity = async (clickHouseClient, ddbIdentity) => {
-  console.log(`Ingesting single identity record`);
-  const row = mapDDBIdentity(ddbIdentity);
-
-  // Check if identity already exists
-  const exists = await clickHouseClient.query({
-    query: `SELECT count() as c FROM identity WHERE id = '${row.id}'`,
-    format: "JSONEachRow",
-  });
-
-  const result = await exists.json();
-  if (result[0].c > 0) {
-    console.log(`Identity ${row.id} already exists, skipping insert`);
-    return { skipped: true };
-  }
-
-  const resp = await clickHouseClient.insert({
-    table: "identity",
-    values: [row],
-    format: "JSONEachRow",
-  });
-
-  console.log(`Ingested identity`, resp);
-  return resp;
-};
-
-const ingestDDBIdentities = async (clickHouseClient, dDBIdentities) => {
-  console.log(`Ingesting ${dDBIdentities.length} identity records`);
-  const rows = dDBIdentities.map(mapDDBIdentity);
-
-  // Fetch existing ids in one query
-  const ids = rows.map((r) => `'${r.id}'`).join(",");
-  const existingResp = await clickHouseClient.query({
-    query: `SELECT id FROM identity WHERE id IN (${ids})`,
-    format: "JSONEachRow",
-  });
-
-  const existing = await existingResp.json();
-  const existingIds = new Set(existing.map((r) => r.id));
-
-  const toInsert = rows.filter((r) => !existingIds.has(r.id));
-
-  if (toInsert.length === 0) {
-    console.log(`All identities already exist, skipping insert`);
-    return { skipped: true };
-  }
-
-  const resp = await clickHouseClient.insert({
-    table: "identity",
-    values: toInsert,
-    format: "JSONEachRow",
-  });
-
-  console.log(`Ingested ${toInsert.length} new identities`, resp);
-  return resp;
-};
-
-// identity
-const createIdentityTable = async (clickHouseClient) => {
-  console.log(`Creating identity table if not exists`);
-  const resp = await clickHouseClient.query({
-    query: `
-      CREATE TABLE IF NOT EXISTS identity (
-        id String,
-        email String,
-        ipAddress IPv4,
-
-        -- OS info
-        os_name String,
-        os_version String,
-
-        -- Device info
-        device_type LowCardinality(String) DEFAULT '',
-        device_model String,
-        device_vendor String,
-
-        -- Browser info
-        browser_name String,
-        browser_major String,
-        browser_version String,
-
-        -- Metadata
-        websiteId LowCardinality(String),
-        emailAndDeviceType String,
-
-        createdAt DateTime64(3, 'UTC'), -- millisecond precision timestamp
-        updatedAt DateTime64(3, 'UTC')
-      )
-      ENGINE = MergeTree
-      ORDER BY (email, websiteId, createdAt);
-    `,
-  });
-
-  console.log(`Identity table created`);
-
-  return resp;
-};
-
-const cleanIdentityTable = async (clickHouseClient) => {
-  console.log(`Cleaning all items from identity table`);
-  const resp = await clickHouseClient.query({
-    query: `ALTER TABLE identity DELETE WHERE 1=1`,
-  });
-
-  console.log(`Identity table cleaned`);
-  return resp;
-};
-
-const deleteIdentityTable = async (clickHouseClient) => {
-  console.log(`Deleting identity table`);
-  const resp = await clickHouseClient.query({
-    query: `DROP TABLE IF EXISTS identity`,
-  });
-
-  console.log(`Identity table deleted`);
-  return resp;
-};
-
-const listIdentitiesByWebsiteId = async (clickHouseClient, websiteId) => {
-  console.log(`Listing identities for websiteId: ${websiteId}`);
-  const resp = await clickHouseClient.query({
-    query: `SELECT * FROM identity WHERE websiteId = '${websiteId}' ORDER BY createdAt DESC`,
-    format: "JSONEachRow",
-  });
-  return await resp.json();
-};
-
-const listIdentitiesByEmail = async (clickHouseClient, email) => {
-  console.log(`Listing identities for email: ${email}`);
-  const resp = await clickHouseClient.query({
-    query: `SELECT * FROM identity WHERE email = '${email}' ORDER BY createdAt DESC`,
-    format: "JSONEachRow",
-  });
-  return await resp.json();
-};
-
-// Query Functions
-
-// i. Total views by websiteId
-const getTotalViewsByWebsiteId = async (
-  clickHouseClient,
-  websiteId,
-  period,
-  from,
-  to
-) => {
-  const { start, previousStart } = buildDateRange(period, from, to);
-
-  console.log("START", start);
-  console.log("previous start", previousStart);
-
-  let currentQuery, previousQuery;
-
-  // Determine grouping based on period
-  if (period === "last24h") {
-    // Group by hour for last 24 hours
-    currentQuery = `
-      SELECT toStartOfHour(createdAt) as hour, COUNT(*) as total
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${start}'
-      GROUP BY hour
-      ORDER BY hour ASC
-    `;
-    previousQuery = `
-      SELECT toStartOfHour(createdAt) as hour, COUNT(*) as total
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${previousStart}'
-        AND createdAt < '${start}'
-      GROUP BY hour
-      ORDER BY hour ASC
-    `;
-  } else if (period === "week" || period === "month") {
-    // Group by day for week or month
-    currentQuery = `
-      SELECT toDate(createdAt) as day, COUNT(*) as total
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${start}'
-        ${period === "custom" ? `AND createdAt <= '${to.toISOString()}'` : ""}
-      GROUP BY day
-      ORDER BY day ASC
-    `;
-    previousQuery = `
-      SELECT toDate(createdAt) as day, COUNT(*) as total
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${previousStart}'
-        AND createdAt < '${start}'
-      GROUP BY day
-      ORDER BY day ASC
-    `;
-  } else if (period === "ytd" || period === "year") {
-    // Group by month for year or ytd
-    currentQuery = `
-      SELECT toYYYYMM(createdAt) as month, COUNT(*) as total
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${start}'
-        ${period === "custom" ? `AND createdAt <= '${to.toISOString()}'` : ""}
-      GROUP BY month
-      ORDER BY month ASC
-    `;
-    previousQuery = `
-      SELECT toYYYYMM(createdAt) as month, COUNT(*) as total
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${previousStart}'
-        AND createdAt < '${start}'
-      GROUP BY month
-      ORDER BY month ASC
-    `;
-  } else {
-    // Default to total count for other periods
-    currentQuery = `
-      SELECT COUNT(*) as total
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${start}'
-        ${period === "custom" ? `AND createdAt <= '${to.toISOString()}'` : ""}
-    `;
-    previousQuery = `
-      SELECT COUNT(*) as total
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${previousStart}'
-        AND createdAt < '${start}'
-    `;
-  }
-
-  const current = await clickHouseClient.query({
-    query: currentQuery,
-    format: "JSONEachRow",
-  });
-  const previous = await clickHouseClient.query({
-    query: previousQuery,
-    format: "JSONEachRow",
-  });
-
-  const curr = await current.json();
-  const prev = await previous.json();
-
-  return {
-    current: curr,
-    previous: prev,
-  };
-};
-
-// ii. Total page visits by websiteId
-const getTotalPageVisitsByWebsiteId = async (
-  clickHouseClient,
-  websiteId,
-  period,
-  from,
-  to
-) => {
-  const { start, previousStart } = buildDateRange(period, from, to);
-  const current = await clickHouseClient.query({
-    query: `
-      SELECT href, COUNT(*) as visits
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND type = 'pageview'
-        AND createdAt >= '${start}'
-        ${period === "custom" ? `AND createdAt <= '${to.toISOString()}'` : ""}
-      GROUP BY href
-      ORDER BY visits DESC
-    `,
-    format: "JSONEachRow",
-  });
-  const previous = await clickHouseClient.query({
-    query: `
-      SELECT href, COUNT(*) as visits
-      FROM event
-      WHERE websiteId = '${websiteId}'
-        AND type = 'pageview'
-        AND createdAt >= '${previousStart}'
-        AND createdAt < '${start}'
-      GROUP BY href
-      ORDER BY visits DESC
-    `,
-    format: "JSONEachRow",
-  });
-  return {
-    current: await current.json(),
-    previous: await previous.json(),
-  };
-};
-
-// iii. Total visitors by websiteId by country, region, city
-const getTotalVisitorsByGeo = async (
-  clickHouseClient,
-  websiteId,
-  period,
-  from,
-  to
-) => {
-  const { start, previousStart } = buildDateRange(period, from, to);
-  const current = await clickHouseClient.query({
-    query: `
-      SELECT
-        geo.country,
-        geo.region,
-        geo.city,
-        COUNT(DISTINCT visitorId) as visitors
-      FROM event
-      ARRAY JOIN geo
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${start}'
-        ${period === "custom" ? `AND createdAt <= '${to.toISOString()}'` : ""}
-      GROUP BY geo.country, geo.region, geo.city
-      ORDER BY visitors DESC
-    `,
-    format: "JSONEachRow",
-  });
-  const previous = await clickHouseClient.query({
-    query: `
-      SELECT
-        geo.country,
-        geo.region,
-        geo.city,
-        COUNT(DISTINCT visitorId) as visitors
-      FROM event
-      ARRAY JOIN geo
-      WHERE websiteId = '${websiteId}'
-        AND createdAt >= '${previousStart}'
-        AND createdAt < '${start}'
-      GROUP BY geo.country, geo.region, geo.city
-      ORDER BY visitors DESC
-    `,
-    format: "JSONEachRow",
-  });
-  return {
-    current: await current.json(),
-    previous: await previous.json(),
-  };
-};
-
-const formatDateForClickHouse = (date) => {
-  return date.toISOString().replace("T", " ").replace("Z", "").slice(0, 23);
-};
-
-// Helper to build date ranges
-function buildDateRange(period, from, to) {
-  const now = new Date();
-  let start, previousStart;
-  switch (period) {
-    case "last24h":
-      start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      previousStart = new Date(start.getTime() - 24 * 60 * 60 * 1000);
-      break;
-    case "day":
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      previousStart = new Date(start.getTime() - 24 * 60 * 60 * 1000);
-      break;
-    case "week":
-      const weekStart = now.getDate() - now.getDay();
-      start = new Date(now.getFullYear(), now.getMonth(), weekStart);
-      previousStart = new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000);
-      break;
-    case "month":
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      break;
-    case "year":
-      start = new Date(now.getFullYear(), 0, 1);
-      previousStart = new Date(now.getFullYear() - 1, 0, 1);
-      break;
-    case "ytd":
-      start = new Date(now.getFullYear(), 0, 1);
-      previousStart = new Date(now.getFullYear() - 1, 0, 1);
-      break;
-    case "wtd":
-      const wtdStart = now.getDate() - now.getDay();
-      start = new Date(now.getFullYear(), now.getMonth(), wtdStart);
-      previousStart = new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000);
-      break;
-    case "all":
-      start = new Date(0);
-      previousStart = new Date(0);
-      break;
-    case "custom":
-      start = new Date(from);
-      previousStart = new Date(
-        from.getTime() - (to.getTime() - from.getTime())
-      );
-      break;
-    default:
-      throw new Error("Invalid period");
-  }
-
-  return {
-    start: formatDateForClickHouse(start),
-    previousStart: formatDateForClickHouse(previousStart),
-  };
-}
 
 const clickhouse = async (params) => {
   const client = createClient(params);
@@ -1058,60 +741,38 @@ const params = {
 
 // Manual Testing
 clickhouse(params).then(async (resp) => {
-  const {
-    client,
-    ingestDDBIdentities,
-    cleanIdentityTable,
-    ingestDDBEvents,
-    cleanEventTable,
-    deleteIdentityTable,
-    deleteEventTable,
-  } = resp;
-
+  const { client } = resp;
   // await ingestDDBIdentities(client, mockIdentities);
   // await cleanIdentityTable(client);
-
   // const identities = await listIdentitiesByWebsiteId(client, "mando-prod");
   // console.log("identities", identities);
-
   // const identities = await listIdentitiesByEmail(client, "learnuidev@gmail.com");
   // console.log("identities", identities);
-
-  // await ingestDDBEvents(client, mockEvents);
+  await ingestDDBEvents(client, mock_events);
   // await cleanEventTable(client);
-
-  // const events = await listEventsByWebsiteId(client, "mando-prod");
-  // console.log("events", events);
-
+  const events = await listEventsByWebsiteId(client, "mando-prod");
+  console.log("events", events);
   // const events = await listEventByEmail(client, "learnuidev@gmail.com");
   // console.log("events", events);
-
   // console.log("client", client);
-
   // await ingestDDBEvents(client, mockEvents);
-
   // const learnuiEvents = await listEventByEmail(client, "learnuidev@gmail.com");
   // console.log("learnuiEvents", learnuiEvents);
-
   // const totalViews = await getTotalViewsByWebsiteId(
   //   client,
   //   "mando-prod",
   //   "year"
   // );
   //   console.log("totalViews", totalViews);
-
   // const totalPageVisits = await getTotalPageVisitsByWebsiteId(
   //   client,
   //   "mando-prod",
   //   "month"
   // );
-
   // console.log("total page visits", totalPageVisits);
-
   // Errors out
   // const geoVisits = await getTotalVisitorsByGeo(client, "mando-prod", "month");
   // console.log("geoVisits", geoVisits);
-
-  await deleteIdentityTable(client);
-  await deleteEventTable(client);
+  // await deleteIdentityTable(client);
+  // await deleteEventTable(client);
 });
