@@ -69,7 +69,7 @@ const addUserCredentialApi = async ({
 
   const response = {
     ...credentialParams,
-    apiSecret: `adapt-${apiKey}${apiSecret}`,
+    apiSecret: `adaptive-${apiKey}${apiSecret}`,
   };
   return response;
 };
