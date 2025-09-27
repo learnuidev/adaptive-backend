@@ -196,27 +196,30 @@ const getFunnelData = async (
       SELECT
         visitor_id,
         session_id,
-        min(created_at) as ts
+        metadata,
+        min(created_at) as ts,
+        count() as event_count
       FROM event
       WHERE website_id = '${websiteId}'
         AND ${condition}
         AND created_at >= '${start}'
         ${period === "custom" ? `AND created_at <= '${end.toISOString()}'` : ""}
-      GROUP BY visitor_id, session_id
+      GROUP BY visitor_id, session_id, metadata
     `;
   });
 
   // Execute each step query and collect counts
   const stepResults = await Promise.all(
-    stepQueries.map((q) =>
-      clickHouseClient
-        .query({ query: q, format: "JSONEachRow" })
-        .then((r) => r.json())
-        .then((rows) => rows.length)
+    stepQueries.map(
+      (q) =>
+        clickHouseClient
+          .query({ query: q, format: "JSONEachRow" })
+          .then((r) => r.json())
+      // .then((rows) => rows)
     )
   );
 
-  console.log("STEP RESULTS", stepResults);
+  console.log("STEP RESULTS", JSON.stringify(stepResults, null, 4));
 
   // Build response with actual step counts
   return {
@@ -236,27 +239,27 @@ const getFunnelData = async (
     data: steps.map((step, index) => ({
       id: step?.id,
       name: step?.name,
-      value: stepResults[index],
+      value: stepResults[index]?.length,
       revenue: 0,
       stepIndex: index,
       stepType: step.type,
       conversionRate:
         index === 0
           ? 1
-          : stepResults[index] / Math.max(stepResults[index - 1], 1),
+          : stepResults[index] / Math.max(stepResults[index - 1]?.length, 1),
       dropoffFromPrevious:
         index === 0
           ? 0
-          : Math.max(0, stepResults[index - 1] - stepResults[index]),
+          : Math.max(0, stepResults[index - 1] - stepResults[index]?.length),
       topReferrers: [],
       topCountries: [],
     })),
     metrics: {
-      totalVisitors: stepResults[0] || 0,
-      completions: stepResults[stepResults.length - 1] || 0,
+      totalVisitors: stepResults[0]?.length || 0,
+      completions: stepResults[stepResults.length - 1]?.length || 0,
       overallConversionRate:
-        stepResults.length > 1 && stepResults[0] > 0
-          ? stepResults[stepResults.length - 1] / stepResults[0]
+        stepResults.length > 1 && stepResults[0]?.length > 0
+          ? stepResults[stepResults.length - 1]?.length / stepResults[0]?.length
           : 0,
       overallRevenuePerVisitor: 0,
       period,
@@ -265,6 +268,26 @@ const getFunnelData = async (
     },
   };
 };
+
+function addParamToRoutes(routes) {
+  function extractPattern(route) {
+    // Match something like /section/value, return /section/[param]
+    const match = route.match(/^\/([^/]+)\/[^/]+$/);
+    if (match) {
+      return `/${match[1]}/[param]`;
+    }
+    return null;
+  }
+
+  const extended = routes?.map((item) => {
+    const url = new URL(item.href);
+    const pattern = extractPattern(url.pathname);
+    // Compose patternHref as full origin + pattern
+    return pattern ? { ...item, patternHref: url.origin + pattern } : item;
+  });
+
+  return extended;
+}
 
 const getTotalPageVisitsByWebsiteId = async (
   clickHouseClient,
@@ -300,10 +323,28 @@ const getTotalPageVisitsByWebsiteId = async (
     `,
     format: "JSONEachRow",
   });
+
   return {
-    current: await current.json(),
-    previous: await previous.json(),
+    current: addParamToRoutes(await current.json()),
+    previous: addParamToRoutes(await previous.json()),
   };
+};
+
+const listPagesByWebsiteId = async (clickHouseClient, websiteId) => {
+  console.log(`Listing pages for websiteId: ${websiteId}`);
+  const resp = await clickHouseClient.query({
+    query: `
+      SELECT DISTINCT href
+      FROM event
+      WHERE website_id = '${websiteId}'
+        AND type = 'pageview'
+      ORDER BY href ASC
+    `,
+    format: "JSONEachRow",
+  });
+  const routes = await resp.json();
+
+  return addParamToRoutes(routes);
 };
 const getTotalViewsByWebsiteId = async (
   clickHouseClient,
@@ -524,4 +565,5 @@ module.exports = {
   getTotalViewsByWebsiteId,
   getTotalPageVisitsByWebsiteId,
   getFunnelData,
+  listPagesByWebsiteId,
 };

@@ -1,4 +1,5 @@
 const { clickhouseClient } = require("../lib/clickhouse-client");
+const { period } = require("./utils");
 
 require("dotenv").config();
 
@@ -1064,7 +1065,13 @@ const clickhouseTest = async () => {
 
 // Manual Testing
 clickhouseTest().then(async (resp) => {
-  const { client, ingestDDBEvents, getFunnelData } = resp;
+  const {
+    client,
+    ingestDDBEvents,
+    getFunnelData,
+    getTotalPageVisitsByWebsiteId,
+    listPagesByWebsiteId,
+  } = resp;
 
   const exampleFunnel = {
     websiteId: "68d4c2a24b0000c1caa0dde9",
@@ -1094,12 +1101,24 @@ clickhouseTest().then(async (resp) => {
     id: "68d736c1e5cddd8ba71b401a",
   };
 
-  const funnelData = await getFunnelData(
+  // const funnelData = await getFunnelData(
+  //   client,
+  //   exampleFunnel,
+  //   "mando-prod",
+  //   period.month
+  // );
+
+  // console.log("Funnel Data", funnelData);
+
+  const totalPageVisits = await getTotalPageVisitsByWebsiteId(
     client,
-    exampleFunnel,
     "mando-prod",
-    "last24h"
+    period.all
   );
 
-  console.log("Funnel Data", funnelData);
+  console.log("total-page-visits", totalPageVisits);
+
+  const totalRoutes = await listPagesByWebsiteId(client, "mando-prod");
+
+  console.log("total-routes", totalPageVisits);
 });

@@ -14,6 +14,7 @@ const {
   getTotalPageVisitsByWebsiteId,
   getTotalVisitorsByGeo,
   getFunnelData,
+  ...rest
 } = require("./events");
 
 // IDentity Stuff
@@ -57,6 +58,7 @@ const clickhouse = (params) => {
     getTotalPageVisitsByWebsiteId,
     getTotalVisitorsByGeo,
     getFunnelData,
+    ...rest,
   };
 };
 

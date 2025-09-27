@@ -2,53 +2,92 @@ const formatDateForClickHouse = (date) => {
   return date.toISOString().replace("T", " ").replace("Z", "").slice(0, 23);
 };
 
-function buildDateRange(period, from, to) {
+const period = {
+  last24h: "last24h",
+  day: "day",
+  week: "week",
+  month: "month",
+  year: "year",
+  ytd: "ytd",
+  wtd: "wtd",
+  all: "all",
+  custom: "custom",
+};
+
+const periodCalculators = {
+  [period.last24h]: (now) => {
+    const start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    return {
+      start,
+      previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
+    };
+  },
+  [period.day]: (now) => {
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return {
+      start,
+      previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
+    };
+  },
+  [period.week]: (now) => {
+    const weekStart = now.getDate() - now.getDay();
+    const start = new Date(now.getFullYear(), now.getMonth(), weekStart);
+    return {
+      start,
+      previousStart: new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000),
+    };
+  },
+  [period.month]: (now) => {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    return {
+      start,
+      previousStart: new Date(now.getFullYear(), now.getMonth() - 1, 1),
+    };
+  },
+  [period.year]: (now) => {
+    const start = new Date(now.getFullYear(), 0, 1);
+    return {
+      start,
+      previousStart: new Date(now.getFullYear() - 1, 0, 1),
+    };
+  },
+  [period.ytd]: (now) => {
+    const start = new Date(now.getFullYear(), 0, 1);
+    return {
+      start,
+      previousStart: new Date(now.getFullYear() - 1, 0, 1),
+    };
+  },
+  [period.wtd]: (now) => {
+    const wtdStart = now.getDate() - now.getDay();
+    const start = new Date(now.getFullYear(), now.getMonth(), wtdStart);
+    return {
+      start,
+      previousStart: new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000),
+    };
+  },
+  [period.all]: () => {
+    const epoch = new Date(0);
+    return { start: epoch, previousStart: epoch };
+  },
+  [period.custom]: (now, from, to) => {
+    const start = new Date(from);
+    return {
+      start,
+      previousStart: new Date(from.getTime() - (to.getTime() - from.getTime())),
+    };
+  },
+};
+
+function buildDateRange(periodKey, from, to) {
   const now = new Date();
-  let start, previousStart;
-  switch (period) {
-    case "last24h":
-      start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      previousStart = new Date(start.getTime() - 24 * 60 * 60 * 1000);
-      break;
-    case "day":
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      previousStart = new Date(start.getTime() - 24 * 60 * 60 * 1000);
-      break;
-    case "week":
-      const weekStart = now.getDate() - now.getDay();
-      start = new Date(now.getFullYear(), now.getMonth(), weekStart);
-      previousStart = new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000);
-      break;
-    case "month":
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      break;
-    case "year":
-      start = new Date(now.getFullYear(), 0, 1);
-      previousStart = new Date(now.getFullYear() - 1, 0, 1);
-      break;
-    case "ytd":
-      start = new Date(now.getFullYear(), 0, 1);
-      previousStart = new Date(now.getFullYear() - 1, 0, 1);
-      break;
-    case "wtd":
-      const wtdStart = now.getDate() - now.getDay();
-      start = new Date(now.getFullYear(), now.getMonth(), wtdStart);
-      previousStart = new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000);
-      break;
-    case "all":
-      start = new Date(0);
-      previousStart = new Date(0);
-      break;
-    case "custom":
-      start = new Date(from);
-      previousStart = new Date(
-        from.getTime() - (to.getTime() - from.getTime())
-      );
-      break;
-    default:
-      throw new Error("Invalid period");
+  if (!periodCalculators[periodKey]) {
+    throw new Error("Invalid period");
   }
+  const { start, previousStart } =
+    periodKey === period.custom
+      ? periodCalculators[period.custom](now, from, to)
+      : periodCalculators[periodKey](now);
 
   return {
     start: formatDateForClickHouse(start),
@@ -58,4 +97,5 @@ function buildDateRange(period, from, to) {
 
 module.exports = {
   buildDateRange,
+  period,
 };
