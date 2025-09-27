@@ -11,6 +11,7 @@ const { removeNull } = require("../../utils/remove-null");
 const { tableNames } = require("../../constants/table-names");
 const { apiConfig } = require("../../constants/api-config");
 const { constructParams } = require("../../utils/construct-params");
+const { clickhouseClient } = require("../../lib/clickhouse-client");
 
 // Create low-level DynamoDB client (singleton)
 const ddbClient = new DynamoDBClient({
@@ -85,6 +86,10 @@ const identifyApi = async (props) => {
   };
 
   await dynamodb.send(new PutCommand(inputParams));
+
+  if (clickhouseClient) {
+    await clickhouseClient.ingestDDBIdentity(clickhouseClient.client, params);
+  }
 
   return params;
 };

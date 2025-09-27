@@ -5,6 +5,7 @@ const ulid = require("ulid");
 const { removeNull } = require("../../utils/remove-null");
 const { tableNames } = require("../../constants/table-names");
 const { apiConfig } = require("../../constants/api-config");
+const { clickhouseClient } = require("../../lib/clickhouse-client");
 
 const addEventsApi = async (props) => {
   // Create low-level DynamoDB client
@@ -26,6 +27,10 @@ const addEventsApi = async (props) => {
 
   // Use `PutCommand` from @aws-sdk/lib-dynamodb
   await dynamodb.send(new PutCommand(inputParams));
+
+  if (clickhouseClient) {
+    await clickhouseClient.ingestDDBEvent(clickhouseClient.client, params);
+  }
 
   return params;
 };
