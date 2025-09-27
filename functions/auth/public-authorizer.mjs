@@ -1,5 +1,5 @@
-import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api";
-import { generatePolicy } from "./generate-policy";
+import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api.mjs";
+import { generatePolicy } from "./generate-policy.mjs";
 
 export const handler = async (event) => {
   const websiteId = JSON.parse(event.body)?.websiteId;

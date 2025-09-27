@@ -2,8 +2,8 @@ import { ulid } from "ulid";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 
-import { tableNames } from "../../constants/table-names.js";
-import { apiConfig } from "../../constants/api-config.js";
+import { tableNames } from "../../constants/table-names.mjs";
+import { apiConfig } from "../../constants/api-config.mjs";
 
 const ddbClient = new DynamoDBClient({
   region: apiConfig.region,

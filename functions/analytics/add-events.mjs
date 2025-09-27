@@ -1,6 +1,6 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
-import { addEventsApi } from "./add-events.api";
+import { addEventsApi } from "./add-events.api.mjs";
 
 import { extractLocationInfo } from "../../utils/extract-location-info";
 import { extractDeviceInfo } from "../../utils/extract-device-info";

@@ -1,4 +1,4 @@
-import { buildDateRange } from "./utils.js";
+import { buildDateRange } from "./utils.mjs";
 
 /* eslint-disable no-unused-vars */
 const sample_events = {

@@ -1,7 +1,7 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 
-import { addUserCredentialApi } from "./add-user-credential.api.js";
+import { addUserCredentialApi } from "./add-user-credential.api.mjs";
 
 export const handler = middy(async (event) => {
   const userId = event.requestContext.authorizer.claims.email;

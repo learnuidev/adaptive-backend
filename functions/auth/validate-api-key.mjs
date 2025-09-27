@@ -1,4 +1,4 @@
-import { apiConfig } from "../../constants/api-config";
+import { apiConfig } from "../../constants/api-config.mjs";
 import { cryptoV2 } from "../../lib/crypto-v2";
 import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api";
 import { credentialsPrefix } from "../user-credentials/user-credentials.constants";

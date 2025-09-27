@@ -3,11 +3,11 @@ import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
 import crypto from "crypto";
 
-import { apiConfig } from "../../constants/api-config.js";
-import { tableNames } from "../../constants/table-names.js";
+import { apiConfig } from "../../constants/api-config.mjs";
+import { tableNames } from "../../constants/table-names.mjs";
 import { removeNull } from "../../utils/remove-null.js";
-import { credentialsPrefix } from "./user-credentials.constants.js";
-import { cryptoV2 } from "../../lib/crypto-v2.js";
+import { credentialsPrefix } from "./user-credentials.constants.mjs";
+import { cryptoV2 } from "../../lib/crypto-v2.mjs";
 
 const ddbClient = new DynamoDBClient({
   region: apiConfig.region,

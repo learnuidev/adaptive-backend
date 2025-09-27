@@ -3,8 +3,8 @@ import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import ulid from "ulid";
 
 import { removeNull } from "../../utils/remove-null.js";
-import { tableNames } from "../../constants/table-names.js";
-import { apiConfig } from "../../constants/api-config.js";
+import { tableNames } from "../../constants/table-names.mjs";
+import { apiConfig } from "../../constants/api-config.mjs";
 import { clickhouseClient } from "../../lib/clickhouse-client.js";
 
 export const addEventsApi = async (props) => {

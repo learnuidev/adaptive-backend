@@ -17,7 +17,7 @@ import {
   getTotalPageVisitsByWebsiteId,
   getFunnelData,
   listPagesByWebsiteId,
-} from "./events.js";
+} from "./events.mjs";
 
 // IDentity Stuff
 import {
@@ -29,7 +29,7 @@ import {
   deleteIdentityTable,
   listIdentitiesByWebsiteId,
   listIdentitiesByEmail,
-} from "./identity.js";
+} from "./identity.mjs";
 import "dotenv/config";
 
 export const clickhouse = (params) => {

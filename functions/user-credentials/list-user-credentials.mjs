@@ -1,6 +1,6 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
-import { listUserCredentialsApi } from "./list-user-credentials.api.js";
+import { listUserCredentialsApi } from "./list-user-credentials.api.mjs";
 
 const baseHandler = async (event) => {
   const userEmail = event.requestContext.authorizer.claims.email;

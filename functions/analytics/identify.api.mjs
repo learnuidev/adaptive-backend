@@ -8,8 +8,8 @@ import {
 import { ulid } from "ulid";
 
 import { removeNull } from "../../utils/remove-null.js";
-import { tableNames } from "../../constants/table-names.js";
-import { apiConfig } from "../../constants/api-config.js";
+import { tableNames } from "../../constants/table-names.mjs";
+import { apiConfig } from "../../constants/api-config.mjs";
 import { constructParams } from "../../utils/construct-params.js";
 import { clickhouseClient } from "../../lib/clickhouse-client.js";
 
