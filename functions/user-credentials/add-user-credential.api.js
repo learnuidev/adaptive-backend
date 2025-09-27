@@ -14,6 +14,7 @@ const ddbClient = new DynamoDBClient({
   apiVersion: "2012-08-10",
 });
 
+// eslint-disable-next-line no-unused-vars
 const sample = {
   apiSecret: "",
   previewApiSecret: "mando-who...319c",
@@ -51,6 +52,7 @@ const addUserCredentialApi = async ({
   scopes,
   permissionType,
   userId,
+  ...rest
 }) => {
   const crypto = cryptoV2({ keyArn: apiConfig.kmsArn });
 
@@ -76,6 +78,7 @@ const addUserCredentialApi = async ({
     permissionType,
     previewApiSecret: `${credentialsPrefix}${prefix}...${suffix}`,
     createdAt,
+    ...rest,
   };
 
   var params = {

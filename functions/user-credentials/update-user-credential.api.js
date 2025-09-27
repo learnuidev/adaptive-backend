@@ -8,8 +8,9 @@ const {
 const { tableNames } = require("../../constants/table-names");
 const { removeNull } = require("../../utils/remove-null");
 const { constructParams } = require("../../utils/construct-params");
+const { apiConfig } = require("../../constants/api-config");
 
-const ddbClient = new DynamoDBClient({ region: "us-east-1" });
+const ddbClient = new DynamoDBClient({ region: apiConfig.region });
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
 const updateUserCredentialApi = async ({

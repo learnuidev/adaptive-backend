@@ -30,6 +30,7 @@ provider:
   region: us-east-1
   memorySize: 512
   environment:
+    USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
     ADAPTIVE_KMS_ARN: !GetAtt AdaptiveKMSKey.Arn
     REGION: ${self:provider.region}
     STAGE: ${self:provider.stage}

@@ -6,7 +6,9 @@ const { addUserCredentialApi } = require("./add-user-credential.api");
 module.exports.handler = middy(async (event) => {
   const userId = event.requestContext.authorizer.claims.email;
 
-  const { title, description, scopes, permissionType } = JSON.parse(event.body);
+  const { title, description, scopes, permissionType, ...rest } = JSON.parse(
+    event.body
+  );
 
   const userCredential = await addUserCredentialApi({
     title,
@@ -14,6 +16,7 @@ module.exports.handler = middy(async (event) => {
     scopes,
     permissionType,
     userId,
+    ...rest,
   });
 
   const response = {
