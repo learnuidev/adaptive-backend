@@ -80,14 +80,17 @@ provider:
 
 functions:
   public-authorizer:
+    timeout: 30
     handler: dist/functions/auth/public-authorizer.handler
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   authorizer:
+    timeout: 30
     handler: dist/functions/auth/authorizer.handler
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   list-user-credentials:
+    timeout: 30
     handler: dist/functions/user-credentials/list-user-credentials.handler
     events:
       - http:
@@ -101,6 +104,7 @@ functions:
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   add-user-credential:
+    timeout: 30
     handler: dist/functions/user-credentials/add-user-credential.handler
     events:
       - http:
@@ -114,6 +118,7 @@ functions:
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   update-user-credential:
+    timeout: 30
     handler: dist/functions/user-credentials/update-user-credential.handler
     events:
       - http:
@@ -127,6 +132,7 @@ functions:
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   delete-user-credential:
+    timeout: 30
     handler: dist/functions/user-credentials/delete-user-credential.handler
     events:
       - http:
@@ -140,11 +146,13 @@ functions:
     environment:
       user_credentials_table: !Ref UserCredentialsTable
   confirmUserSignup:
+    timeout: 30
     handler: dist/functions/user/confirm-user-signup.handler
     environment:
       USERS_TABLE: !Ref UsersTable
       USER_PREFERENCE_TABLE: !Ref UserPreferenceTable
   identify:
+    timeout: 30
     handler: dist/functions/analytics/identify.handler
     events:
       - http:
@@ -158,6 +166,7 @@ functions:
     environment:
       IDENTITY_TABLE: !Ref IdentityTableV2
   add-events:
+    timeout: 30
     handler: dist/functions/analytics/add-events.handler
     events:
       - http:
@@ -171,6 +180,7 @@ functions:
     environment:
       EVENTS_TABLE: !Ref EventsTableV2
   add-feature-flag:
+    timeout: 30
     handler: dist/functions/analytics/add-feature-flag.handler
     events:
       - http:
@@ -184,6 +194,7 @@ functions:
     environment:
       FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
   remove-feature-flag:
+    timeout: 30
     handler: dist/functions/analytics/remove-feature-flag.handler
     events:
       - http:
@@ -197,6 +208,7 @@ functions:
     environment:
       FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
   list-feature-flags:
+    timeout: 30
     handler: dist/functions/analytics/list-feature-flags.handler
     events:
       - http:
