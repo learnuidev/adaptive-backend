@@ -17,7 +17,7 @@ const ddbClient = new DynamoDBClient({
 // eslint-disable-next-line no-unused-vars
 const sample = {
   apiSecret: "",
-  previewApiSecret: "mando-who...319c",
+  previewApiSecret: "adaptive-who...319c",
   apiKey: "whowtlTBt+8C/XHCPH31K+vj8iflASMvb0BP+/EBqnI=",
   userId: "learnuidev@gmail.com",
   permissionType: "all",

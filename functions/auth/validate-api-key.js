@@ -20,8 +20,6 @@ async function validateApiKey(apiKeyWithMando) {
 
   const userCredential = await getUserCredentialById(userCredentialId);
 
-  console.log("USER CREDENTIAL", userCredential);
-
   if (!userCredential) {
     return false;
   }

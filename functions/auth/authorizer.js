@@ -3,6 +3,7 @@ const { validateApiKey } = require("./validate-api-key");
 
 exports.handler = async (event) => {
   const token = event.authorizationToken;
+  const websiteId = JSON.parse(event.body)?.websiteId;
 
   if (!token || !token.startsWith("Bearer ")) {
     throw new Error("Unauthorized");
