@@ -15,6 +15,7 @@
   "devDependencies": {
     "aws-sdk": "^2.1692.0",
     "eslint": "^8.57.0",
+    "prettier": "^3.6.2",
     "serverless": "^3.38.0",
     "serverless-appsync-plugin": "^2.4.0",
     "serverless-export-env": "github:arabold/serverless-export-env",
@@ -22,20 +23,16 @@
     "serverless-step-functions": "^3.18.0"
   },
   "dependencies": {
-    "@aws-crypto/client-node": "^4.2.1",
+    "@aws-crypto/client-node": "^4.0.1",
     "@aws-sdk/client-dynamodb": "^3.896.0",
     "@aws-sdk/lib-dynamodb": "^3.896.0",
     "@clickhouse/client": "^1.12.1",
     "@middy/core": "^4.6.5",
     "@middy/http-cors": "^4.6.5",
-    "adm-zip": "^0.5.12",
-    "axios": "^1.6.8",
     "date-fns": "^2.30.0",
     "dotenv": "^16.5.0",
     "geoip-lite": "^1.4.10",
     "lodash": "^4.17.21",
-    "mime-types": "^2.1.35",
-    "prettier": "^3.4.2",
     "ua-parser-js": "^2.0.5",
     "ulid": "^2.3.0"
   }
