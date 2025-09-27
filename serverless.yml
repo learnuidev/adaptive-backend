@@ -15,11 +15,15 @@ package:
 custom:
   esbuild:
     bundle: true
-    minify: false
+    minify: true
     sourcemap: true
-    target: node20
+    target: node18
     platform: node
     format: esm
+    mainFields: ["module", "main"]
+    resolveExtensions: [".mjs", ".js", ".ts"]
+    external:
+      - "@aws-sdk/*"
   name: vishal
   stage: ${opt:stage, self:provider.stage}
   logRetentionInDays: 30

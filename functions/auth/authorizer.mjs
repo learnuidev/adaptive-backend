@@ -1,5 +1,5 @@
-import { generatePolicy } from "./generate-policy.js";
-import { validateApiKey } from "./validate-api-key.js";
+import { generatePolicy } from "./generate-policy.mjs";
+import { validateApiKey } from "./validate-api-key.mjs";
 
 export const handler = async (event) => {
   const token = event.authorizationToken;

@@ -1,8 +1,8 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
-import { identifyApi } from "./identify.api.mjs/index.js";
-import { extractLocationInfo } from "../../utils/extract-location-info.js";
-import { extractDeviceInfo } from "../../utils/extract-device-info.js";
+import { identifyApi } from "./identify.api.mjs";
+import { extractLocationInfo } from "../../utils/extract-location-info.mjs";
+import { extractDeviceInfo } from "../../utils/extract-device-info.mjs";
 
 export const handler = middy(async (event) => {
   const ipAddress = event.requestContext.identity.sourceIp;

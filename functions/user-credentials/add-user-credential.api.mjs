@@ -5,7 +5,7 @@ import crypto from "crypto";
 
 import { apiConfig } from "../../constants/api-config.mjs";
 import { tableNames } from "../../constants/table-names.mjs";
-import { removeNull } from "../../utils/remove-null.js";
+import { removeNull } from "../../utils/remove-null.mjs";
 import { credentialsPrefix } from "./user-credentials.constants.mjs";
 import { cryptoV2 } from "../../lib/crypto-v2.mjs";
 

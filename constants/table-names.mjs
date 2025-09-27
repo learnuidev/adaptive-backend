@@ -1,4 +1,6 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config();
+
 /* eslint-disable no-undef */
 export const tableNames = {
   usersTable: process.env.USERS_TABLE,

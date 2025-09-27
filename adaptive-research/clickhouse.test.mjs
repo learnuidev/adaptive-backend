@@ -1,5 +1,5 @@
-import { clickhouseClient } from "../lib/clickhouse-client.js";
-import { period } from "./utils.js";
+import { clickhouseClient } from "../lib/clickhouse-client.mjs";
+import { period } from "./utils.mjs";
 
 import dotenv from "dotenv";
 dotenv.config();

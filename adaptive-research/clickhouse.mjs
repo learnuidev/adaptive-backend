@@ -19,6 +19,9 @@ import {
   listPagesByWebsiteId,
 } from "./events.mjs";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 // IDentity Stuff
 import {
   createIdentityTable,
@@ -30,7 +33,6 @@ import {
   listIdentitiesByWebsiteId,
   listIdentitiesByEmail,
 } from "./identity.mjs";
-import "dotenv/config";
 
 export const clickhouse = (params) => {
   const client = createClient(params);

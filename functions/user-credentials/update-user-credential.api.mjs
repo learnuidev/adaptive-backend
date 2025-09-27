@@ -6,8 +6,8 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 
 import { tableNames } from "../../constants/table-names.mjs";
-import { removeNull } from "../../utils/remove-null.js";
-import { constructParams } from "../../utils/construct-params.js";
+import { removeNull } from "../../utils/remove-null.mjs";
+import { constructParams } from "../../utils/construct-params.mjs";
 import { apiConfig } from "../../constants/api-config.mjs";
 
 const ddbClient = new DynamoDBClient({ region: apiConfig.region });

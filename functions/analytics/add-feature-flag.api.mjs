@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { ulid } from "ulid";
 
-import { removeNull } from "../../utils/remove-null.js";
+import { removeNull } from "../../utils/remove-null.mjs";
 import { apiConfig } from "../../constants/api-config.mjs";
 import { tableNames } from "../../constants/table-names.mjs";
 
