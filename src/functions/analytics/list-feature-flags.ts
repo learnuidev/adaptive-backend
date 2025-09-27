@@ -1,7 +1,7 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 
-import { addFeatureFlagsApi } from "./add-feature-flag.api";
+import { addFeatureFlagsApi } from "./add-feature-flag.api.js";
 
 export const handler = middy(async (event) => {
   try {

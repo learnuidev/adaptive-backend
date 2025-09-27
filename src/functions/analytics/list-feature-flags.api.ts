@@ -2,9 +2,9 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { ulid } from "ulid";
 
-import { removeNull } from "../../utils/remove-null";
-import { apiConfig } from "../../constants/api-config";
-import { tableNames } from "../../constants/table-names";
+import { removeNull } from "../../utils/remove-null.js";
+import { apiConfig } from "../../constants/api-config.js";
+import { tableNames } from "../../constants/table-names.js";
 
 // Create low-level DynamoDB client once
 const ddbClient = new DynamoDBClient({

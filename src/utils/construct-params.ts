@@ -1,4 +1,4 @@
-import { removeNull } from "./remove-null";
+import { removeNull } from "./remove-null.js";
 
 export const constructParams = ({ tableName, attributes }, props = {}) => {
   const { id, ...rest } = attributes;

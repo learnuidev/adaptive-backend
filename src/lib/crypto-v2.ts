@@ -8,7 +8,7 @@ import {
   buildClient,
   CommitmentPolicy,
 } from "@aws-crypto/client-node";
-import { apiConfig } from "../constants/api-config";
+import { apiConfig } from "../constants/api-config.js";
 
 const { encrypt, decrypt } = buildClient(
   CommitmentPolicy.REQUIRE_ENCRYPT_REQUIRE_DECRYPT

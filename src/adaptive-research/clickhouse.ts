@@ -17,7 +17,7 @@ import {
   getTotalPageVisitsByWebsiteId,
   getFunnelData,
   listPagesByWebsiteId,
-} from "./events";
+} from "./events.js";
 
 import dotenv from "dotenv";
 dotenv.config();

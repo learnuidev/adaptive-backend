@@ -5,10 +5,10 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 
-import { tableNames } from "../../constants/table-names";
-import { removeNull } from "../../utils/remove-null";
-import { constructParams } from "../../utils/construct-params";
-import { apiConfig } from "../../constants/api-config";
+import { tableNames } from "../../constants/table-names.js";
+import { removeNull } from "../../utils/remove-null.js";
+import { constructParams } from "../../utils/construct-params.js";
+import { apiConfig } from "../../constants/api-config.js";
 
 const ddbClient = new DynamoDBClient({ region: apiConfig.region });
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);

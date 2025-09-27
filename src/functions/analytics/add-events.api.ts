@@ -2,10 +2,10 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { ulid } from "ulid";
 
-import { removeNull } from "../../utils/remove-null";
-import { tableNames } from "../../../constants/table-names";
-import { apiConfig } from "../../../constants/api-config";
-import { clickhouseClient } from "../../lib/clickhouse-client";
+import { removeNull } from "../../utils/remove-null.js";
+import { tableNames } from "../../constants/table-names.js";
+import { apiConfig } from "../../constants/api-config.js";
+import { clickhouseClient } from "../../lib/clickhouse-client.js";
 
 export const addEventsApi = async (props) => {
   // Create low-level DynamoDB client

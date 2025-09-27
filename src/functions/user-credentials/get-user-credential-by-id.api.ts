@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
-import { apiConfig } from "../../constants/api-config";
-import { tableNames } from "../../constants/table-names";
+import { apiConfig } from "../../constants/api-config.js";
+import { tableNames } from "../../constants/table-names.js";
 
 const ddbClient = new DynamoDBClient({
   apiVersion: "2012-08-10",

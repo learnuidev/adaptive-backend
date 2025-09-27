@@ -1,4 +1,4 @@
-import { confirmUserSignuApi } from "./confirm-user-signup.api";
+import { confirmUserSignuApi } from "./confirm-user-signup.api.js";
 
 export const handler = async (event) => {
   if (event.triggerSource === "PostConfirmation_ConfirmSignUp") {

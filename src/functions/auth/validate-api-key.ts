@@ -1,7 +1,7 @@
-import { apiConfig } from "../../constants/api-config";
-import { cryptoV2 } from "../../lib/crypto-v2";
-import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api";
-import { credentialsPrefix } from "../user-credentials/user-credentials.constants";
+import { apiConfig } from "../../constants/api-config.js";
+import { cryptoV2 } from "../../lib/crypto-v2.js";
+import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api.js";
+import { credentialsPrefix } from "../user-credentials/user-credentials.constants.js";
 // import { getUserCredentialById } from "./user-credential/get-user-credential-by-id";
 
 export async function validateApiKey(apiKeyWithMando) {

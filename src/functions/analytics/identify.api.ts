@@ -7,11 +7,11 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { ulid } from "ulid";
 
-import { removeNull } from "../../utils/remove-null";
-import { tableNames } from "../../constants/table-names";
-import { apiConfig } from "../../constants/api-config";
-import { constructParams } from "../../utils/construct-params";
-import { clickhouseClient } from "../../lib/clickhouse-client";
+import { removeNull } from "../../utils/remove-null.js";
+import { tableNames } from "../../constants/table-names.js";
+import { apiConfig } from "../../constants/api-config.js";
+import { constructParams } from "../../utils/construct-params.js";
+import { clickhouseClient } from "../../lib/clickhouse-client.js";
 
 // Create low-level DynamoDB client (singleton)
 const ddbClient = new DynamoDBClient({

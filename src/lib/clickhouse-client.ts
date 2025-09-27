@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { clickhouse } from "../adaptive-research/clickhouse";
+import { clickhouse } from "../adaptive-research/clickhouse.js";
 
 let clickhouseClient;
 

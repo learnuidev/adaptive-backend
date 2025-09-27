@@ -5,8 +5,8 @@ import {
   DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
 
-import { apiConfig } from "../../constants/api-config";
-import { tableNames } from "../../constants/table-names";
+import { apiConfig } from "../../constants/api-config.js";
+import { tableNames } from "../../constants/table-names.js";
 
 const ddbClient = new DynamoDBClient({
   region: apiConfig.region,

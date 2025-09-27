@@ -1,7 +1,7 @@
 // Middlewares
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
-import { deleteUserCredentialApi } from "./delete-user-credential.api";
+import { deleteUserCredentialApi } from "./delete-user-credential.api.js";
 
 export const handler = middy(async (event) => {
   try {
