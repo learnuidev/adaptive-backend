@@ -305,26 +305,6 @@ export const getFunnelData = async (
   };
 };
 
-export function addParamToRoutes(routes: any) {
-  function extractPattern(route) {
-    // Match something like /section/value, return /section/[param]
-    const match = route.match(/^\/([^/]+)\/[^/]+$/);
-    if (match) {
-      return `/${match[1]}/[param]`;
-    }
-    return null;
-  }
-
-  const extended = routes?.map((item) => {
-    const url = new URL(item.href);
-    const pattern = extractPattern(url.pathname);
-    // Compose patternHref as full origin + pattern
-    return pattern ? { ...item, patternHref: url.origin + pattern } : item;
-  });
-
-  return extended;
-}
-
 /**
  * Efficiently checks if any user events exist for a given websiteId.
  * Uses LIMIT 1 for minimal data transfer.
@@ -346,25 +326,6 @@ export const hasUserEvents = async (
   return rows.length > 0;
 };
 
-export const listPagesByWebsiteId = async (
-  clickHouseClient: any,
-  websiteId: string
-) => {
-  console.log(`Listing pages for websiteId: ${websiteId}`);
-  const resp = await clickHouseClient.query({
-    query: `
-      SELECT DISTINCT href
-      FROM event
-      WHERE website_id = '${websiteId}'
-        AND type = 'pageview'
-      ORDER BY href ASC
-    `,
-    format: "JSONEachRow",
-  });
-  const routes = await resp.json();
-
-  return addParamToRoutes(routes);
-};
 export const getTotalViewsByWebsiteId = async (
   clickHouseClient,
   websiteId,

@@ -15,7 +15,6 @@ import {
   getTotalVisitorsByGeo,
   getTotalViewsByWebsiteId,
   getFunnelData,
-  listPagesByWebsiteId,
   hasUserEvents,
 } from "./events.js";
 
@@ -62,7 +61,6 @@ export const clickhouse = (params: any) => {
     getTotalViewsByWebsiteId,
     getTotalVisitorsByGeo,
     getFunnelData,
-    listPagesByWebsiteId,
   };
 };
 

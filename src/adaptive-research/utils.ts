@@ -164,4 +164,24 @@ function buildDateRange(periodKey: FilterPeriod, from?: Date, to?: Date) {
   };
 }
 
+export function addParamToRoutes(routes: any) {
+  function extractPattern(route) {
+    // Match something like /section/value, return /section/[param]
+    const match = route.match(/^\/([^/]+)\/[^/]+$/);
+    if (match) {
+      return `/${match[1]}/[param]`;
+    }
+    return null;
+  }
+
+  const extended = routes?.map((item) => {
+    const url = new URL(item.href);
+    const pattern = extractPattern(url.pathname);
+    // Compose patternHref as full origin + pattern
+    return pattern ? { ...item, patternHref: url.origin + pattern } : item;
+  });
+
+  return extended;
+}
+
 export { buildDateRange, period };

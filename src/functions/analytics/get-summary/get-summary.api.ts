@@ -1,6 +1,6 @@
-import { listPagesByWebsiteId } from "../../../adaptive-research/events.js";
 import { getTotalPageVisitsByWebsiteId } from "../../../adaptive-research/get-total-page-visits-by-website-id.js";
 import { getTotalUniqueUsers } from "../../../adaptive-research/get-total-unique-users.js";
+import { listPagesByWebsiteId } from "../../../adaptive-research/list-pages-by-website-id.js";
 import { listVisitorsByWebsiteId } from "../../../adaptive-research/list-visitors-by-website-id.js";
 import { FilterPeriod } from "../../../adaptive-research/utils.js";
 import { clickhouseClient } from "../../../lib/clickhouse-client.js";
