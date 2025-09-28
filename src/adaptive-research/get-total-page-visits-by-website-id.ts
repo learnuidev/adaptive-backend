@@ -44,14 +44,20 @@ const addParamToRoutes = (routes) => {
   }));
 };
 
-export const getTotalPageVisitsByWebsiteId = async (
+export const getTotalPageVisitsByWebsiteId = async ({
   clickHouseClient,
+  timezoneName = "America/Montreal",
   websiteId,
   period,
   from,
-  to
-) => {
-  const { start, previousStart } = buildDateRange({ period, from, to });
+  to,
+}: any) => {
+  const { start, previousStart } = buildDateRange({
+    period,
+    from,
+    to,
+    timezoneName,
+  });
 
   // Format the 'to' date for custom period
   const endDate = period === "custom" ? formatDateForClickHouse(to) : null;

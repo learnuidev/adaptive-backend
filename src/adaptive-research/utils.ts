@@ -1,3 +1,5 @@
+import { timezones } from "./timezones.js";
+
 export const formatDateForClickHouse = (date) => {
   return date.toISOString().replace("T", " ").replace("Z", "").slice(0, 23);
 };
@@ -37,25 +39,6 @@ const period: Record<FilterPeriod, FilterPeriod> = {
   custom: "custom",
 };
 
-const timezones = [
-  {
-    name: "Pacific/Midway",
-    offset: -660,
-    utcOffsetStr: "GMT+11:00",
-    region: "Pacific",
-    city: "Midway",
-    currentTime: "10:06 AM",
-  },
-  {
-    name: "America/New_York",
-    offset: -240,
-    utcOffsetStr: "GMT+04:00",
-    region: "America",
-    city: "New York",
-    currentTime: "5:06 PM",
-  },
-];
-
 function applyTimezoneOffset(date: Date, timezoneName: string): Date {
   const tz = timezones.find((t) => t.name === timezoneName);
   if (!tz) throw new Error("Unknown timezone: " + timezoneName);
@@ -77,28 +60,32 @@ const periodCalculators = {
     };
   },
   last24h: (now: Date, timezoneName: string) => {
-    const start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const localNow = applyTimezoneOffset(now, timezoneName);
+    const start = new Date(localNow.getTime() - 24 * 60 * 60 * 1000);
     return {
       start,
       previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
     };
   },
   last7d: (now: Date, timezoneName: string) => {
-    const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const localNow = applyTimezoneOffset(now, timezoneName);
+    const start = new Date(localNow.getTime() - 7 * 24 * 60 * 60 * 1000);
     return {
       start,
       previousStart: new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000),
     };
   },
   last30d: (now: Date, timezoneName: string) => {
-    const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const localNow = applyTimezoneOffset(now, timezoneName);
+    const start = new Date(localNow.getTime() - 30 * 24 * 60 * 60 * 1000);
     return {
       start,
       previousStart: new Date(start.getTime() - 30 * 24 * 60 * 60 * 1000),
     };
   },
   last12m: (now: Date, timezoneName: string) => {
-    const start = new Date(now.getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
+    const localNow = applyTimezoneOffset(now, timezoneName);
+    const start = new Date(localNow.getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
     return {
       start,
       previousStart: new Date(start.getTime() - 12 * 30 * 24 * 60 * 60 * 1000),
