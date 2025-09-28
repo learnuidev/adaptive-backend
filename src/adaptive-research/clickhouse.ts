@@ -14,7 +14,6 @@ import {
   // Queries
   getTotalVisitorsByGeo,
   getTotalViewsByWebsiteId,
-  getTotalPageVisitsByWebsiteId,
   getFunnelData,
   listPagesByWebsiteId,
   hasUserEvents,
@@ -61,7 +60,6 @@ export const clickhouse = (params: any) => {
     hasUserEvents,
     // Query Functions
     getTotalViewsByWebsiteId,
-    getTotalPageVisitsByWebsiteId,
     getTotalVisitorsByGeo,
     getFunnelData,
     listPagesByWebsiteId,

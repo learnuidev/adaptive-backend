@@ -1,9 +1,5 @@
-import {
-  getTotalPageVisitsByWebsiteId,
-  getTotalViewsByWebsiteId,
-  getTotalVisitorsByGeo,
-  listPagesByWebsiteId,
-} from "../../../adaptive-research/events.js";
+import { listPagesByWebsiteId } from "../../../adaptive-research/events.js";
+import { getTotalPageVisitsByWebsiteId } from "../../../adaptive-research/get-total-page-visits-by-website-id.js";
 import { getTotalUniqueUsers } from "../../../adaptive-research/get-total-unique-users.js";
 import { listVisitorsByWebsiteId } from "../../../adaptive-research/list-visitors-by-website-id.js";
 import { FilterPeriod } from "../../../adaptive-research/utils.js";

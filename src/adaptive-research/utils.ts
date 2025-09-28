@@ -1,4 +1,4 @@
-const formatDateForClickHouse = (date) => {
+export const formatDateForClickHouse = (date) => {
   return date.toISOString().replace("T", " ").replace("Z", "").slice(0, 23);
 };
 

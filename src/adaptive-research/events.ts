@@ -346,46 +346,6 @@ export const hasUserEvents = async (
   return rows.length > 0;
 };
 
-export const getTotalPageVisitsByWebsiteId = async (
-  clickHouseClient,
-  websiteId,
-  period,
-  from,
-  to
-) => {
-  const { start, previousStart } = buildDateRange(period, from, to);
-  const current = await clickHouseClient.query({
-    query: `
-      SELECT href, COUNT(*) as visits
-      FROM event
-      WHERE website_id = '${websiteId}'
-        AND type = 'pageview'
-        AND created_at >= '${start}'
-        ${period === "custom" ? `AND created_at <= '${to.toISOString()}'` : ""}
-      GROUP BY href
-      ORDER BY visits DESC
-    `,
-    format: "JSONEachRow",
-  });
-  const previous = await clickHouseClient.query({
-    query: `
-      SELECT href, COUNT(*) as visits
-      FROM event
-      WHERE website_id = '${websiteId}'
-        AND type = 'pageview'
-        AND created_at >= '${previousStart}'
-        AND created_at < '${start}'
-      GROUP BY href
-      ORDER BY visits DESC
-    `,
-    format: "JSONEachRow",
-  });
-
-  return {
-    current: addParamToRoutes(await current.json()),
-    previous: addParamToRoutes(await previous.json()),
-  };
-};
 export const listPagesByWebsiteId = async (
   clickHouseClient: any,
   websiteId: string
