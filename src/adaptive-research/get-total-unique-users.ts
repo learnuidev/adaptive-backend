@@ -42,10 +42,13 @@ export const getTotalUniqueUsers = async (
   from,
   to
 ) => {
-  const { start, previousStart } = buildDateRange({ period, from, to });
+  const { startStart, startEnd, previousStartStart, previousStartEnd } =
+    buildDateRange({ period, from, to });
 
-  console.log("START", start);
-  console.log("previous start", previousStart);
+  console.log("START", startStart);
+  console.log("END", startEnd);
+  console.log("previous start", previousStartStart);
+  console.log("previous end", previousStartEnd);
 
   let currentQuery, previousQuery;
 
@@ -56,7 +59,8 @@ export const getTotalUniqueUsers = async (
       SELECT toStartOfHour(created_at) as hour, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${start}'
+        AND created_at >= '${startStart}'
+        AND created_at <= '${startEnd}'
       GROUP BY hour
       ORDER BY hour ASC
     `;
@@ -64,8 +68,8 @@ export const getTotalUniqueUsers = async (
       SELECT toStartOfHour(created_at) as hour, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${previousStart}'
-        AND created_at < '${start}'
+        AND created_at >= '${previousStartStart}'
+        AND created_at <= '${previousStartEnd}'
       GROUP BY hour
       ORDER BY hour ASC
     `;
@@ -81,8 +85,8 @@ export const getTotalUniqueUsers = async (
       SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${start}'
-        ${period === "custom" ? `AND created_at <= '${to.toISOString()}'` : ""}
+        AND created_at >= '${startStart}'
+        AND created_at <= '${startEnd}'
       GROUP BY day
       ORDER BY day ASC
     `;
@@ -90,8 +94,8 @@ export const getTotalUniqueUsers = async (
       SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${previousStart}'
-        AND created_at < '${start}'
+        AND created_at >= '${previousStartStart}'
+        AND created_at <= '${previousStartEnd}'
       GROUP BY day
       ORDER BY day ASC
     `;
@@ -107,8 +111,8 @@ export const getTotalUniqueUsers = async (
       SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${start}'
-        ${period === "custom" ? `AND created_at <= '${to.toISOString()}'` : ""}
+        AND created_at >= '${startStart}'
+        AND created_at <= '${startEnd}'
       GROUP BY day
       ORDER BY day ASC
     `;
@@ -116,8 +120,8 @@ export const getTotalUniqueUsers = async (
       SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${previousStart}'
-        AND created_at < '${start}'
+        AND created_at >= '${previousStartStart}'
+        AND created_at <= '${previousStartEnd}'
       GROUP BY day
       ORDER BY day ASC
     `;
@@ -127,8 +131,8 @@ export const getTotalUniqueUsers = async (
       SELECT toYYYYMM(created_at) as month, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${start}'
-        ${period === "custom" ? `AND created_at <= '${to.toISOString()}'` : ""}
+        AND created_at >= '${startStart}'
+        AND created_at <= '${startEnd}'
       GROUP BY month
       ORDER BY month ASC
     `;
@@ -136,8 +140,8 @@ export const getTotalUniqueUsers = async (
       SELECT toYYYYMM(created_at) as month, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${previousStart}'
-        AND created_at < '${start}'
+        AND created_at >= '${previousStartStart}'
+        AND created_at <= '${previousStartEnd}'
       GROUP BY month
       ORDER BY month ASC
     `;
@@ -148,12 +152,31 @@ export const getTotalUniqueUsers = async (
       FROM event
       WHERE website_id = '${websiteId}'
     `;
-    // Fixed: previous query now uses the same time window as current but shifted back
     previousQuery = `
       SELECT COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at < '${start}'
+        AND created_at <= '${previousStartEnd}'
+    `;
+  } else if (period === "custom") {
+    // Custom period
+    currentQuery = `
+      SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
+      FROM event
+      WHERE website_id = '${websiteId}'
+        AND created_at >= '${startStart}'
+        AND created_at <= '${startEnd}'
+      GROUP BY day
+      ORDER BY day ASC
+    `;
+    previousQuery = `
+      SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
+      FROM event
+      WHERE website_id = '${websiteId}'
+        AND created_at >= '${previousStartStart}'
+        AND created_at <= '${previousStartEnd}'
+      GROUP BY day
+      ORDER BY day ASC
     `;
   } else {
     // Default to total count for other periods
@@ -161,15 +184,15 @@ export const getTotalUniqueUsers = async (
       SELECT COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${start}'
-        ${period === "custom" ? `AND created_at <= '${to.toISOString()}'` : ""}
+        AND created_at >= '${startStart}'
+        AND created_at <= '${startEnd}'
     `;
     previousQuery = `
       SELECT COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
-        AND created_at >= '${previousStart}'
-        AND created_at < '${start}'
+        AND created_at >= '${previousStartStart}'
+        AND created_at <= '${previousStartEnd}'
     `;
   }
 
@@ -190,113 +213,3 @@ export const getTotalUniqueUsers = async (
     previous: prev,
   };
 };
-
-// export const getTotalUniqueUsers = async (
-//   clickHouseClient,
-//   websiteId,
-//   period,
-//   from,
-//   to
-// ) => {
-//   const { start, previousStart } = buildDateRange(period, from, to);
-
-//   console.log("START", start);
-//   console.log("previous start", previousStart);
-
-//   let currentQuery, previousQuery;
-
-//   // Determine grouping based on period
-//   if (period === "last24h") {
-//     // Group by hour for last 24 hours
-//     currentQuery = `
-//       SELECT toStartOfHour(created_at) as hour, COUNT(DISTINCT email) as total
-//       FROM event
-//       WHERE website_id = '${websiteId}'
-//         AND created_at >= '${start}'
-//       GROUP BY hour
-//       ORDER BY hour ASC
-//     `;
-//     previousQuery = `
-//       SELECT toStartOfHour(created_at) as hour, COUNT(DISTINCT email) as total
-//       FROM event
-//       WHERE website_id = '${websiteId}'
-//         AND created_at >= '${previousStart}'
-//         AND created_at < '${start}'
-//       GROUP BY hour
-//       ORDER BY hour ASC
-//     `;
-//   } else if (period === "week" || period === "month") {
-//     // Group by day for week or month
-//     currentQuery = `
-//       SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
-//       FROM event
-//       WHERE website_id = '${websiteId}'
-//         AND created_at >= '${start}'
-//         ${period === "custom" ? `AND created_at <= '${to.toISOString()}'` : ""}
-//       GROUP BY day
-//       ORDER BY day ASC
-//     `;
-//     previousQuery = `
-//       SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
-//       FROM event
-//       WHERE website_id = '${websiteId}'
-//         AND created_at >= '${previousStart}'
-//         AND created_at < '${start}'
-//       GROUP BY day
-//       ORDER BY day ASC
-//     `;
-//   } else if (period === "ytd" || period === "year") {
-//     // Group by month for year or ytd
-//     currentQuery = `
-//       SELECT toYYYYMM(created_at) as month, COUNT(DISTINCT email) as total
-//       FROM event
-//       WHERE website_id = '${websiteId}'
-//         AND created_at >= '${start}'
-//         ${period === "custom" ? `AND created_at <= '${to.toISOString()}'` : ""}
-//       GROUP BY month
-//       ORDER BY month ASC
-//     `;
-//     previousQuery = `
-//       SELECT toYYYYMM(created_at) as month, COUNT(DISTINCT email) as total
-//       FROM event
-//       WHERE website_id = '${websiteId}'
-//         AND created_at >= '${previousStart}'
-//         AND created_at < '${start}'
-//       GROUP BY month
-//       ORDER BY month ASC
-//     `;
-//   } else {
-//     // Default to total count for other periods
-//     currentQuery = `
-//       SELECT COUNT(DISTINCT email) as total
-//       FROM event
-//       WHERE website_id = '${websiteId}'
-//         AND created_at >= '${start}'
-//         ${period === "custom" ? `AND created_at <= '${to.toISOString()}'` : ""}
-//     `;
-//     previousQuery = `
-//       SELECT COUNT(DISTINCT email) as total
-//       FROM event
-//       WHERE website_id = '${websiteId}'
-//         AND created_at >= '${previousStart}'
-//         AND created_at < '${start}'
-//     `;
-//   }
-
-//   const current = await clickHouseClient.query({
-//     query: currentQuery,
-//     format: "JSONEachRow",
-//   });
-//   const previous = await clickHouseClient.query({
-//     query: previousQuery,
-//     format: "JSONEachRow",
-//   });
-
-//   const curr = await current.json();
-//   const prev = await previous.json();
-
-//   return {
-//     current: curr,
-//     previous: prev,
-//   };
-// };

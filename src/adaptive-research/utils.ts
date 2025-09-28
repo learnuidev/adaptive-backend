@@ -41,127 +41,328 @@ const period: Record<FilterPeriod, FilterPeriod> = {
 
 const periodCalculators = {
   day: (now) => {
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const startEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      59,
+      999
+    );
+    const previousStartStart = new Date(
+      startStart.getTime() - 24 * 60 * 60 * 1000
+    );
+    const previousStartEnd = new Date(startEnd.getTime() - 24 * 60 * 60 * 1000);
     return {
-      start,
-      previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   last24h: (now) => {
-    const start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const startStart = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const startEnd = new Date(now);
+    const previousStartStart = new Date(
+      startStart.getTime() - 24 * 60 * 60 * 1000
+    );
+    const previousStartEnd = new Date(startEnd.getTime() - 24 * 60 * 60 * 1000);
     return {
-      start,
-      previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   last7d: (now) => {
-    const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    // This week: Monday to Sunday
+    const dayOfWeek = now.getDay(); // 0 = Sunday
+    const daysSinceMonday = (dayOfWeek + 6) % 7; // Monday offset
+    const startStart = new Date(now);
+    startStart.setDate(now.getDate() - daysSinceMonday);
+    startStart.setHours(0, 0, 0, 0);
+
+    const startEnd = new Date(startStart);
+    startEnd.setDate(startStart.getDate() + 6);
+    startEnd.setHours(23, 59, 59, 999);
+
+    // Previous week: Monday to Sunday
+    const previousStartStart = new Date(startStart);
+    previousStartStart.setDate(startStart.getDate() - 7);
+
+    const previousStartEnd = new Date(startEnd);
+    previousStartEnd.setDate(startEnd.getDate() - 7);
+
     return {
-      start,
-      previousStart: new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   last30d: (now) => {
-    const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const startStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const startEnd = new Date(now);
+    const previousStartStart = new Date(
+      startStart.getTime() - 30 * 24 * 60 * 60 * 1000
+    );
+    const previousStartEnd = new Date(
+      startEnd.getTime() - 30 * 24 * 60 * 60 * 1000
+    );
     return {
-      start,
-      previousStart: new Date(start.getTime() - 30 * 24 * 60 * 60 * 1000),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   last12m: (now) => {
-    const start = new Date(now.getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
+    const startStart = new Date(now.getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
+    const startEnd = new Date(now);
+    const previousStartStart = new Date(
+      startStart.getTime() - 12 * 30 * 24 * 60 * 60 * 1000
+    );
+    const previousStartEnd = new Date(
+      startEnd.getTime() - 12 * 30 * 24 * 60 * 60 * 1000
+    );
     return {
-      start,
-      previousStart: new Date(start.getTime() - 12 * 30 * 24 * 60 * 60 * 1000),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   month: (now) => {
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startEnd = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999
+    );
+    const previousStartStart = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1
+    );
+    const previousStartEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59,
+      999
+    );
     return {
-      start,
-      previousStart: new Date(now.getFullYear(), now.getMonth() - 1, 1),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   mtd: (now) => {
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startEnd = new Date(now);
+    const previousStartStart = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1
+    );
+    const previousStartEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59,
+      999
+    );
     return {
-      start,
-      previousStart: new Date(now.getFullYear(), now.getMonth() - 1, 1),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   week: (now) => {
-    const weekStart = now.getDate() - now.getDay();
-    const start = new Date(now.getFullYear(), now.getMonth(), weekStart);
+    // Get current day (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const dayOfWeek = now.getDay();
+    // Calculate days to subtract to get to Monday (this week)
+    const daysToMonday = (dayOfWeek + 6) % 7; // Monday offset
+    const startStart = new Date(now);
+    startStart.setDate(now.getDate() - daysToMonday);
+    startStart.setHours(0, 0, 0, 0);
+
+    const startEnd = new Date(startStart);
+    startEnd.setDate(startStart.getDate() + 6);
+    startEnd.setHours(23, 59, 59, 999);
+
+    // Previous week: Monday to Sunday
+    const previousStartStart = new Date(startStart);
+    previousStartStart.setDate(startStart.getDate() - 7);
+
+    const previousStartEnd = new Date(startEnd);
+    previousStartEnd.setDate(startEnd.getDate() - 7);
+
     return {
-      start,
-      previousStart: new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   wtd: (now) => {
     const wtdStart = now.getDate() - now.getDay();
-    const start = new Date(now.getFullYear(), now.getMonth(), wtdStart);
+    const startStart = new Date(now.getFullYear(), now.getMonth(), wtdStart);
+    const startEnd = new Date(now);
+    const previousStartStart = new Date(
+      startStart.getTime() - 7 * 24 * 60 * 60 * 1000
+    );
+    const previousStartEnd = new Date(
+      startEnd.getTime() - 7 * 24 * 60 * 60 * 1000
+    );
     return {
-      start,
-      previousStart: new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   year: (now) => {
-    const start = new Date(now.getFullYear(), 0, 1);
+    const startStart = new Date(now.getFullYear(), 0, 1);
+    const startEnd = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+    const previousStartStart = new Date(now.getFullYear() - 1, 0, 1);
+    const previousStartEnd = new Date(
+      now.getFullYear() - 1,
+      11,
+      31,
+      23,
+      59,
+      59,
+      999
+    );
     return {
-      start,
-      previousStart: new Date(now.getFullYear() - 1, 0, 1),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   ytd: (now) => {
-    const start = new Date(now.getFullYear(), 0, 1);
+    const startStart = new Date(now.getFullYear(), 0, 1);
+    const startEnd = new Date(now);
+    const previousStartStart = new Date(now.getFullYear() - 1, 0, 1);
+    const previousStartEnd = new Date(
+      now.getFullYear() - 1,
+      11,
+      31,
+      23,
+      59,
+      59,
+      999
+    );
     return {
-      start,
-      previousStart: new Date(now.getFullYear() - 1, 0, 1),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   yesterday: (now) => {
-    const start = new Date(
+    const startStart = new Date(
       now.getFullYear(),
       now.getMonth(),
       now.getDate() - 1
     );
+    const startEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 1,
+      23,
+      59,
+      59,
+      999
+    );
+    const previousStartStart = new Date(
+      startStart.getTime() - 24 * 60 * 60 * 1000
+    );
+    const previousStartEnd = new Date(startEnd.getTime() - 24 * 60 * 60 * 1000);
     return {
-      start,
-      previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   today: (now) => {
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const startEnd = new Date(now);
+    const previousStartStart = new Date(
+      startStart.getTime() - 24 * 60 * 60 * 1000
+    );
+    const previousStartEnd = new Date(startEnd.getTime() - 24 * 60 * 60 * 1000);
     return {
-      start,
-      previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
   all: () => {
     const epoch = new Date(0);
-    return { start: epoch, previousStart: epoch };
+    return {
+      startStart: epoch,
+      startEnd: new Date(),
+      previousStartStart: epoch,
+      previousStartEnd: new Date(),
+    };
   },
   custom: (now, from, to) => {
-    const start = new Date(from);
+    const startStart = new Date(from);
+    const startEnd = new Date(to);
+    const duration = to.getTime() - from.getTime();
+    const previousStartStart = new Date(from.getTime() - duration);
+    const previousStartEnd = new Date(to.getTime() - duration);
     return {
-      start,
-      previousStart: new Date(from.getTime() - (to.getTime() - from.getTime())),
+      startStart,
+      startEnd,
+      previousStartStart,
+      previousStartEnd,
     };
   },
 };
 
-
 function formatTime(
-  { start: _start, previousStart: _previousStart },
+  {
+    startStart: _startStart,
+    startEnd: _startEnd,
+    previousStartStart: _previousStartStart,
+    previousStartEnd: _previousStartEnd,
+  },
   timezoneName = "America/Montreal"
 ) {
-  const start = `${_start.split(" ")?.[0]} 00:00:00.000`;
-  const previousStart = `${_previousStart.split(" ")?.[0]} 00:00:00.000`;
+  const startStart = `${_startStart.split(" ")?.[0]} 00:00:00.000`;
+  const startEnd = `${_startEnd.split(" ")?.[0]} 23:59:59.999`;
+  const previousStartStart = `${_previousStartStart.split(" ")?.[0]} 00:00:00.000`;
+  const previousStartEnd = `${_previousStartEnd.split(" ")?.[0]} 23:59:59.999`;
 
   // Fixed timezone database with correct offset
 
-
-  const targetTimezone = timezones?.find(tz => tz.name === timezoneName)
+  const targetTimezone = timezones?.find((tz) => tz.name === timezoneName);
 
   if (!targetTimezone) {
     throw new Error(`Timezone ${timezoneName} not found`);
@@ -169,7 +370,7 @@ function formatTime(
 
   const convertTimestamp = (timestamp) => {
     const date = new Date(timestamp);
-    const offsetMinutes = (targetTimezone.offset) * -1;
+    const offsetMinutes = targetTimezone.offset * -1;
     date.setMinutes(date.getMinutes() + offsetMinutes);
 
     const year = date.getFullYear();
@@ -178,33 +379,49 @@ function formatTime(
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
     const seconds = String(date.getSeconds()).padStart(2, "0");
+    const milliseconds = String(date.getMilliseconds()).padStart(3, "0");
 
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.000`;
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
   };
 
   return {
-    start: convertTimestamp(start),
-    previousStart: convertTimestamp(previousStart),
+    startStart: convertTimestamp(startStart),
+    startEnd: convertTimestamp(startEnd),
+    previousStartStart: convertTimestamp(previousStartStart),
+    previousStartEnd: convertTimestamp(previousStartEnd),
   };
 }
 
-
-function buildDateRange({period, from, to, timezoneName}: {periodKey: FilterPeriod, from?: Date, to?: Date, timezoneName: string = "America/Montreal"}) {
+function buildDateRange({
+  period,
+  from,
+  to,
+  timezoneName = "America/Montreal",
+}: {
+  period: FilterPeriod;
+  from?: Date;
+  to?: Date;
+  timezoneName?: string;
+}) {
   const now = new Date();
   if (!periodCalculators[period]) {
     throw new Error("Invalid period");
   }
-  const { start, previousStart } =
-    period === period.custom
-      ? periodCalculators[period.custom](now, from, to)
-      : periodCalculators[period](now)
+  const { startStart, startEnd, previousStartStart, previousStartEnd } =
+    period === "custom"
+      ? periodCalculators.custom(now, from, to)
+      : periodCalculators[period](now);
 
-  return formatTime({
-    start: formatDateForClickHouse(start),
-    previousStart: formatDateForClickHouse(previousStart),
-  }, timezoneName)
+  return formatTime(
+    {
+      startStart: formatDateForClickHouse(startStart),
+      startEnd: formatDateForClickHouse(startEnd),
+      previousStartStart: formatDateForClickHouse(previousStartStart),
+      previousStartEnd: formatDateForClickHouse(previousStartEnd),
+    },
+    timezoneName
+  );
 }
-
 export function addParamToRoutes(routes: any) {
   function extractPattern(route) {
     // Match something like /section/value, return /section/[param]

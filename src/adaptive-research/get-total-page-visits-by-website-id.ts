@@ -36,14 +36,6 @@ const sample_clickhouse_event = {
 };
 
 // First, let's add the missing addParamToRoutes function
-const addParamToRoutes = (routes) => {
-  return routes.map((route) => ({
-    ...route,
-    // Add any additional parameters you need here
-    // For example, you might want to calculate percentages or add metadata
-  }));
-};
-
 export const getTotalPageVisitsByWebsiteId = async ({
   clickHouseClient,
   timezoneName,
@@ -51,25 +43,29 @@ export const getTotalPageVisitsByWebsiteId = async ({
   period,
   from,
   to,
-}: any) => {
-  const { start, previousStart } = buildDateRange({
-    period,
-    from,
-    to,
-    timezoneName,
-  });
+}: {
+  clickHouseClient: any;
+  timezoneName?: string;
+  websiteId: string;
+  period: import("./utils.js").FilterPeriod;
+  from?: Date;
+  to?: Date;
+}) => {
+  const { startStart, startEnd, previousStartStart, previousStartEnd } =
+    buildDateRange({
+      period,
+      from,
+      to,
+      timezoneName,
+    });
 
-  // Format the 'to' date for custom period
-  const endDate = period === "custom" ? formatDateForClickHouse(to) : null;
-
-  // Use parameterized queries to prevent SQL injection
   const currentQuery = `
     SELECT href, COUNT(*) as visits
     FROM event
     WHERE website_id = {websiteId:String}
       AND type = 'pageview'
-      AND created_at >= {start:String}
-      ${period === "custom" ? "AND created_at <= {endDate:String}" : ""}
+      AND created_at >= {startStart:String}
+      ${period === "custom" ? "AND created_at <= {startEnd:String}" : ""}
     GROUP BY href
     ORDER BY visits DESC
   `;
@@ -79,19 +75,18 @@ export const getTotalPageVisitsByWebsiteId = async ({
     FROM event
     WHERE website_id = {websiteId:String}
       AND type = 'pageview'
-      AND created_at >= {previousStart:String}
-      AND created_at < {start:String}
+      AND created_at >= {previousStartStart:String}
+      AND created_at < ${period === "custom" ? "{previousStartEnd:String}" : "{startStart:String}"}
     GROUP BY href
     ORDER BY visits DESC
   `;
 
-  // Execute queries with parameters
   const current = await clickHouseClient.query({
     query: currentQuery,
     query_params: {
       websiteId,
-      start,
-      ...(period === "custom" && { endDate }),
+      startStart,
+      ...(period === "custom" && { startEnd }),
     },
     format: "JSONEachRow",
   });
@@ -100,16 +95,18 @@ export const getTotalPageVisitsByWebsiteId = async ({
     query: previousQuery,
     query_params: {
       websiteId,
-      start,
-      previousStart,
+      previousStartStart,
+      ...(period === "custom" ? { previousStartEnd } : { startStart }),
     },
     format: "JSONEachRow",
   });
 
   return {
-    current: addParamToRoutes(await current.json()),
-    previous: addParamToRoutes(await previous.json()),
-    start,
-    previousStart,
+    current: await current.json(),
+    previous: await previous.json(),
+    startStart,
+    startEnd,
+    previousStartStart,
+    previousStartEnd,
   };
 };
