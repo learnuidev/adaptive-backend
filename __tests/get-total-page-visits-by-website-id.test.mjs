@@ -189,6 +189,7 @@ function buildDateRange(periodKey, from, to) {
 
 // First, let's add the missing addParamToRoutes function
 const addParamToRoutes = (routes) => {
+  console.log("yooo");
   return routes.map((route) => ({
     ...route,
     // Add any additional parameters you need here
@@ -281,5 +282,5 @@ getTotalPageVisitsByWebsiteId(
   "01K66XSK34CXMV0TT8ATS953W0",
   "today"
 ).then((resp) => {
-  console.log(resp);
+  console.log("p", resp);
 });

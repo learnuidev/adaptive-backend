@@ -7,6 +7,8 @@ export const handler = middy(async (event) => {
   try {
     const { websiteId, period, from, to } = JSON.parse(event.body);
 
+    console.log("yoo");
+
     const summary = await getSummaryApi({ websiteId, period, from, to });
     const response = {
       statusCode: 200,

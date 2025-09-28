@@ -148,7 +148,7 @@ const periodCalculators = {
   },
 };
 
-function buildDateRange(periodKey: FilterPeriod, from?: Date, to?: Date) {
+function buildDateRange(periodKey, from, to) {
   const now = new Date();
   if (!periodCalculators[periodKey]) {
     throw new Error("Invalid period");
