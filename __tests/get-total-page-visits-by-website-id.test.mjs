@@ -188,14 +188,25 @@ function buildDateRange(periodKey, from, to) {
 }
 
 // First, let's add the missing addParamToRoutes function
-const addParamToRoutes = (routes) => {
-  console.log("yooo");
-  return routes.map((route) => ({
-    ...route,
-    // Add any additional parameters you need here
-    // For example, you might want to calculate percentages or add metadata
-  }));
-};
+function addParamToRoutes(routes) {
+  function extractPattern(route) {
+    // Match something like /section/value, return /section/[param]
+    const match = route.match(/^\/([^/]+)\/[^/]+$/);
+    if (match) {
+      return `/${match[1]}/[param]`;
+    }
+    return null;
+  }
+
+  const extended = routes?.map((item) => {
+    const url = new URL(item.href);
+    const pattern = extractPattern(url.pathname);
+    // Compose patternHref as full origin + pattern
+    return pattern ? { ...item, patternHref: url.origin + pattern } : item;
+  });
+
+  return extended;
+}
 
 const getTotalPageVisitsByWebsiteId = async (
   clickHouseClient,
@@ -205,6 +216,8 @@ const getTotalPageVisitsByWebsiteId = async (
   to
 ) => {
   const { start, previousStart } = buildDateRange(period, from, to);
+
+  console.log("start", { start, previousStart });
 
   // Format the 'to' date for custom period
   const endDate = period === "custom" ? formatDateForClickHouse(to) : null;
@@ -221,6 +234,8 @@ const getTotalPageVisitsByWebsiteId = async (
     ORDER BY visits DESC
   `;
 
+  console.log("current", currentQuery);
+
   const previousQuery = `
     SELECT href, COUNT(*) as visits
     FROM event
@@ -231,6 +246,8 @@ const getTotalPageVisitsByWebsiteId = async (
     GROUP BY href
     ORDER BY visits DESC
   `;
+
+  console.log("previous", previousQuery);
 
   // Execute queries with parameters
   const current = await clickHouseClient.query({
@@ -278,9 +295,10 @@ const client = createClient(params);
 // "01K66XSK34CXMV0TT8ATS953W0"
 getTotalPageVisitsByWebsiteId(
   client,
-
   "01K66XSK34CXMV0TT8ATS953W0",
-  "today"
+  "today",
+  undefined,
+  undefined
 ).then((resp) => {
-  console.log("p", resp);
+  // console.log("p", resp);
 });

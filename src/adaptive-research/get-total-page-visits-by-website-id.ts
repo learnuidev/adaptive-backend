@@ -103,5 +103,7 @@ export const getTotalPageVisitsByWebsiteId = async (
   return {
     current: addParamToRoutes(await current.json()),
     previous: addParamToRoutes(await previous.json()),
+    start,
+    previousStart,
   };
 };

@@ -21,17 +21,14 @@ import { clickhouseClient } from "../../../lib/clickhouse-client.js";
 //       filter_country: string;
 //     };
 
-export const getSummaryApi = async ({
-  websiteId,
-  period,
-  from,
-  to,
-}: {
+export const getSummaryApi = async (params: {
   websiteId: string;
   period: FilterPeriod;
   from?: string;
   to?: string;
 }) => {
+  const { websiteId, period, from, to } = params;
+
   const totalPageVisits = await getTotalPageVisitsByWebsiteId(
     clickhouseClient.client,
     websiteId,
