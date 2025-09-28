@@ -230,6 +230,51 @@ const periodCalculators = {
   },
 };
 
+function formatTime(
+  { start: _start, previousStart: _previousStart },
+  timezoneName = "America/Montreal"
+) {
+  const start = `${_start.split(" ")?.[0]} 00:00:00.000`;
+  const previousStart = `${_previousStart.split(" ")?.[0]} 00:00:00.000`;
+
+  // Fixed timezone database with correct offset
+  const timezones = {
+    "America/Montreal": {
+      name: "America/Montreal",
+      offset: 240, // +240 minutes = +4 hours (not -240)
+      city: "Montreal",
+      region: "America",
+      offsetStr: "GMT+04:00",
+    },
+  };
+
+  const targetTimezone = timezones[timezoneName];
+
+  if (!targetTimezone) {
+    throw new Error(`Timezone ${timezoneName} not found`);
+  }
+
+  const convertTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const offsetMinutes = targetTimezone.offset;
+    date.setMinutes(date.getMinutes() + offsetMinutes);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.000`;
+  };
+
+  return {
+    start: convertTimestamp(start),
+    previousStart: convertTimestamp(previousStart),
+  };
+}
+
 function buildDateRange({
   period,
   from,
@@ -279,7 +324,9 @@ const getTotalPageVisitsByWebsiteId = async (
   from,
   to
 ) => {
-  const { start, previousStart } = buildDateRange({ period, from, to });
+  const { start, previousStart } = formatTime(
+    buildDateRange({ period, from, to })
+  );
 
   console.log("start", { start, previousStart });
 

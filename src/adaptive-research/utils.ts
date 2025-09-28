@@ -39,158 +39,109 @@ const period: Record<FilterPeriod, FilterPeriod> = {
   custom: "custom",
 };
 
-function applyTimezoneOffsetRaw(date, offset) {
-  const offsetMs = offset * 60 * 1000;
-  return new Date(date.getTime() + offsetMs);
-}
-
-function applyTimezoneOffset(date: Date, timezoneName: string): Date {
-  const tz = timezones.find((t) => t.name === timezoneName);
-  if (!tz) throw new Error("Unknown timezone: " + timezoneName);
-  const offsetMs = tz.offset * 60 * 1000;
-  return new Date(date.getTime() + offsetMs);
-}
-
 const periodCalculators = {
-  day: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(
-      localNow.getFullYear(),
-      localNow.getMonth(),
-      localNow.getDate()
-    );
+  day: (now) => {
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     return {
       start,
       previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
     };
   },
-  last24h: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(localNow.getTime() - 24 * 60 * 60 * 1000);
+  last24h: (now) => {
+    const start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     return {
       start,
       previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
     };
   },
-  last7d: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(localNow.getTime() - 7 * 24 * 60 * 60 * 1000);
+  last7d: (now) => {
+    const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     return {
       start,
       previousStart: new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000),
     };
   },
-  last30d: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(localNow.getTime() - 30 * 24 * 60 * 60 * 1000);
+  last30d: (now) => {
+    const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     return {
       start,
       previousStart: new Date(start.getTime() - 30 * 24 * 60 * 60 * 1000),
     };
   },
-  last12m: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(localNow.getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
+  last12m: (now) => {
+    const start = new Date(now.getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
     return {
       start,
       previousStart: new Date(start.getTime() - 12 * 30 * 24 * 60 * 60 * 1000),
     };
   },
-  month: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(localNow.getFullYear(), localNow.getMonth(), 1);
+  month: (now) => {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
     return {
       start,
-      previousStart: new Date(
-        localNow.getFullYear(),
-        localNow.getMonth() - 1,
-        1
-      ),
+      previousStart: new Date(now.getFullYear(), now.getMonth() - 1, 1),
     };
   },
-  mtd: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(localNow.getFullYear(), localNow.getMonth(), 1);
+  mtd: (now) => {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
     return {
       start,
-      previousStart: new Date(
-        localNow.getFullYear(),
-        localNow.getMonth() - 1,
-        1
-      ),
+      previousStart: new Date(now.getFullYear(), now.getMonth() - 1, 1),
     };
   },
-  week: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const weekStart = localNow.getDate() - localNow.getDay();
-    const start = new Date(
-      localNow.getFullYear(),
-      localNow.getMonth(),
-      weekStart
-    );
+  week: (now) => {
+    const weekStart = now.getDate() - now.getDay();
+    const start = new Date(now.getFullYear(), now.getMonth(), weekStart);
     return {
       start,
       previousStart: new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000),
     };
   },
-  wtd: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const wtdStart = localNow.getDate() - localNow.getDay();
-    const start = new Date(
-      localNow.getFullYear(),
-      localNow.getMonth(),
-      wtdStart
-    );
+  wtd: (now) => {
+    const wtdStart = now.getDate() - now.getDay();
+    const start = new Date(now.getFullYear(), now.getMonth(), wtdStart);
     return {
       start,
       previousStart: new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000),
     };
   },
-  year: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(localNow.getFullYear(), 0, 1);
+  year: (now) => {
+    const start = new Date(now.getFullYear(), 0, 1);
     return {
       start,
-      previousStart: new Date(localNow.getFullYear() - 1, 0, 1),
+      previousStart: new Date(now.getFullYear() - 1, 0, 1),
     };
   },
-  ytd: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(localNow.getFullYear(), 0, 1);
+  ytd: (now) => {
+    const start = new Date(now.getFullYear(), 0, 1);
     return {
       start,
-      previousStart: new Date(localNow.getFullYear() - 1, 0, 1),
+      previousStart: new Date(now.getFullYear() - 1, 0, 1),
     };
   },
-  yesterday: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
+  yesterday: (now) => {
     const start = new Date(
-      localNow.getFullYear(),
-      localNow.getMonth(),
-      localNow.getDate() - 1
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 1
     );
     return {
       start,
       previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
     };
   },
-  today: (now: Date, timezoneName: string) => {
-    const localNow = applyTimezoneOffset(now, timezoneName);
-    const start = new Date(
-      localNow.getFullYear(),
-      localNow.getMonth(),
-      localNow.getDate()
-    );
+  today: (now) => {
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     return {
       start,
       previousStart: new Date(start.getTime() - 24 * 60 * 60 * 1000),
     };
   },
-  all: (now: Date, timezoneName: string) => {
+  all: () => {
     const epoch = new Date(0);
     return { start: epoch, previousStart: epoch };
   },
-  custom: (now: Date, timezoneName: string, from: Date, to: Date) => {
+  custom: (now, from, to) => {
     const start = new Date(from);
     return {
       start,
@@ -199,30 +150,59 @@ const periodCalculators = {
   },
 };
 
-function buildDateRange({
-  period,
-  from,
-  to,
-  timezoneName = "America/Montreal",
-}: {
-  period: FilterPeriod;
-  from?: Date;
-  to?: Date;
-  timezoneName?: string;
-}) {
+
+function formatTime(
+  { start: _start, previousStart: _previousStart },
+  timezoneName = "America/Montreal"
+) {
+  const start = `${_start.split(" ")?.[0]} 00:00:00.000`;
+  const previousStart = `${_previousStart.split(" ")?.[0]} 00:00:00.000`;
+
+  // Fixed timezone database with correct offset
+
+
+  const targetTimezone = timezones?.find(tz => tz.name === timezoneName)
+
+  if (!targetTimezone) {
+    throw new Error(`Timezone ${timezoneName} not found`);
+  }
+
+  const convertTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const offsetMinutes = (targetTimezone.offset) * -1;
+    date.setMinutes(date.getMinutes() + offsetMinutes);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.000`;
+  };
+
+  return {
+    start: convertTimestamp(start),
+    previousStart: convertTimestamp(previousStart),
+  };
+}
+
+
+function buildDateRange({period, from, to, timezoneName}: {periodKey: FilterPeriod, from?: Date, to?: Date, timezoneName: string = "America/Montreal"}) {
   const now = new Date();
   if (!periodCalculators[period]) {
     throw new Error("Invalid period");
   }
   const { start, previousStart } =
     period === period.custom
-      ? periodCalculators[period.custom](now, timezoneName, from!, to!)
-      : periodCalculators[period](now, timezoneName);
+      ? periodCalculators[period.custom](now, from, to)
+      : periodCalculators[period](now)
 
-  return {
+  return formatTime({
     start: formatDateForClickHouse(start),
     previousStart: formatDateForClickHouse(previousStart),
-  };
+  }, timezoneName)
 }
 
 export function addParamToRoutes(routes: any) {
