@@ -1,6 +1,7 @@
 import {
   getTotalPageVisitsByWebsiteId,
   getTotalViewsByWebsiteId,
+  getTotalVisitorsByGeo,
   listPagesByWebsiteId,
 } from "../../../adaptive-research/events.js";
 import { getTotalUniqueUsers } from "../../../adaptive-research/get-total-unique-users.js";
@@ -52,9 +53,18 @@ export const getSummaryApi = async ({
     to
   );
 
+  const visitors = await getTotalVisitorsByGeo(
+    clickhouseClient.client,
+    websiteId,
+    period,
+    from,
+    to
+  );
+
   return {
     pages,
     totalPageVisits,
     totalVisitors,
+    visitors,
   };
 };
