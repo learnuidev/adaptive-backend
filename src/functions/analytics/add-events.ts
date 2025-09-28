@@ -4,11 +4,14 @@ import { addEventsApi } from "./add-events.api.js";
 
 import { extractLocationInfo } from "../../utils/extract-location-info.js";
 import { extractDeviceInfo } from "../../utils/extract-device-info.js";
+import { validateWebSiteId } from "../auth/validate-website-id.js";
 
 export const handler = middy(async (event: any) => {
   const ipAddress = event.requestContext.identity.sourceIp;
 
   try {
+    await validateWebSiteId(event);
+
     const rawParams = JSON.parse(event.body);
 
     const userAgentString =

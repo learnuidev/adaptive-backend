@@ -73,6 +73,13 @@ export const identifyApi = async (props: any) => {
     // Use UpdateCommand for update
     await dynamodb.send(new UpdateCommand(updatedStepParams));
 
+    if (clickhouseClient) {
+      await clickhouseClient.ingestDDBIdentity(
+        clickhouseClient.client,
+        updatedStepParams
+      );
+    }
+
     return params;
   }
 
