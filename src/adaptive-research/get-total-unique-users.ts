@@ -42,7 +42,7 @@ export const getTotalUniqueUsers = async (
   from,
   to
 ) => {
-  const { start, previousStart } = buildDateRange(period, from, to);
+  const { start, previousStart } = buildDateRange({ period, from, to });
 
   console.log("START", start);
   console.log("previous start", previousStart);

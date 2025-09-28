@@ -157,7 +157,7 @@ export const getTotalVisitorsByGeo = async (
   from,
   to
 ) => {
-  const { start, previousStart } = buildDateRange(period, from, to);
+  const { start, previousStart } = buildDateRange({ period, from, to });
   const current = await clickHouseClient.query({
     query: `
       SELECT
@@ -214,7 +214,7 @@ export const getFunnelData = async (
   from,
   to
 ) => {
-  const { start, end } = buildDateRange(period, from, to);
+  const { start, end } = buildDateRange({ period, from, to });
   const steps = funnelInput.steps;
 
   // Build and run step queries
@@ -333,7 +333,7 @@ export const getTotalViewsByWebsiteId = async (
   from,
   to
 ) => {
-  const { start, previousStart } = buildDateRange(period, from, to);
+  const { start, previousStart } = buildDateRange({ period, from, to });
 
   console.log("START", start);
   console.log("previous start", previousStart);

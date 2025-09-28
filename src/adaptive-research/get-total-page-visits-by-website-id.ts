@@ -51,7 +51,7 @@ export const getTotalPageVisitsByWebsiteId = async (
   from,
   to
 ) => {
-  const { start, previousStart } = buildDateRange(period, from, to);
+  const { start, previousStart } = buildDateRange({ period, from, to });
 
   // Format the 'to' date for custom period
   const endDate = period === "custom" ? formatDateForClickHouse(to) : null;
