@@ -46,7 +46,7 @@ const addParamToRoutes = (routes) => {
 
 export const getTotalPageVisitsByWebsiteId = async ({
   clickHouseClient,
-  timezoneName = "America/Montreal",
+  timezoneName,
   websiteId,
   period,
   from,

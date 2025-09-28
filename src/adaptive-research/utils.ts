@@ -39,6 +39,11 @@ const period: Record<FilterPeriod, FilterPeriod> = {
   custom: "custom",
 };
 
+function applyTimezoneOffsetRaw(date, offset) {
+  const offsetMs = offset * 60 * 1000;
+  return new Date(date.getTime() + offsetMs);
+}
+
 function applyTimezoneOffset(date: Date, timezoneName: string): Date {
   const tz = timezones.find((t) => t.name === timezoneName);
   if (!tz) throw new Error("Unknown timezone: " + timezoneName);
@@ -198,14 +203,14 @@ function buildDateRange({
   period,
   from,
   to,
-  timezoneName = "America/New_York",
+  timezoneName = "America/Montreal",
 }: {
   period: FilterPeriod;
   from?: Date;
   to?: Date;
   timezoneName?: string;
 }) {
-  const now = applyTimezoneOffset(new Date(), timezoneName);
+  const now = new Date();
   if (!periodCalculators[period]) {
     throw new Error("Invalid period");
   }
