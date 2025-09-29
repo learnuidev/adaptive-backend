@@ -1,4 +1,5 @@
-import { buildDateRange } from "./utils.js";
+import { ClickHouseClient } from "@clickhouse/client";
+import { buildDateRange, FilterPeriod } from "./utils.js";
 
 const sample_clickhouse_event = {
   id: "01K646STTAYEA10JXAQX8FZB2K",
@@ -35,26 +36,52 @@ const sample_clickhouse_event = {
   },
 };
 
-export const getTotalUniqueUsers = async (
-  clickHouseClient,
-  websiteId,
-  period,
-  from,
-  to
-) => {
+// Response types based on period grouping
+type HourlyRecord = { hour: string; total: number };
+type DailyRecord = { day: string; total: number };
+type MonthlyRecord = { month: number; total: number };
+type TotalRecord = { total: number };
+
+type CurrentPrevious<T> = {
+  current: T[];
+  previous: T[];
+};
+
+// Discriminated union mapping period to return type
+type PeriodResultMap = {
+  last24h: CurrentPrevious<HourlyRecord>;
+  week: CurrentPrevious<DailyRecord>;
+  wtd: CurrentPrevious<DailyRecord>;
+  day: CurrentPrevious<DailyRecord>;
+  yesterday: CurrentPrevious<DailyRecord>;
+  today: CurrentPrevious<DailyRecord>;
+  month: CurrentPrevious<DailyRecord>;
+  mtd: CurrentPrevious<DailyRecord>;
+  last7d: CurrentPrevious<DailyRecord>;
+  last30d: CurrentPrevious<DailyRecord>;
+  last12m: CurrentPrevious<DailyRecord>;
+  ytd: CurrentPrevious<MonthlyRecord>;
+  year: CurrentPrevious<MonthlyRecord>;
+  all: CurrentPrevious<TotalRecord>;
+  custom: CurrentPrevious<DailyRecord>;
+};
+
+export async function getTotalUniqueUsers<P extends FilterPeriod>(
+  clickHouseClient: ClickHouseClient,
+  websiteId: string,
+  period: P,
+  from: string,
+  to: string
+): Promise<PeriodResultMap[P]> {
   const { startStart, startEnd, previousStartStart, previousStartEnd } =
     buildDateRange({ period, from, to });
 
-  console.log("START", startStart);
-  console.log("END", startEnd);
-  console.log("previous start", previousStartStart);
-  console.log("previous end", previousStartEnd);
-
-  let currentQuery, previousQuery;
+  let currentQuery: string;
+  let previousQuery: string;
 
   // Determine grouping based on period
-  if (period === "last24h") {
-    // Group by hour for last 24 hours
+  if (period === "last24h" || period === "today" || period === "yesterday") {
+    // Group by hour for last 24 hours, today, and yesterday
     currentQuery = `
       SELECT toStartOfHour(created_at) as hour, COUNT(DISTINCT email) as total
       FROM event
@@ -73,14 +100,8 @@ export const getTotalUniqueUsers = async (
       GROUP BY hour
       ORDER BY hour ASC
     `;
-  } else if (
-    period === "week" ||
-    period === "wtd" ||
-    period === "day" ||
-    period === "yesterday" ||
-    period === "today"
-  ) {
-    // Group by day for week, wtd, day, yesterday, today
+  } else if (period === "week" || period === "wtd" || period === "day") {
+    // Group by day for week, wtd, day
     currentQuery = `
       SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
       FROM event
@@ -211,5 +232,5 @@ export const getTotalUniqueUsers = async (
   return {
     current: curr,
     previous: prev,
-  };
-};
+  } as PeriodResultMap[P];
+}

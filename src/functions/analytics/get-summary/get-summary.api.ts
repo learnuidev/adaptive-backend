@@ -69,13 +69,13 @@ export const getSummaryApi = async (params: {
     websiteId
   );
 
-  const totalVisitorTraffic = await getTotalVisitorTrafficByWebsiteId(
-    clickhouseClient.client,
-    websiteId,
-    period,
-    from,
-    to
-  );
+  // const totalVisitorTraffic = await getTotalVisitorTrafficByWebsiteId(
+  //   clickhouseClient.client,
+  //   websiteId,
+  //   period,
+  //   from,
+  //   to
+  // );
 
   return {
     pages,
@@ -83,6 +83,6 @@ export const getSummaryApi = async (params: {
     totalVisitors,
     visitors,
     averageSession,
-    totalVisitorTraffic,
+    // totalVisitorTraffic,
   };
 };
