@@ -412,15 +412,22 @@ function buildDateRange({
       ? periodCalculators.custom(now, from, to)
       : periodCalculators[period](now);
 
-  return formatTime(
-    {
-      startStart: formatDateForClickHouse(startStart),
-      startEnd: formatDateForClickHouse(startEnd),
-      previousStartStart: formatDateForClickHouse(previousStartStart),
-      previousStartEnd: formatDateForClickHouse(previousStartEnd),
-    },
-    timezoneName
-  );
+  return {
+    startStart: formatDateForClickHouse(startStart),
+    startEnd: formatDateForClickHouse(startEnd),
+    previousStartStart: formatDateForClickHouse(previousStartStart),
+    previousStartEnd: formatDateForClickHouse(previousStartEnd),
+  };
+
+  // return formatTime(
+  //   {
+  //     startStart: formatDateForClickHouse(startStart),
+  //     startEnd: formatDateForClickHouse(startEnd),
+  //     previousStartStart: formatDateForClickHouse(previousStartStart),
+  //     previousStartEnd: formatDateForClickHouse(previousStartEnd),
+  //   },
+  //   timezoneName
+  // );
 }
 export function addParamToRoutes(routes: any) {
   function extractPattern(route) {
