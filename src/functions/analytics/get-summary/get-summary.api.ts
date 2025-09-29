@@ -57,26 +57,26 @@ export const getSummaryApi = async (params: {
 
   const pages = await listPagesByWebsiteId(clickhouseClient.client, websiteId);
 
-  const totalVisitors = await getTotalUniqueUsers(
-    clickhouseClient.client,
+  const totalVisitors = await getTotalUniqueUsers({
+    clickHouseClient: clickhouseClient.client,
     websiteId,
     period,
     from,
-    to
-  );
+    to,
+  });
 
-  const totalPageVisitsOvertime = await getTotalPageVisitsTrafficByWebsiteId(
-    clickhouseClient.client,
+  const totalPageVisitsOvertime = await getTotalPageVisitsTrafficByWebsiteId({
+    clickHouseClient: clickhouseClient.client,
     websiteId,
     period,
     from,
-    to
-  );
+    to,
+  });
 
-  const visitors = await listVisitorsByWebsiteId(
-    clickhouseClient.client,
-    websiteId
-  );
+  const visitors = await listVisitorsByWebsiteId({
+    clickHouseClient: clickhouseClient.client,
+    websiteId,
+  });
 
   // const totalVisitorTraffic = await getTotalVisitorTrafficByWebsiteId(
   //   clickhouseClient.client,

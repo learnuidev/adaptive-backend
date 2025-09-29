@@ -1,4 +1,12 @@
-export const listVisitorsByWebsiteId = async (clickHouseClient, websiteId) => {
+import { ClickHouseClient } from "@clickhouse/client";
+
+export const listVisitorsByWebsiteId = async ({
+  clickHouseClient,
+  websiteId,
+}: {
+  clickHouseClient: ClickHouseClient;
+  websiteId: string;
+}) => {
   console.log(`Listing visitors for websiteId: ${websiteId}`);
   const resp = await clickHouseClient.query({
     query: `

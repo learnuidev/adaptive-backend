@@ -36,13 +36,19 @@ const sample_clickhouse_event = {
   },
 };
 
-export const getTotalPageVisitsTrafficByWebsiteId = async (
-  clickHouseClient: ClickHouseClient,
-  websiteId: string,
-  period: FilterPeriod,
-  from?: Date,
-  to?: Date
-) => {
+export const getTotalPageVisitsTrafficByWebsiteId = async ({
+  clickHouseClient,
+  websiteId,
+  period,
+  from,
+  to,
+}: {
+  clickHouseClient: ClickHouseClient;
+  websiteId: string;
+  period: FilterPeriod;
+  from?: Date;
+  to?: Date;
+}) => {
   const { startStart, startEnd, previousStartStart, previousStartEnd } =
     buildDateRange({ period, from, to });
 

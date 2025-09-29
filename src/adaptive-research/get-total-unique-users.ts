@@ -66,13 +66,19 @@ type PeriodResultMap = {
   custom: CurrentPrevious<DailyRecord>;
 };
 
-export async function getTotalUniqueUsers<P extends FilterPeriod>(
-  clickHouseClient: ClickHouseClient,
-  websiteId: string,
-  period: P,
-  from: string,
-  to: string
-): Promise<PeriodResultMap[P]> {
+export async function getTotalUniqueUsers<P extends FilterPeriod>({
+  clickHouseClient,
+  websiteId,
+  period,
+  from,
+  to,
+}: {
+  clickHouseClient: ClickHouseClient;
+  websiteId: string;
+  period: P;
+  from: string;
+  to: string;
+}): Promise<PeriodResultMap[P]> {
   const { startStart, startEnd, previousStartStart, previousStartEnd } =
     buildDateRange({ period, from, to });
 
