@@ -272,6 +272,18 @@ functions:
             name: CognitoAuthorizer
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
+  get-total-visitors-by:
+    timeout: 30
+    handler: dist/functions/analytics/list-total-visitors-by/list-total-visitors-by.handler
+    events:
+      - http:
+          path: /v1/analytics/get-total-visitors-by
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
   # ============================== Analytics Routes End ===============================
 resources:
   Resources:

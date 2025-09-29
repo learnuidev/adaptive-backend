@@ -1,3 +1,4 @@
+import { ClickHouseClient } from "@clickhouse/client";
 import { buildDateRange, FilterPeriod } from "./utils.js";
 
 const sample_clickhouse_event = {
@@ -71,6 +72,20 @@ function buildWhereClause(filters: {
   return { clause: conditions.join(" AND "), params };
 }
 
+export interface LsitTotalVisitorsByParams {
+  clickHouseClient: ClickHouseClient;
+  timezoneName: string;
+  websiteId: string;
+  period: FilterPeriod;
+  from: Date;
+  to?: Date;
+  country?: string;
+  region?: string;
+  city?: string;
+  browserName?: string;
+  osName?: string;
+  groupBy: "country" | "region" | "city" | "browser_name" | "os_name";
+}
 // New: listTotalsVisitorBy with optional filters
 export const listTotalsVisitorBy = async ({
   clickHouseClient,
@@ -85,20 +100,7 @@ export const listTotalsVisitorBy = async ({
   browserName,
   osName,
   groupBy,
-}: {
-  clickHouseClient: any;
-  timezoneName?: string;
-  websiteId: string;
-  period: FilterPeriod;
-  from?: Date;
-  to?: Date;
-  country?: string;
-  region?: string;
-  city?: string;
-  browserName?: string;
-  osName?: string;
-  groupBy: "country" | "region" | "city" | "browser_name" | "os_name";
-}) => {
+}: LsitTotalVisitorsByParams) => {
   const { startStart, startEnd, previousStartStart, previousStartEnd } =
     buildDateRange({
       period,
@@ -117,7 +119,7 @@ export const listTotalsVisitorBy = async ({
   });
 
   const buildQuery = (start: string, end?: string, previous = false) => `
-    SELECT ${groupBy} as key, COUNT(DISTINCT visitor_id) as visitors
+    SELECT ${groupBy} as name, COUNT(DISTINCT visitor_id) as visitors
     FROM event
     WHERE ${clause}
       AND type = 'pageview'
@@ -153,22 +155,20 @@ export const listTotalsVisitorBy = async ({
     format: "JSONEachRow",
   });
 
-  const previous = await clickHouseClient.query({
-    query: previousQuery,
-    query_params: {
-      ...params,
-      previousStartStart,
-      ...(period === "custom" ? { previousStartEnd } : { startStart }),
-    },
-    format: "JSONEachRow",
-  });
+  return await current.json();
 
-  return {
-    current: await current.json(),
-    previous: await previous.json(),
-    startStart,
-    startEnd,
-    previousStartStart,
-    previousStartEnd,
-  };
+  //   const previous = await clickHouseClient.query({
+  //     query: previousQuery,
+  //     query_params: {
+  //       ...params,
+  //       previousStartStart,
+  //       ...(period === "custom" ? { previousStartEnd } : { startStart }),
+  //     },
+  //     format: "JSONEachRow",
+  //   });
+
+  //   return {
+  //     current: await current.json(),
+  //     previous: await previous.json(),
+  //   };
 };
