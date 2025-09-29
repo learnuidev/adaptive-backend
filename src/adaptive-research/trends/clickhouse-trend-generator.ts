@@ -132,11 +132,15 @@ const executeQuery = async <T = any>(
 
 // Module functions
 // 1 Custom Trend
-export const generateCustomTrend = async (
-  client: ClickHouseClient,
-  options: CustomTrendOptions
+
+interface AnalyzeMetadataTrendsInput extends CustomTrendOptions {
+  client: ClickHouseClient;
+}
+export const analyzeMetadataTrends = async (
+  options: AnalyzeMetadataTrendsInput
 ): Promise<TrendData[]> => {
   const {
+    client,
     metadataField,
     trendType = "count",
     timeRange = "7d",
@@ -157,18 +161,18 @@ export const generateCustomTrend = async (
   return await executeQuery(client, query);
 };
 
-interface GetMetadataTrendsInput {
+interface GetMetadataValuesInput {
   client: ClickHouseClient;
   metadataField: string;
   topN?: number;
   timeRange?: TimeRange;
 }
-export const getTopMetadataTrends = async ({
+export const getTopMetadataValues = async ({
   client,
   metadataField,
   topN = 10,
   timeRange = "7d",
-}: GetMetadataTrendsInput): Promise<TopMetadataTrendData[]> => {
+}: GetMetadataValuesInput): Promise<TopMetadataTrendData[]> => {
   const query = `
             SELECT 
                 JSONExtractString(metadata, '${metadataField}') as metadata_value,
@@ -185,14 +189,18 @@ export const getTopMetadataTrends = async ({
   return await executeQuery(client, query);
 };
 
+interface GetMetadataTimelineInput extends GetMetadataValuesInput {
+  metadataValue: string;
+  groupByTime?: GroupByTime;
+}
 // 3. Get top metadata trends
-export const getMetadataValueTrend = async (
-  client: ClickHouseClient,
-  metadataField: string,
-  metadataValue: string,
-  timeRange: TimeRange = "30d",
-  groupByTime: GroupByTime = "day"
-): Promise<MetadataValueTrendData[]> => {
+export const getMetadataTimeline = async ({
+  client,
+  metadataField,
+  metadataValue,
+  timeRange = "30d",
+  groupByTime = "day",
+}: GetMetadataTimelineInput): Promise<MetadataValueTrendData[]> => {
   const timeFunction = getTimeFunction(groupByTime);
   const interval = getTimeInterval(timeRange);
 
@@ -214,7 +222,8 @@ export const getMetadataValueTrend = async (
 // Usage Examples (wrapped in async function)
 const exampleUsage = async (client: ClickHouseClient) => {
   // Example 1: Trend of content views by content ID
-  const contentTrends = await generateCustomTrend(client, {
+  const contentTrends = await analyzeMetadataTrends({
+    client,
     metadataField: "contentid",
     trendType: "unique_users",
     timeRange: "30d",
@@ -223,7 +232,7 @@ const exampleUsage = async (client: ClickHouseClient) => {
   });
 
   // Example 2: Top 10 most common metadata values
-  const topContent = await getTopMetadataTrends({
+  const topContent = await getTopMetadataValues({
     client,
     metadataField: "contentid",
     topN: 10,
@@ -231,16 +240,17 @@ const exampleUsage = async (client: ClickHouseClient) => {
   });
 
   // Example 3: Specific content trend over time
-  const specificContentTrend = await getMetadataValueTrend(
+  const specificContentTrend = await getMetadataTimeline({
     client,
-    "contentid",
-    "b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
-    "30d",
-    "day"
-  );
+    metadataField: "contentid",
+    metadataValue: "b3f8880b-def5-5ff7-97a0-cbab2b07b41d",
+    timeRange: "30d",
+    groupByTime: "day",
+  });
 
   // Example 4: Custom event trends
-  const customEventTrends = await generateCustomTrend(client, {
+  const customEventTrends = await analyzeMetadataTrends({
+    client,
     metadataField: "eventName",
     trendType: "count",
     timeRange: "7d",
