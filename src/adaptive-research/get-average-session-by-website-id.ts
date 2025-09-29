@@ -39,8 +39,7 @@ const sample_clickhouse_event = {
   },
 };
 
-// First, let's add the missing addParamToRoutes function
-export const getTotalPageVisitsByWebsiteId = async ({
+export const getAverageSessionByWebsiteId = async ({
   clickHouseClient,
   timezoneName,
   websiteId,
@@ -63,74 +62,31 @@ export const getTotalPageVisitsByWebsiteId = async ({
       timezoneName,
     });
 
-  if (period === "yesterday" || period === "today") {
-    const currentQuery = `
-    SELECT href, COUNT(*) as visits
-    FROM event
-    WHERE website_id = {websiteId:String}
-      AND type = 'pageview'
-      AND toDate(created_at) = toDate({startStart:String})
-    GROUP BY href
-    ORDER BY visits DESC
+  const buildQuery = (start: string, end?: string, isPrevious = false) => `
+    SELECT 
+      AVG(session_duration) as avg_session_duration
+    FROM (
+      SELECT 
+        session_id,
+        dateDiff('second', MIN(created_at), MAX(created_at)) as session_duration
+      FROM event
+      WHERE website_id = {websiteId:String}
+        AND created_at >= {${start}:String}
+        ${end ? `AND created_at <= {${end}:String}` : ""}
+      GROUP BY session_id
+      HAVING session_duration > 0
+    )
   `;
 
-    const previousQuery = `
-    SELECT href, COUNT(*) as visits
-    FROM event
-    WHERE website_id = {websiteId:String}
-      AND type = 'pageview'
-      AND toDate(created_at) = toDate({previousStartStart:String})
-    GROUP BY href
-    ORDER BY visits DESC
-  `;
-
-    const current = await clickHouseClient.query({
-      query: currentQuery,
-      query_params: {
-        websiteId,
-        startStart,
-      },
-      format: "JSONEachRow",
-    });
-
-    const previous = await clickHouseClient.query({
-      query: previousQuery,
-      query_params: {
-        websiteId,
-        previousStartStart,
-      },
-      format: "JSONEachRow",
-    });
-
-    return {
-      current: await current.json(),
-      previous: await previous.json(),
-      startStart,
-      previousStartStart,
-    };
-  }
-
-  const currentQuery = `
-    SELECT href, COUNT(*) as visits
-    FROM event
-    WHERE website_id = {websiteId:String}
-      AND type = 'pageview'
-      AND created_at >= {startStart:String}
-      ${period === "custom" ? "AND created_at <= {startEnd:String}" : ""}
-    GROUP BY href
-    ORDER BY visits DESC
-  `;
-
-  const previousQuery = `
-    SELECT href, COUNT(*) as visits
-    FROM event
-    WHERE website_id = {websiteId:String}
-      AND type = 'pageview'
-      AND created_at >= {previousStartStart:String}
-      AND created_at < ${period === "custom" ? "{previousStartEnd:String}" : "{startStart:String}"}
-    GROUP BY href
-    ORDER BY visits DESC
-  `;
+  const currentQuery = buildQuery(
+    "startStart",
+    period === "custom" ? "startEnd" : undefined
+  );
+  const previousQuery = buildQuery(
+    "previousStartStart",
+    period === "custom" ? "previousStartEnd" : "startStart",
+    true
+  );
 
   const current = await clickHouseClient.query({
     query: currentQuery,
@@ -152,9 +108,12 @@ export const getTotalPageVisitsByWebsiteId = async ({
     format: "JSONEachRow",
   });
 
+  const currentResult = await current.json();
+  const previousResult = await previous.json();
+
   return {
-    current: await current.json(),
-    previous: await previous.json(),
+    current: currentResult[0]?.avg_session_duration ?? 0,
+    previous: previousResult[0]?.avg_session_duration ?? 0,
     startStart,
     startEnd,
     previousStartStart,

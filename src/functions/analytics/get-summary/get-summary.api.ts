@@ -1,3 +1,4 @@
+import { getAverageSessionByWebsiteId } from "../../../adaptive-research/get-average-session-by-website-id.js";
 import { getTotalPageVisitsByWebsiteId } from "../../../adaptive-research/get-total-page-visits-by-website-id.js";
 import { getTotalUniqueUsers } from "../../../adaptive-research/get-total-unique-users.js";
 import { listPagesByWebsiteId } from "../../../adaptive-research/list-pages-by-website-id.js";
@@ -43,6 +44,15 @@ export const getSummaryApi = async (params: {
     to: to,
   });
 
+  const averageSession = await getAverageSessionByWebsiteId({
+    clickHouseClient: clickhouseClient.client,
+    timezoneName,
+    websiteId: websiteId,
+    period: period,
+    from: from,
+    to: to,
+  });
+
   const pages = await listPagesByWebsiteId(clickhouseClient.client, websiteId);
 
   const totalVisitors = await getTotalUniqueUsers(
@@ -63,5 +73,6 @@ export const getSummaryApi = async (params: {
     totalPageVisits,
     totalVisitors,
     visitors,
+    averageSession,
   };
 };
