@@ -1,5 +1,51 @@
 import { timezones } from "./timezones.js";
 
+function formatTime(
+  {
+    startStart: _startStart,
+    startEnd: _startEnd,
+    previousStartStart: _previousStartStart,
+    previousStartEnd: _previousStartEnd,
+  },
+  timezoneName = "America/Montreal"
+) {
+  const startStart = `${_startStart.split(" ")?.[0]} 00:00:00.000`;
+  const startEnd = `${_startEnd.split(" ")?.[0]} 23:59:59.999`;
+  const previousStartStart = `${_previousStartStart.split(" ")?.[0]} 00:00:00.000`;
+  const previousStartEnd = `${_previousStartEnd.split(" ")?.[0]} 23:59:59.999`;
+
+  // Fixed timezone database with correct offset
+
+  const targetTimezone = timezones?.find((tz) => tz.name === timezoneName);
+
+  if (!targetTimezone) {
+    throw new Error(`Timezone ${timezoneName} not found`);
+  }
+
+  const convertTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const offsetMinutes = targetTimezone.offset * -1;
+    date.setMinutes(date.getMinutes() + offsetMinutes);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    const milliseconds = String(date.getMilliseconds()).padStart(3, "0");
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+  };
+
+  return {
+    startStart: convertTimestamp(startStart),
+    startEnd: convertTimestamp(startEnd),
+    previousStartStart: convertTimestamp(previousStartStart),
+    previousStartEnd: convertTimestamp(previousStartEnd),
+  };
+}
+
 export const formatDateForClickHouse = (date) => {
   return date.toISOString().replace("T", " ").replace("Z", "").slice(0, 23);
 };
@@ -345,52 +391,6 @@ const periodCalculators = {
     };
   },
 };
-
-function formatTime(
-  {
-    startStart: _startStart,
-    startEnd: _startEnd,
-    previousStartStart: _previousStartStart,
-    previousStartEnd: _previousStartEnd,
-  },
-  timezoneName = "America/Montreal"
-) {
-  const startStart = `${_startStart.split(" ")?.[0]} 00:00:00.000`;
-  const startEnd = `${_startEnd.split(" ")?.[0]} 23:59:59.999`;
-  const previousStartStart = `${_previousStartStart.split(" ")?.[0]} 00:00:00.000`;
-  const previousStartEnd = `${_previousStartEnd.split(" ")?.[0]} 23:59:59.999`;
-
-  // Fixed timezone database with correct offset
-
-  const targetTimezone = timezones?.find((tz) => tz.name === timezoneName);
-
-  if (!targetTimezone) {
-    throw new Error(`Timezone ${timezoneName} not found`);
-  }
-
-  const convertTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    const offsetMinutes = targetTimezone.offset * -1;
-    date.setMinutes(date.getMinutes() + offsetMinutes);
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    const milliseconds = String(date.getMilliseconds()).padStart(3, "0");
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
-  };
-
-  return {
-    startStart: convertTimestamp(startStart),
-    startEnd: convertTimestamp(startEnd),
-    previousStartStart: convertTimestamp(previousStartStart),
-    previousStartEnd: convertTimestamp(previousStartEnd),
-  };
-}
 
 function buildDateRange({
   period,
