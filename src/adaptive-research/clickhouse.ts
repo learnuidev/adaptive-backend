@@ -2,20 +2,18 @@ import { createClient } from "@clickhouse/client";
 
 // Event Stuff
 import {
-  mapDDBEvent,
-  createEventTable,
   cleanEventTable,
+  createEventTable,
   deleteEventTable,
+  getFunnelData,
+  getTotalViewsByWebsiteId,
+  // Queries
+  getTotalVisitorsByGeo,
+  hasUserEvents,
   ingestDDBEvent,
   ingestDDBEvents,
   listEventsByWebsiteId,
-  listEventByEmail,
-
-  // Queries
-  getTotalVisitorsByGeo,
-  getTotalViewsByWebsiteId,
-  getFunnelData,
-  hasUserEvents,
+  mapDDBEvent,
 } from "./events.js";
 
 import dotenv from "dotenv";
@@ -23,14 +21,14 @@ dotenv.config();
 
 // IDentity Stuff
 import {
+  cleanIdentityTable,
   createIdentityTable,
+  deleteIdentityTable,
   ingestDDBIdentities,
   ingestDDBIdentity,
-  mapDDBIdentity,
-  cleanIdentityTable,
-  deleteIdentityTable,
-  listIdentitiesByWebsiteId,
   listIdentitiesByEmail,
+  listIdentitiesByWebsiteId,
+  mapDDBIdentity,
 } from "./identity.js";
 
 export const clickhouse = (params: any) => {
@@ -55,7 +53,6 @@ export const clickhouse = (params: any) => {
     cleanEventTable,
     deleteEventTable,
     listEventsByWebsiteId,
-    listEventByEmail,
     hasUserEvents,
     // Query Functions
     getTotalViewsByWebsiteId,

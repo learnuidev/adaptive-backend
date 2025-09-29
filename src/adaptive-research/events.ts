@@ -521,12 +521,3 @@ export const listEventsByWebsiteId = async (clickHouseClient, websiteId) => {
   });
   return await resp.json();
 };
-
-export const listEventByEmail = async (clickHouseClient, email) => {
-  console.log(`Listing events for email: ${email}`);
-  const resp = await clickHouseClient.query({
-    query: `SELECT * FROM event WHERE email = '${email}' ORDER BY created_at DESC`,
-    format: "JSONEachRow",
-  });
-  return await resp.json();
-};
