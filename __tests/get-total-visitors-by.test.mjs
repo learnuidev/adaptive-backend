@@ -62,22 +62,37 @@ export const listTotalsVisitorBy = async ({
     osName,
   });
 
-  const buildQuery = (start, end, previous = false) => `
-    SELECT ${groupBy} as name, COUNT(DISTINCT visitor_id) as visitors
-    FROM event
-    WHERE ${clause}
-      AND type = 'pageview'
-      AND created_at >= {${start}:String}
-      ${
-        period === "custom" && end
-          ? `AND created_at <= {${end}:String}`
-          : previous && period !== "custom"
-            ? `AND created_at < {startStart:String}`
-            : ""
-      }
-    GROUP BY ${groupBy}
-    ORDER BY visitors DESC
-  `;
+  const buildQuery = (start, end, previous = false) => {
+    let selectClause;
+    if (groupBy === "device") {
+      selectClause = `
+        CASE
+          WHEN viewport_width <= 768 THEN 'mobile'
+          WHEN viewport_width <= 1024 THEN 'tablet'
+          ELSE 'desktop'
+        END as name
+      `;
+    } else {
+      selectClause = `${groupBy} as name`;
+    }
+
+    return `
+      SELECT ${selectClause}, COUNT(DISTINCT visitor_id) as visitors
+      FROM event
+      WHERE ${clause}
+        AND type = 'pageview'
+        AND created_at >= {${start}:String}
+        ${
+          period === "custom" && end
+            ? `AND created_at <= {${end}:String}`
+            : previous && period !== "custom"
+              ? `AND created_at < {startStart:String}`
+              : ""
+        }
+      GROUP BY name
+      ORDER BY visitors DESC
+    `;
+  };
 
   const currentQuery = buildQuery(
     "startStart",
@@ -122,9 +137,7 @@ listTotalsVisitorBy({
   timezoneName: "America/New_York",
   websiteId: "01K66XSK34CXMV0TT8ATS953W0",
   period: "ytd",
-  from: "2024-01-01",
-  to: "2024-01-07",
-  groupBy: "country",
+  groupBy: "device",
   //   country: "GB",
   // city: "New York",
 }).then((resp) => {

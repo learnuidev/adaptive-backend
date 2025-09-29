@@ -183,7 +183,7 @@ functions:
       EVENTS_TABLE: !Ref EventsTableV2
   add-feature-flag:
     timeout: 30
-    handler: dist/functions/analytics/add-feature-flag.handler
+    handler: dist/functions/analytics/feature-flags/add-feature-flag.handler
     events:
       - http:
           path: /v1/analytics/add-feature-flag
@@ -197,7 +197,7 @@ functions:
       FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
   remove-feature-flag:
     timeout: 30
-    handler: dist/functions/analytics/remove-feature-flag.handler
+    handler: dist/functions/analytics/feature-flags/remove-feature-flag.handler
     events:
       - http:
           path: /v1/analytics/remove-feature-flag
@@ -211,10 +211,25 @@ functions:
       FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
   list-feature-flags:
     timeout: 30
-    handler: dist/functions/analytics/list-feature-flags.handler
+    handler: dist/functions/analytics/feature-flags/list-feature-flags.handler
     events:
       - http:
           path: /v1/analytics/list-feature-flags
+          method: POST
+          cors: true
+          # authorizer:
+          #   name: CognitoAuthorizer
+          #   type: COGNITO_USER_POOLS
+          #   arn: !GetAtt CognitoUserPool.Arn
+
+    environment:
+      FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
+  is-feature-flag-enabled:
+    timeout: 30
+    handler: dist/functions/analytics/feature-flags/is-feature-flag-enabled.handler
+    events:
+      - http:
+          path: /v1/feature-flags/is-enabled
           method: POST
           cors: true
           # authorizer:

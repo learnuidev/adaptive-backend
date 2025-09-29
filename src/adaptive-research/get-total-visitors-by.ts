@@ -84,7 +84,13 @@ export interface LsitTotalVisitorsByParams {
   city?: string;
   browserName?: string;
   osName?: string;
-  groupBy: "country" | "region" | "city" | "browser_name" | "os_name";
+  groupBy:
+    | "country"
+    | "region"
+    | "city"
+    | "browser_name"
+    | "os_name"
+    | "device";
 }
 // New: listTotalsVisitorBy with optional filters
 export const listTotalsVisitorBy = async ({
@@ -118,22 +124,37 @@ export const listTotalsVisitorBy = async ({
     osName,
   });
 
-  const buildQuery = (start: string, end?: string, previous = false) => `
-    SELECT ${groupBy} as name, COUNT(DISTINCT visitor_id) as visitors
-    FROM event
-    WHERE ${clause}
-      AND type = 'pageview'
-      AND created_at >= {${start}:String}
-      ${
-        period === "custom" && end
-          ? `AND created_at <= {${end}:String}`
-          : previous && period !== "custom"
-            ? `AND created_at < {startStart:String}`
-            : ""
-      }
-    GROUP BY ${groupBy}
-    ORDER BY visitors DESC
-  `;
+  const buildQuery = (start: string, end?: string, previous = false) => {
+    let selectClause: string;
+    if (groupBy === "device") {
+      selectClause = `
+        CASE
+          WHEN viewport_width <= 768 THEN 'mobile'
+          WHEN viewport_width <= 1024 THEN 'tablet'
+          ELSE 'desktop'
+        END as name
+      `;
+    } else {
+      selectClause = `${groupBy} as name`;
+    }
+
+    return `
+      SELECT ${selectClause}, COUNT(DISTINCT visitor_id) as visitors
+      FROM event
+      WHERE ${clause}
+        AND type = 'pageview'
+        AND created_at >= {${start}:String}
+        ${
+          period === "custom" && end
+            ? `AND created_at <= {${end}:String}`
+            : previous && period !== "custom"
+              ? `AND created_at < {startStart:String}`
+              : ""
+        }
+      GROUP BY name
+      ORDER BY visitors DESC
+    `;
+  };
 
   const currentQuery = buildQuery(
     "startStart",
