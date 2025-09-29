@@ -157,12 +157,18 @@ export const generateCustomTrend = async (
   return await executeQuery(client, query);
 };
 
-export const getTopMetadataTrends = async (
-  client: ClickHouseClient,
-  metadataField: string,
-  topN: number = 10,
-  timeRange: TimeRange = "7d"
-): Promise<TopMetadataTrendData[]> => {
+interface GetMetadataTrendsInput {
+  client: ClickHouseClient;
+  metadataField: string;
+  topN?: number;
+  timeRange?: TimeRange;
+}
+export const getTopMetadataTrends = async ({
+  client,
+  metadataField,
+  topN = 10,
+  timeRange = "7d",
+}: GetMetadataTrendsInput): Promise<TopMetadataTrendData[]> => {
   const query = `
             SELECT 
                 JSONExtractString(metadata, '${metadataField}') as metadata_value,
@@ -179,7 +185,7 @@ export const getTopMetadataTrends = async (
   return await executeQuery(client, query);
 };
 
-// 3. Ge
+// 3. Get top metadata trends
 export const getMetadataValueTrend = async (
   client: ClickHouseClient,
   metadataField: string,
@@ -217,7 +223,12 @@ const exampleUsage = async (client: ClickHouseClient) => {
   });
 
   // Example 2: Top 10 most common metadata values
-  const topContent = await getTopMetadataTrends(client, "contentid", 10, "7d");
+  const topContent = await getTopMetadataTrends({
+    client,
+    metadataField: "contentid",
+    topN: 10,
+    timeRange: "7d",
+  });
 
   // Example 3: Specific content trend over time
   const specificContentTrend = await getMetadataValueTrend(
