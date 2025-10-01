@@ -15,13 +15,13 @@ const ddbClient = new DynamoDBClient({
 // Wrap with DocumentClient for convenience
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
-const addFeatureFlagsApi = async (props) => {
+export const addFeatureApi = async (props) => {
   const id = ulid();
 
   const params = removeNull({ id, ...props, createdAt: Date.now() });
 
   const inputParams = {
-    TableName: tableNames.featureFlagsTable,
+    TableName: tableNames.featureTable,
     Item: params,
   };
 
@@ -30,5 +30,3 @@ const addFeatureFlagsApi = async (props) => {
 
   return params;
 };
-
-export { addFeatureFlagsApi };

@@ -181,12 +181,12 @@ functions:
           #   arn: !GetAtt CognitoUserPool.Arn
     environment:
       EVENTS_TABLE: !Ref EventsTableV2
-  add-feature-flag:
+  add-feature:
     timeout: 30
-    handler: dist/functions/analytics/feature-flags/add-feature-flag.handler
+    handler: dist/functions/analytics/feature/add-feature.handler
     events:
       - http:
-          path: /v1/analytics/add-feature-flag
+          path: /v1/analytics/add-feature
           method: POST
           cors: true
           authorizer:
@@ -194,13 +194,13 @@ functions:
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
     environment:
-      FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
-  remove-feature-flag:
+      FEATURE_TABLE: !Ref FeatureTable
+  remove-feature:
     timeout: 30
-    handler: dist/functions/analytics/feature-flags/remove-feature-flag.handler
+    handler: dist/functions/analytics/feature/remove-feature.handler
     events:
       - http:
-          path: /v1/analytics/remove-feature-flag
+          path: /v1/analytics/remove-feature
           method: POST
           cors: true
           authorizer:
@@ -208,13 +208,27 @@ functions:
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
     environment:
-      FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
-  list-feature-flags:
+      FEATURE_TABLE: !Ref FeatureTable
+  list-features:
     timeout: 30
-    handler: dist/functions/analytics/feature-flags/list-feature-flags.handler
+    handler: dist/functions/analytics/feature/list-features.handler
     events:
       - http:
-          path: /v1/analytics/list-feature-flags
+          path: /v1/analytics/list-features
+          method: POST
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+    environment:
+      FEATURE_TABLE: !Ref FeatureTable
+  is-feature-enabled:
+    timeout: 30
+    handler: dist/functions/analytics/feature/is-feature-enabled.handler
+    events:
+      - http:
+          path: /v1/feature/is-enabled
           method: POST
           cors: true
           # authorizer:
@@ -223,22 +237,7 @@ functions:
           #   arn: !GetAtt CognitoUserPool.Arn
 
     environment:
-      FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
-  is-feature-flag-enabled:
-    timeout: 30
-    handler: dist/functions/analytics/feature-flags/is-feature-flag-enabled.handler
-    events:
-      - http:
-          path: /v1/feature-flags/is-enabled
-          method: POST
-          cors: true
-          # authorizer:
-          #   name: CognitoAuthorizer
-          #   type: COGNITO_USER_POOLS
-          #   arn: !GetAtt CognitoUserPool.Arn
-
-    environment:
-      FEATURE_FLAGS_TABLE: !Ref FeatureFlagsTable
+      FEATURE_TABLE: !Ref FeatureTable
   has-user-events:
     timeout: 30
     handler: dist/functions/analytics/has-user-events.handler
@@ -293,6 +292,18 @@ functions:
     events:
       - http:
           path: /v1/analytics/get-total-visitors-by
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+  list-metadatas:
+    timeout: 30
+    handler: dist/functions/analytics/list-metadatas/list-metadatas.handler
+    events:
+      - http:
+          path: /v1/analytics/list-metadatas
           method: post
           cors: true
           authorizer:
@@ -512,7 +523,7 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: events-table
-    FeatureFlagsTable:
+    FeatureTable:
       Type: AWS::DynamoDB::Table
       Properties:
         BillingMode: PAY_PER_REQUEST
@@ -540,4 +551,33 @@ resources:
           - Key: Environment
             Value: ${self:custom.stage}
           - Key: Name
-            Value: feature-flags-table
+            Value: features-table
+    FeatureVersionTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: featureId
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byFeatureId
+            KeySchema:
+              - AttributeName: featureId
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        Tags:
+          # To keep track of user table for diffeent environment
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: feature-versions-table

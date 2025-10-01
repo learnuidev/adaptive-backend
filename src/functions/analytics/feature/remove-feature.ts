@@ -1,19 +1,17 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 
-import { addFeatureFlagsApi } from "./add-feature-flag.api.js";
+import { removeFeatureApi } from "./remove-feature.api.js";
 
 export const handler = middy(async (event) => {
   try {
-    const rawParams = JSON.parse(event.body);
+    const { id } = JSON.parse(event.body);
 
-    const newFeatureFlag = await addFeatureFlagsApi({
-      ...rawParams,
-    });
+    const deletedFeature = await removeFeatureApi(id);
 
     const response = {
       statusCode: 200,
-      body: JSON.stringify(newFeatureFlag),
+      body: JSON.stringify({ id, deletedAt: Date.now() }),
     };
     return response;
   } catch (err) {

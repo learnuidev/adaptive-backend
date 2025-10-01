@@ -1,13 +1,13 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 
-import { addFeatureFlagsApi } from "./add-feature-flag.api.js";
+import { listFeatureFlagsApi } from "./list-features.api.js";
 
 export const handler = middy(async (event) => {
   try {
     const rawParams = JSON.parse(event.body);
 
-    const newFeatureFlag = await addFeatureFlagsApi({
+    const newFeatureFlag = await listFeatureFlagsApi({
       ...rawParams,
     });
 
