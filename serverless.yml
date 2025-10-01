@@ -27,6 +27,8 @@ provider:
   region: us-east-1
   memorySize: 512
   environment:
+    FEATURE_TABLE: !Ref FeatureTableV2
+    FEATURE_VERSION_TABLE: !Ref FeatureVersionTable
     USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
     ADAPTIVE_KMS_ARN: !GetAtt AdaptiveKMSKey.Arn
     REGION: ${self:provider.region}
@@ -194,7 +196,21 @@ functions:
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
     environment:
-      FEATURE_TABLE: !Ref FeatureTable
+      FEATURE_TABLE: !Ref FeatureTableV2
+  add-feature-version:
+    timeout: 30
+    handler: dist/functions/analytics/feature/add-feature-version.handler
+    events:
+      - http:
+          path: /v1/analytics/add-feature-version
+          method: POST
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+    environment:
+      FEATURE_VERSION_TABLE: !Ref FeatureVersionTable
   remove-feature:
     timeout: 30
     handler: dist/functions/analytics/feature/remove-feature.handler
@@ -208,7 +224,7 @@ functions:
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
     environment:
-      FEATURE_TABLE: !Ref FeatureTable
+      FEATURE_TABLE: !Ref FeatureTableV2
   list-features:
     timeout: 30
     handler: dist/functions/analytics/feature/list-features.handler
@@ -222,7 +238,7 @@ functions:
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
     environment:
-      FEATURE_TABLE: !Ref FeatureTable
+      FEATURE_TABLE: !Ref FeatureTableV2
   is-feature-enabled:
     timeout: 30
     handler: dist/functions/analytics/feature/is-feature-enabled.handler
@@ -237,7 +253,7 @@ functions:
           #   arn: !GetAtt CognitoUserPool.Arn
 
     environment:
-      FEATURE_TABLE: !Ref FeatureTable
+      FEATURE_TABLE: !Ref FeatureTableV2
   has-user-events:
     timeout: 30
     handler: dist/functions/analytics/has-user-events.handler
@@ -523,7 +539,7 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: events-table
-    FeatureTable:
+    FeatureTableV2:
       Type: AWS::DynamoDB::Table
       Properties:
         BillingMode: PAY_PER_REQUEST
@@ -535,10 +551,20 @@ resources:
             AttributeType: S
           - AttributeName: websiteId
             AttributeType: S
+          - AttributeName: featureKeyAndWebsiteId
+            AttributeType: S
         GlobalSecondaryIndexes:
           - IndexName: byWebsiteId
             KeySchema:
               - AttributeName: websiteId
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: byFeatureKeyAndWebsiteId
+            KeySchema:
+              - AttributeName: featureKeyAndWebsiteId
                 KeyType: HASH
               - AttributeName: id
                 KeyType: RANGE

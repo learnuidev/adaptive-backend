@@ -17,7 +17,7 @@ const ddbClient = new DynamoDBClient({
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
 // Zod schema for FeatureVersion
-const addFeatureVersionSchema = z
+export const addFeatureVersionSchema = z
   .object({
     featureId: z.string().uuid(),
     version: z.string().regex(/^\d+\.\d+\.\d+$/, {
