@@ -28,7 +28,7 @@ export const handler = middy(async (event) => {
     }
 
     const featureVersions = await listFeatureVersionsByFeatureIdApi({
-      featureId: feature.featureId,
+      featureId: feature.id,
     });
 
     if (!featureVersions || featureVersions?.length === 0) {
@@ -47,14 +47,14 @@ export const handler = middy(async (event) => {
     const response = {
       statusCode: 200,
 
-      body: JSON.stringify({ enabled: true }),
+      body: JSON.stringify({ enabled: true, versions: featureVersions }),
     };
     return response;
   } catch (err) {
     const response = {
       statusCode: 400,
       body: JSON.stringify({
-        enabled: true,
+        message: err?.message,
       }),
     };
     return response;

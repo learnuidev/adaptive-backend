@@ -2,6 +2,7 @@ import middy from "@middy/core";
 import cors from "@middy/http-cors";
 import { addFeatureApi } from "./add-feature.api.js";
 import { z } from "zod";
+import { constructFeatureKeyAndWebsiteId } from "./utils.js";
 
 const addFeatureSchema = z.object({
   name: z.string().min(1),
@@ -26,7 +27,7 @@ export const handler = middy(async (event) => {
       userId,
       tags: rawParams.tags,
       websiteId: rawParams.websiteId,
-      featureKeyAndWebsiteId: `${rawParams.key}-${rawParams.websiteId}`,
+      featureKeyAndWebsiteId: constructFeatureKeyAndWebsiteId(rawParams),
     };
 
     const validated = addFeatureSchema.parse(rawInputParams);

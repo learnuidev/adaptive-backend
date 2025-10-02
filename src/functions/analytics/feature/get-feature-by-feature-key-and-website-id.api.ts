@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { apiConfig } from "../../../constants/api-config.js";
 import { tableNames } from "../../../constants/table-names.js";
+import { constructFeatureKeyAndWebsiteId } from "./utils.js";
 
 // Create low-level DynamoDB client once
 const ddbClient = new DynamoDBClient({
@@ -17,7 +18,7 @@ const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 // Zod schema for getFeatureByFeatureKeyAndWebsiteId input
 export const getFeatureByFeatureKeyAndWebsiteIdSchema = z.object({
   featureKey: z.string(),
-  websiteId: z.string().uuid(),
+  websiteId: z.ulid(),
 });
 
 export type GetFeatureByFeatureKeyAndWebsiteIdInput = z.infer<
@@ -31,7 +32,7 @@ export const getFeatureByFeatureKeyAndWebsiteIdApi = async (
 
   const { featureKey, websiteId } = parsed;
 
-  const featureKeyAndWebsiteId = `${featureKey}#${websiteId}`;
+  const featureKeyAndWebsiteId = constructFeatureKeyAndWebsiteId(parsed);
 
   const params = {
     TableName: tableNames.featureTable,
