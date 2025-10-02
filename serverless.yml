@@ -27,6 +27,7 @@ provider:
   region: us-east-1
   memorySize: 512
   environment:
+    COHORT_TABLE: !Ref CohortTable
     FEATURE_TABLE: !Ref FeatureTableV2
     FEATURE_VERSION_TABLE: !Ref FeatureVersionTable
     USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
@@ -146,7 +147,7 @@ functions:
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
     environment:
-      user_credentials_table: !Ref UserCredentialsTable
+      USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   confirmUserSignup:
     timeout: 30
     handler: dist/functions/user/confirm-user-signup.handler
@@ -352,9 +353,59 @@ functions:
             name: CognitoAuthorizer
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
+  add-cohort:
+    timeout: 30
+    handler: dist/functions/analytics/cohort/add-cohort.handler
+    events:
+      - http:
+          path: /v1/analytics/add-cohort
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+  list-cohorts:
+    timeout: 30
+    handler: dist/functions/analytics/cohort/list-cohorts.handler
+    events:
+      - http:
+          path: /v1/analytics/list-cohorts
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
   # ============================== Analytics Routes End ===============================
 resources:
   Resources:
+    CohortTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: websiteId
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byWebsiteId
+            KeySchema:
+              - AttributeName: websiteId
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: cohort-table
     UserCredentialsTable:
       Type: AWS::DynamoDB::Table
       Properties:

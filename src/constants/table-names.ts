@@ -10,6 +10,7 @@ export const tableNames = {
   featureVersionTable: process.env.FEATURE_VERSION_TABLE,
   identityTable: process.env.IDENTITY_TABLE,
   userCredentialsTable: process.env.USER_CREDENTIALS_TABLE,
+  cohortTable: process.env.COHORT_TABLE,
 };
 
 export default {
