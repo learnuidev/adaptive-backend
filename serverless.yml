@@ -340,6 +340,18 @@ functions:
             name: CognitoAuthorizer
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
+  list-selected-attribute-values:
+    timeout: 30
+    handler: dist/functions/analytics/list-attribute-values/list-attribute-values.handler
+    events:
+      - http:
+          path: /v1/analytics/list-attribute-values
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
   # ============================== Analytics Routes End ===============================
 resources:
   Resources:
