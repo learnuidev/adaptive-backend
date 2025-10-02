@@ -239,6 +239,20 @@ functions:
             arn: !GetAtt CognitoUserPool.Arn
     environment:
       FEATURE_TABLE: !Ref FeatureTableV2
+  get-feature-details:
+    timeout: 30
+    handler: dist/functions/analytics/feature/get-feature-details.handler
+    events:
+      - http:
+          path: /v1/analytics/get-feature-details
+          method: POST
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+    environment:
+      FEATURE_TABLE: !Ref FeatureTableV2
   is-feature-enabled:
     timeout: 30
     handler: dist/functions/analytics/feature/is-feature-enabled.handler

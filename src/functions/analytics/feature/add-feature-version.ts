@@ -11,12 +11,12 @@ const addNewFeatureVersionHandler = async (event) => {
 
     const newFeatureVersionInput = {
       featureId: rawParams.featureId,
+      description: rawParams.description,
       version: rawParams.version,
       config: rawParams.config,
       isActive: rawParams.isActive,
       rolloutPercentage: rawParams.rolloutPercentage,
       rolloutRules: rawParams.rolloutRules,
-      createdBy: rawParams.createdBy,
     };
 
     const validated = addFeatureVersionSchema.parse(newFeatureVersionInput);

@@ -31,6 +31,16 @@ export const handler = middy(async (event) => {
       featureId: feature.featureId,
     });
 
+    if (!featureVersions || featureVersions?.length === 0) {
+      const response = {
+        statusCode: 200,
+
+        body: JSON.stringify({ enabled: true }),
+      };
+
+      return response;
+    }
+
     // todo: implement this
     // 5. See which version this user is in the rollout for against the user's rollout rules
 

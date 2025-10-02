@@ -7,12 +7,15 @@ const addFeatureSchema = z.object({
   name: z.string().min(1),
   featureKey: z.string().min(1),
   description: z.string().optional(),
+  userId: z.string().email(),
   tags: z.array(z.string()).optional(),
   websiteId: z.ulid(),
   featureKeyAndWebsiteId: z.string().min(1),
 });
 
 export const handler = middy(async (event) => {
+  const userId = event.requestContext.authorizer?.claims?.email;
+
   try {
     const rawParams = JSON.parse(event.body);
 
@@ -20,6 +23,7 @@ export const handler = middy(async (event) => {
       name: rawParams.name,
       featureKey: rawParams.featureKey,
       description: rawParams.description,
+      userId,
       tags: rawParams.tags,
       websiteId: rawParams.websiteId,
       featureKeyAndWebsiteId: `${rawParams.key}-${rawParams.websiteId}`,

@@ -16,7 +16,7 @@ const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
 // Zod schema for listFeatureVersionsByFeatureId input
 export const listFeatureVersionsByFeatureIdSchema = z.object({
-  featureId: z.string().uuid(),
+  featureId: z.ulid(),
 });
 
 export type ListFeatureVersionsByFeatureIdInput = z.infer<

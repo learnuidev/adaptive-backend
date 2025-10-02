@@ -19,18 +19,18 @@ const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 // Zod schema for FeatureVersion
 export const addFeatureVersionSchema = z
   .object({
-    featureId: z.string().uuid(),
+    featureId: z.ulid(),
+    description: z.string().optional(),
     version: z.string().regex(/^\d+\.\d+\.\d+$/, {
       message: "Must be a semantic version (e.g., 1.2.3)",
     }),
-    config: z.record(z.string(), z.unknown()),
+    config: z.record(z.string(), z.unknown()).optional(),
     isActive: z.boolean().default(false),
     rolloutPercentage: z.number().int().min(0).max(100).nullable().optional(),
     rolloutRules: z
       .array(z.record(z.string(), z.unknown()))
       .nullable()
       .optional(),
-    createdBy: z.string().uuid(),
   })
   .strict();
 
@@ -45,7 +45,6 @@ export const addFeatureVersionApi = async (props: unknown) => {
     ...parsed,
     createdAt: now,
     updatedAt: now,
-    updatedBy: parsed.createdBy,
   });
 
   const inputParams = {

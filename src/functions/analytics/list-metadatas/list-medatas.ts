@@ -11,8 +11,6 @@ export const handler = middy(async (event) => {
 
     const website = await getUserCredentialById(websiteId);
 
-    console.log("yoo");
-
     const metadatas = await listMetadatasByWebsiteId({
       clickHouseClient: clickhouseClient.client,
 
