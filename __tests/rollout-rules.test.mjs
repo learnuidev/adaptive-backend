@@ -13,7 +13,7 @@ const sampleRollOutRules = [
       {
         field: "email",
         op: "=",
-        value: "learnuidev2@gmail.com",
+        value: "learnuidev@gmail.com",
       },
     ],
   },
