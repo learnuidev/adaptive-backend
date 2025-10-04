@@ -16,7 +16,7 @@ export async function listGoalsCountByWebsiteId({
   from,
   to,
 }: ListGoalsCountByWebsiteIdParams) {
-  const { start } = buildDateRange({ period, from, to });
+  const { startStart: start } = buildDateRange({ period, from, to });
 
   const query = `
     SELECT

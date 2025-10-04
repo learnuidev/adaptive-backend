@@ -218,7 +218,8 @@ async function listGoalsCountByWebsiteId({
 
 listGoalsCountByWebsiteId({
   clickHouseClient: testClient,
-  websiteId: "01K66XSK34CXMV0TT8ATS953W0",
+  // websiteId: "01K66XSK34CXMV0TT8ATS953W0",
+  websiteId: "01K66Y71NVHBWVFX8T9HB76WXH",
   periodKey: "today",
 }).then((resp) => {
   console.log(resp);
