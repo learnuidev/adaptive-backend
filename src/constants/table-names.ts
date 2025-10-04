@@ -11,6 +11,7 @@ export const tableNames = {
   identityTable: process.env.IDENTITY_TABLE,
   userCredentialsTable: process.env.USER_CREDENTIALS_TABLE,
   cohortTable: process.env.COHORT_TABLE,
+  notesTable: process.env.NOTES_TABLE,
 };
 
 export default {

@@ -27,6 +27,7 @@ provider:
   region: us-east-1
   memorySize: 512
   environment:
+    NOTES_TABLE: !Ref NotesTable
     COHORT_TABLE: !Ref CohortTable
     FEATURE_TABLE: !Ref FeatureTableV2
     FEATURE_VERSION_TABLE: !Ref FeatureVersionTable
@@ -402,6 +403,32 @@ functions:
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
   # ============================== Analytics Routes End ===============================
+  # ============================== Notes Routes Start =================================
+  add-note:
+    timeout: 30
+    handler: dist/functions/analytics/note/add-note.handler
+    events:
+      - http:
+          path: /v1/analytics/add-note
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+    list-notes:
+      timeout: 30
+      handler: dist/functions/analytics/note/list-notes.handler
+      events:
+        - http:
+            path: /v1/analytics/list-notes
+            method: post
+            cors: true
+            authorizer:
+              name: CognitoAuthorizer
+              type: COGNITO_USER_POOLS
+              arn: !GetAtt CognitoUserPool.Arn
+    # ============================== Notes Routes End =================================
 resources:
   Resources:
     CohortTable:
@@ -708,3 +735,32 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: feature-versions-table
+    NotesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: websiteId
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byWebsiteId
+            KeySchema:
+              - AttributeName: websiteId
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        Tags:
+          # To keep track of user table for diffeent environment
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: notes-table
