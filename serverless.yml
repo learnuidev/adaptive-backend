@@ -402,6 +402,18 @@ functions:
             name: CognitoAuthorizer
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
+  list-journeys:
+    timeout: 30
+    handler: dist/functions/analytics/list-journeys/list-journeys.handler
+    events:
+      - http:
+          path: /v1/analytics/list-journeys
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
   # ============================== Analytics Routes End ===============================
   # ============================== Notes Routes Start =================================
   add-note:

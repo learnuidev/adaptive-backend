@@ -2,6 +2,8 @@ import { getAverageSessionByWebsiteId } from "../../../adaptive-research/get-ave
 import { getTotalPageVisitsByWebsiteId } from "../../../adaptive-research/get-total-page-visits-by-website-id.js";
 import { getTotalPageVisitsTrafficByWebsiteId } from "../../../adaptive-research/get-total-page-visits-traffic-by-website-id.js";
 import { getTotalUniqueUsers } from "../../../adaptive-research/get-total-unique-users.js";
+import { listGoalsCountByWebsiteId } from "../../../adaptive-research/list-goal-count-by-website-id.js";
+import { listGoalsByWebsiteId } from "../../../adaptive-research/list-goals-by-website-id.js";
 // import { getTotalVisitorTrafficByWebsiteId } from "../../../adaptive-research/get-total-visitor-traffic-by-website.js";
 import { listPagesByWebsiteId } from "../../../adaptive-research/list-pages-by-website-id.js";
 import { listVisitorsByWebsiteId } from "../../../adaptive-research/list-visitors-by-website-id.js";
@@ -78,6 +80,33 @@ export const getSummaryApi = async (params: {
     websiteId,
   });
 
+  let goals = [];
+  let goalsCount = [];
+  try {
+    goals = await listGoalsByWebsiteId({
+      clickHouseClient: clickhouseClient.client,
+      websiteId,
+      period,
+      from,
+      to,
+    });
+  } catch (err) {
+    goals = [];
+    console.log(err);
+  }
+  try {
+    goalsCount = await listGoalsCountByWebsiteId({
+      clickHouseClient: clickhouseClient.client,
+      websiteId,
+      period,
+      from,
+      to,
+    });
+  } catch (err) {
+    goalsCount = [];
+    console.log(err);
+  }
+
   // const totalVisitorTraffic = await getTotalVisitorTrafficByWebsiteId(
   //   clickhouseClient.client,
   //   websiteId,
@@ -93,6 +122,8 @@ export const getSummaryApi = async (params: {
     visitors,
     averageSession,
     totalPageVisitsOvertime,
+    goals,
+    goalsCount,
     // totalVisitorTraffic,
   };
 };
