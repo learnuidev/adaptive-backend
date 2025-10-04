@@ -17,7 +17,7 @@ export async function listGoalsByWebsiteId({
   to,
   selectedKeys = ["id", "email", "goalName", "created_at"],
 }: ListGoalsByWebsiteIdInput) {
-  const { start } = buildDateRange(period, from, to);
+  const { start } = buildDateRange({ period, from, to });
 
   let selectFields;
 

@@ -6,8 +6,8 @@ export interface ListGoalsCountByWebsiteIdParams {
   clickHouseClient: ClickHouseClient;
   websiteId: string;
   period?: FilterPeriod;
-  from?: string;
-  to?: string;
+  from?: Date;
+  to?: Date;
 }
 export async function listGoalsCountByWebsiteId({
   clickHouseClient,
@@ -16,7 +16,7 @@ export async function listGoalsCountByWebsiteId({
   from,
   to,
 }: ListGoalsCountByWebsiteIdParams) {
-  const { start } = buildDateRange(period, from, to);
+  const { start } = buildDateRange({ period, from, to });
 
   const query = `
     SELECT
