@@ -32,6 +32,7 @@ provider:
     FEATURE_TABLE: !Ref FeatureTableV2
     FEATURE_VERSION_TABLE: !Ref FeatureVersionTable
     USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
+    API_KEYS_TABLE: !Ref ApiKeysTable
     ADAPTIVE_KMS_ARN: !GetAtt AdaptiveKMSKey.Arn
     REGION: ${self:provider.region}
     STAGE: ${self:provider.stage}
@@ -149,6 +150,77 @@ functions:
             arn: !GetAtt CognitoUserPool.Arn
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
+  create-api-key:
+    timeout: 30
+    handler: dist/functions/api-keys/create-api-key.handler
+    events:
+      - http:
+          path: /v1/create-api-key
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+    environment:
+      API_KEYS_TABLE: !Ref ApiKeysTable
+  list-api-keys:
+    timeout: 30
+    handler: dist/functions/api-keys/list-api-keys.handler
+    events:
+      - http:
+          path: /v1/list-api-keys
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+    environment:
+      API_KEYS_TABLE: !Ref ApiKeysTable
+  get-api-key:
+    timeout: 30
+    handler: dist/functions/api-keys/get-api-key.handler
+    events:
+      - http:
+          path: /v1/get-api-key
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+    environment:
+      API_KEYS_TABLE: !Ref ApiKeysTable
+  delete-api-key:
+    timeout: 30
+    handler: dist/functions/api-keys/delete-api-key.handler
+    events:
+      - http:
+          path: /v1/delete-api-key
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+    environment:
+      API_KEYS_TABLE: !Ref ApiKeysTable
+  rotate-api-key:
+    timeout: 30
+    handler: dist/functions/api-keys/rotate-api-key.handler
+    events:
+      - http:
+          path: /v1/rotate-api-key
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+    environment:
+      API_KEYS_TABLE: !Ref ApiKeysTable
+      ADAPTIVE_KMS_ARN: !GetAtt AdaptiveKMSKey.Arn
   confirmUserSignup:
     timeout: 30
     handler: dist/functions/user/confirm-user-signup.handler
@@ -776,3 +848,31 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: notes-table
+    ApiKeysTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: websiteId
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byWebsiteId
+            KeySchema:
+              - AttributeName: websiteId
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: api-keys-table

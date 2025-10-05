@@ -62,19 +62,19 @@ export const addUserCredentialApi = async ({
   permissionType: string;
   userId: string;
 }) => {
-  const crypto = cryptoV2({ keyArn: apiConfig.kmsArn });
+  // const crypto = cryptoV2({ keyArn: apiConfig.kmsArn });
 
   const apiKey = generateApiKey();
-  const apiSecret = generateApiSecret();
+  // const apiSecret = generateApiSecret();
 
-  const { result } = await crypto.encrypt(apiSecret);
+  // const { result } = await crypto.encrypt(apiSecret);
 
   console.log(`Successfully encryped api secret for : ${userId}`);
 
   const createdAt = Date.now();
 
-  const prefix = apiKey?.slice(0, 3);
-  const suffix = apiSecret.slice(-4);
+  // const prefix = apiKey?.slice(0, 3);
+  // const suffix = apiSecret.slice(-4);
   const credentialParams = {
     title,
     scopes,
@@ -82,9 +82,9 @@ export const addUserCredentialApi = async ({
     id: apiKey,
     userId,
     apiKey,
-    apiSecret: result,
+    // apiSecret: result,
     permissionType,
-    previewApiSecret: `${credentialsPrefix}${prefix}...${suffix}`,
+    // previewApiSecret: `${credentialsPrefix}${prefix}...${suffix}`,
     createdAt,
     urlEndpoint: apiConfig.urlEndpoint,
     ...rest,
@@ -102,7 +102,7 @@ export const addUserCredentialApi = async ({
 
   const response = {
     ...credentialParams,
-    apiSecret: `${credentialsPrefix}${apiKey}${apiSecret}`,
+    // apiSecret: `${credentialsPrefix}${apiKey}${apiSecret}`,
   };
   return response;
 };
