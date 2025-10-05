@@ -1,15 +1,16 @@
 // Middlewares
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
-import { deleteUserCredentialApi } from "./delete-user-credential.api.js";
+import { deleteUserWebsiteApi } from "./delete-user-website.api.js";
+// import { deleteUserCredentialApi } from "./delete-user-website.api.js";
 
 export const handler = middy(async (event) => {
   try {
     const userId = event.requestContext.authorizer.claims.email;
-    const { credentialId } = JSON.parse(event.body);
+    const { websiteId } = JSON.parse(event.body);
 
-    const deletedCredential = await deleteUserCredentialApi({
-      credentialId,
+    const deletedCredential = await deleteUserWebsiteApi({
+      websiteId,
       userId,
     });
 
@@ -17,7 +18,7 @@ export const handler = middy(async (event) => {
       const response = {
         statusCode: 404,
         body: JSON.stringify({
-          message: `Credential with id: ${credentialId} not found`,
+          message: `Website with id: ${websiteId} not found`,
         }),
       };
       return response;

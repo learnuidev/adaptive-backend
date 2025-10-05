@@ -14,11 +14,17 @@ const ddbClient = new DynamoDBClient({
 
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
-export const deleteUserCredentialApi = async ({ credentialId, userId }) => {
-  // Get the item by credentialId
+export const deleteUserWebsiteApi = async ({
+  websiteId,
+  userId,
+}: {
+  websiteId: string;
+  userId: string;
+}) => {
+  // Get the item by website Id
   const getParams = {
     TableName: tableNames.userCredentialsTable,
-    Key: { id: credentialId },
+    Key: { id: websiteId },
   };
   const resp = await dynamodb.send(new GetCommand(getParams));
   const credential = resp.Item;
@@ -34,13 +40,13 @@ export const deleteUserCredentialApi = async ({ credentialId, userId }) => {
   // Delete the item
   const deleteParams = {
     TableName: tableNames.userCredentialsTable,
-    Key: { id: credentialId },
+    Key: { id: websiteId },
   };
 
   await dynamodb.send(new DeleteCommand(deleteParams));
 
   return {
     success: true,
-    message: `Credential with id: ${credentialId} deleted successfully`,
+    message: `Website with id: ${websiteId} deleted successfully`,
   };
 };

@@ -3,12 +3,12 @@ import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { apiConfig } from "../../constants/api-config.js";
 import { tableNames } from "../../constants/table-names.js";
 import { cryptoV2 } from "../../lib/crypto-v2.js";
-import { credentialsPrefix } from "./user-credentials.constants.js";
+import { credentialsPrefix } from "./user-websites.constants.js";
 
 const ddbClient = new DynamoDBClient({ region: apiConfig.region });
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
-export const listUserCredentialsApi = async (userId: string) => {
+export const listUserWebsitesApi = async (userId: string) => {
   const params = {
     TableName: tableNames.userCredentialsTable,
     IndexName: "byUserId",

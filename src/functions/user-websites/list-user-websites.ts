@@ -1,10 +1,11 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
-import { listUserCredentialsApi } from "./list-user-credentials.api.js";
+import { listUserWebsitesApi } from "./list-user-websites.api.js";
+// import { listUserCredentialsApi } from "./list-user-websites.api.js";
 
 const baseHandler = async (event: any) => {
   const userEmail = event.requestContext.authorizer.claims.email;
-  const credentials = await listUserCredentialsApi(userEmail);
+  const credentials = await listUserWebsitesApi(userEmail);
 
   return {
     statusCode: 200,

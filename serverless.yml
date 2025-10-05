@@ -94,12 +94,12 @@ functions:
     handler: dist/functions/auth/authorizer.handler
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
-  list-user-credentials:
+  list-user-websites:
     timeout: 30
     handler: dist/functions/user-credentials/list-user-credentials.handler
     events:
       - http:
-          path: /v1/list-user-credentials
+          path: /v1/list-user-websites
           method: post
           cors: true
           authorizer:
@@ -108,12 +108,12 @@ functions:
             arn: !GetAtt CognitoUserPool.Arn
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
-  add-user-credential:
+  add-user-website:
     timeout: 30
-    handler: dist/functions/user-credentials/add-user-credential.handler
+    handler: dist/functions/user-credentials/add-user-website.handler
     events:
       - http:
-          path: /v1/add-user-credential
+          path: /v1/add-user-website
           method: post
           cors: true
           authorizer:
@@ -122,12 +122,12 @@ functions:
             arn: !GetAtt CognitoUserPool.Arn
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
-  update-user-credential:
+  update-user-website:
     timeout: 30
-    handler: dist/functions/user-credentials/update-user-credential.handler
+    handler: dist/functions/user-credentials/update-user-website.handler
     events:
       - http:
-          path: /v1/update-user-credential
+          path: /v1/update-user-website
           method: post
           cors: true
           authorizer:
@@ -136,12 +136,12 @@ functions:
             arn: !GetAtt CognitoUserPool.Arn
     environment:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
-  delete-user-credential:
+  delete-user-website:
     timeout: 30
-    handler: dist/functions/user-credentials/delete-user-credential.handler
+    handler: dist/functions/user-credentials/delete-user-website.handler
     events:
       - http:
-          path: /v1/delete-user-credential
+          path: /v1/delete-user-website
           method: post
           cors: true
           authorizer:

@@ -9,7 +9,7 @@ import { listPagesByWebsiteId } from "../../../adaptive-research/list-pages-by-w
 import { listVisitorsByWebsiteId } from "../../../adaptive-research/list-visitors-by-website-id.js";
 import { FilterPeriod } from "../../../adaptive-research/utils.js";
 import { clickhouseClient } from "../../../lib/clickhouse-client.js";
-import { getUserCredentialById } from "../../user-credentials/get-user-credential-by-id.api.js";
+import { getUserWebsiteById } from "../../user-websites/get-user-website-by-id.api.js";
 
 // type GetSummaryRequest =
 //   | {
@@ -35,7 +35,7 @@ export const getSummaryApi = async (params: {
 }) => {
   const { websiteId, period, from, to } = params;
 
-  const website = await getUserCredentialById(websiteId);
+  const website = await getUserWebsiteById(websiteId);
 
   const timezoneName = website?.timezoneName || "America/Montreal";
 

@@ -11,7 +11,7 @@ const ddbClient = new DynamoDBClient({
 // Create high-level DocumentClient wrapper
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
-export async function getUserCredentialById(apiKeyId: string) {
+export async function getUserWebsiteById(apiKeyId: string) {
   // fetch item
   const resp = await dynamodb.send(
     new GetCommand({
@@ -22,7 +22,7 @@ export async function getUserCredentialById(apiKeyId: string) {
     })
   );
 
-  const userCredential = resp?.Item;
+  const website = resp?.Item;
 
-  return userCredential;
+  return website;
 }

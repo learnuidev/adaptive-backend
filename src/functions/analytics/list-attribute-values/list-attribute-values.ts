@@ -1,16 +1,16 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 
-import { listMetadatasByWebsiteId } from "../../../adaptive-research/list-metadatas-by-website-id.js";
 import { clickhouseClient } from "../../../lib/clickhouse-client.js";
-import { getUserCredentialById } from "../../user-credentials/get-user-credential-by-id.api.js";
+
 import { listAttributeValues } from "../../../adaptive-research/list-attribute-values.js";
+import { getUserWebsiteById } from "../../user-websites/get-user-website-by-id.api.js";
 
 export const handler = middy(async (event: any) => {
   try {
     const { websiteId, attributeKey } = JSON.parse(event.body);
 
-    const website = await getUserCredentialById(websiteId);
+    const website = await getUserWebsiteById(websiteId);
 
     const metadatas = await listAttributeValues({
       clickHouseClient: clickhouseClient.client,

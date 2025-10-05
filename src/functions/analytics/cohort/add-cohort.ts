@@ -1,8 +1,5 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
-import { addFeatureApi } from "./add-feature.api.js";
-import { z } from "zod";
-import { constructFeatureKeyAndWebsiteId } from "./utils.js";
 import { addCohortApi } from "./add-cohort.api.js";
 
 export const handler = middy(async (event) => {

@@ -1,6 +1,8 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
-import { updateUserCredentialApi } from "./update-user-credential.api.js";
+import { updateUserWebsiteApi } from "./update-user-website.api.js";
+// import { updateUserWebsitesApi } from "./update-user-website.api.js";
+// import { updateUserCredentialApi } from "./update-user-website.api.js";
 
 export const handler = middy(async (event: any) => {
   const { id, title, description, scopes, permissionType } = JSON.parse(
@@ -10,7 +12,7 @@ export const handler = middy(async (event: any) => {
   const userId = event.requestContext.authorizer.claims.email;
 
   try {
-    const userCredential = await updateUserCredentialApi({
+    const userWebsite = await updateUserWebsiteApi({
       id,
       title,
       description,
@@ -19,7 +21,7 @@ export const handler = middy(async (event: any) => {
       userId,
     });
 
-    if (!userCredential) {
+    if (!userWebsite) {
       const response = {
         statusCode: 401,
         body: JSON.stringify({
@@ -31,7 +33,7 @@ export const handler = middy(async (event: any) => {
 
     const response = {
       statusCode: 200,
-      body: JSON.stringify(userCredential),
+      body: JSON.stringify(userWebsite),
     };
     return response;
   } catch (err) {

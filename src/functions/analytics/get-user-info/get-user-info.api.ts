@@ -1,6 +1,6 @@
 import { getUserInfo } from "../../../adaptive-research/get-user-info.js";
 import { clickhouseClient } from "../../../lib/clickhouse-client.js";
-import { getUserCredentialById } from "../../user-credentials/get-user-credential-by-id.api.js";
+import { getUserWebsiteById } from "../../user-websites/get-user-website-by-id.api.js";
 
 export const getUserInfoApi = async (params: {
   websiteId: string;
@@ -8,7 +8,7 @@ export const getUserInfoApi = async (params: {
 }) => {
   const { websiteId, email } = params;
 
-  const website = await getUserCredentialById(websiteId);
+  const website = await getUserWebsiteById(websiteId);
 
   const timezoneName = website?.timezoneName || "America/Montreal";
 

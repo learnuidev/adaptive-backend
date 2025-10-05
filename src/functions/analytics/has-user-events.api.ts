@@ -1,5 +1,5 @@
 import { clickhouseClient } from "../../lib/clickhouse-client.js";
-import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api.js";
+import { getUserWebsiteById } from "../user-websites/get-user-website-by-id.api.js";
 
 export const hasUserEventsApi = async ({
   websiteId,
@@ -8,7 +8,7 @@ export const hasUserEventsApi = async ({
   websiteId: string;
   userId: string;
 }) => {
-  const userCredential = await getUserCredentialById(websiteId);
+  const userCredential = await getUserWebsiteById(websiteId);
 
   if (userCredential?.userId !== userId) {
     return null;

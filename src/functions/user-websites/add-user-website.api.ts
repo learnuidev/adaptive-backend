@@ -1,15 +1,10 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 
 import { apiConfig } from "../../constants/api-config.js";
 import { tableNames } from "../../constants/table-names.js";
+import { generateApiKey } from "../../lib/crypto-v2.js";
 import { removeNull } from "../../utils/remove-null.js";
-import { credentialsPrefix } from "./user-credentials.constants.js";
-import {
-  cryptoV2,
-  generateApiKey,
-  generateApiSecret,
-} from "../../lib/crypto-v2.js";
 
 const ddbClient = new DynamoDBClient({
   region: apiConfig.region,
@@ -48,7 +43,7 @@ const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 //   return crypto.randomBytes(size).toString("hex");
 // }
 
-export const addUserCredentialApi = async ({
+export const addUserWebsiteApi = async ({
   title,
   description,
   scopes,
@@ -75,7 +70,7 @@ export const addUserCredentialApi = async ({
 
   // const prefix = apiKey?.slice(0, 3);
   // const suffix = apiSecret.slice(-4);
-  const credentialParams = {
+  const websiteParams = {
     title,
     scopes,
     description,
@@ -92,7 +87,7 @@ export const addUserCredentialApi = async ({
 
   var params = {
     TableName: tableNames.userCredentialsTable,
-    Item: removeNull(credentialParams),
+    Item: removeNull(websiteParams),
   };
 
   // Call DynamoDB to add the item to the table
@@ -101,7 +96,7 @@ export const addUserCredentialApi = async ({
   console.log(`=== Successfully added credential for user - ${userId} ===`);
 
   const response = {
-    ...credentialParams,
+    ...websiteParams,
     // apiSecret: `${credentialsPrefix}${apiKey}${apiSecret}`,
   };
   return response;

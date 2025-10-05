@@ -1,7 +1,7 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 
-import { addUserCredentialApi } from "./add-user-credential.api.js";
+import { addUserWebsiteApi } from "./add-user-website.api.js";
 
 export const handler = middy(async (event) => {
   const userId = event.requestContext.authorizer.claims.email;
@@ -10,7 +10,7 @@ export const handler = middy(async (event) => {
     event.body
   );
 
-  const userCredential = await addUserCredentialApi({
+  const userWebsite = await addUserWebsiteApi({
     title,
     description,
     scopes,
@@ -36,7 +36,7 @@ export const handler = middy(async (event) => {
 
   const response = {
     statusCode: 201,
-    body: JSON.stringify(userCredential),
+    body: JSON.stringify(userWebsite),
   };
   return response;
 }).use(cors());

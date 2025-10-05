@@ -4,8 +4,8 @@ import {
   API_SECRET_LENGTH,
   cryptoV2,
 } from "../../lib/crypto-v2.js";
-import { getUserCredentialById } from "../user-credentials/get-user-credential-by-id.api.js";
-import { credentialsPrefix } from "../user-credentials/user-credentials.constants.js";
+import { getUserWebsiteById } from "../user-websites/get-user-website-by-id.api.js";
+import { credentialsPrefix } from "../user-websites/user-websites.constants.js";
 
 export async function validateApiKey(apiKeyWithMando: string) {
   // Implement your API key validation logic here
@@ -21,17 +21,17 @@ export async function validateApiKey(apiKeyWithMando: string) {
     API_KEY_LENGTH + API_SECRET_LENGTH
   );
 
-  const userCredential = await getUserCredentialById(userCredentialId);
+  const userWebsite = await getUserWebsiteById(userCredentialId);
 
-  if (!userCredential) {
+  if (!userWebsite) {
     return false;
   }
 
-  const { apiSecret } = userCredential;
+  const { apiSecret } = userWebsite;
   const { plaintext } = await crypto.decrypt(apiSecret);
 
   if (`${plaintext}` === apiSecretParams) {
-    return userCredential;
+    return userWebsite;
   }
 
   return false;

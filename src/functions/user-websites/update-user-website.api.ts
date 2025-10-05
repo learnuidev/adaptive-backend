@@ -13,7 +13,7 @@ import { apiConfig } from "../../constants/api-config.js";
 const ddbClient = new DynamoDBClient({ region: apiConfig.region });
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
-export const updateUserCredentialApi = async ({
+export const updateUserWebsiteApi = async ({
   id,
   title,
   description,
@@ -34,20 +34,20 @@ export const updateUserCredentialApi = async ({
     Key: { id },
   };
   const itemResponse = await dynamodb.send(new GetCommand(getParams));
-  const userCredential = itemResponse.Item;
+  const userWebsite = itemResponse.Item;
 
-  if (!userCredential) {
+  if (!userWebsite) {
     return null;
   }
 
-  if (userCredential.userId !== userId) {
+  if (userWebsite.userId !== userId) {
     return null;
   }
 
   // Prepare updated parameters, removing null values
   const params = removeNull({
     id,
-    ...userCredential,
+    ...userWebsite,
     title,
     description,
     scopes,

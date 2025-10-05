@@ -5,14 +5,14 @@ import {
 // import { getTotalVisitorTrafficByWebsiteId } from "../../../adaptive-research/get-total-visitor-traffic-by-website.js";
 import { FilterPeriod } from "../../../adaptive-research/utils.js";
 import { clickhouseClient } from "../../../lib/clickhouse-client.js";
-import { getUserCredentialById } from "../../user-credentials/get-user-credential-by-id.api.js";
+import { getUserWebsiteById } from "../../user-websites/get-user-website-by-id.api.js";
 
 export const listJourneysApi = async (
   params: ListJourneysByEventAndWebsiteIdInput
 ) => {
   const { websiteId, eventId, goalName, selectedKeys } = params;
 
-  const website = await getUserCredentialById(websiteId);
+  const website = await getUserWebsiteById(websiteId);
 
   if (!website) {
     throw new Error("Website not found");

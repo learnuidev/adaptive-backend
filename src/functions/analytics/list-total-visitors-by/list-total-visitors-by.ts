@@ -1,15 +1,15 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 
-import { getUserCredentialById } from "../../user-credentials/get-user-credential-by-id.api.js";
 import { listTotalsVisitorBy } from "../../../adaptive-research/get-total-visitors-by.js";
 import { clickhouseClient } from "../../../lib/clickhouse-client.js";
+import { getUserWebsiteById } from "../../user-websites/get-user-website-by-id.api.js";
 
 export const handler = middy(async (event) => {
   try {
     const { websiteId, period, from, to, groupBy } = JSON.parse(event.body);
 
-    const website = await getUserCredentialById(websiteId);
+    const website = await getUserWebsiteById(websiteId);
 
     const timezoneName = website?.timezoneName || "America/Montreal";
 
