@@ -4,7 +4,7 @@ import { GetCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { apiConfig } from "../../constants/api-config.js";
 import { tableNames } from "../../constants/table-names.js";
 import { cryptoV2 } from "../../lib/crypto-v2.js";
-import { credentialsPrefix } from "../user-credentials/user-credentials.constants.js";
+import { credentialsPrefix } from "../user-websites/user-websites.constants.js";
 
 const ddbClient = new DynamoDBClient({
   region: apiConfig.region,

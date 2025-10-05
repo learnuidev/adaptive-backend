@@ -60,6 +60,21 @@ Each Lambda function follows this pattern:
 - Separate schema validation using Zod
 - Error handling with proper HTTP status codes
 
+### 2.3 Middy Middleware Usage
+
+All Lambda handler functions must be wrapped with Middy middleware to handle CORS:
+
+```typescript
+import middy from "@middy/core";
+import cors from "@middy/http-cors";
+
+export const handler = middy(async (event: any) => {
+  // Handler logic here
+}).use(cors());
+```
+
+This ensures proper CORS headers are added to all API responses.
+
 ---
 
 ## 3. Naming Conventions

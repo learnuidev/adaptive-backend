@@ -96,7 +96,7 @@ functions:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   list-user-websites:
     timeout: 30
-    handler: dist/functions/user-credentials/list-user-credentials.handler
+    handler: dist/functions/user-websites/list-user-websites.handler
     events:
       - http:
           path: /v1/list-user-websites
@@ -110,7 +110,7 @@ functions:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   add-user-website:
     timeout: 30
-    handler: dist/functions/user-credentials/add-user-website.handler
+    handler: dist/functions/user-websites/add-user-website.handler
     events:
       - http:
           path: /v1/add-user-website
@@ -124,7 +124,7 @@ functions:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   update-user-website:
     timeout: 30
-    handler: dist/functions/user-credentials/update-user-website.handler
+    handler: dist/functions/user-websites/update-user-website.handler
     events:
       - http:
           path: /v1/update-user-website
@@ -138,7 +138,7 @@ functions:
       USER_CREDENTIALS_TABLE: !Ref UserCredentialsTable
   delete-user-website:
     timeout: 30
-    handler: dist/functions/user-credentials/delete-user-website.handler
+    handler: dist/functions/user-websites/delete-user-website.handler
     events:
       - http:
           path: /v1/delete-user-website

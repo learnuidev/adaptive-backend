@@ -1,6 +1,8 @@
+import middy from "@middy/core";
+import cors from "@middy/http-cors";
 import { createApiKeyApi } from "./create-api-key.api.js";
 
-export const handler = async (event: any) => {
+export const handler = middy(async (event: any) => {
   console.log("=== create-api-key handler started ===");
   console.log("Received event:", JSON.stringify(event, null, 2));
 
@@ -28,4 +30,4 @@ export const handler = async (event: any) => {
       body: JSON.stringify({ error: "Internal server error" }),
     };
   }
-};
+}).use(cors());

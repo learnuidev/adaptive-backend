@@ -4,9 +4,10 @@ import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { apiConfig } from "../../constants/api-config.js";
 import { tableNames } from "../../constants/table-names.js";
 import { removeNull } from "../../utils/remove-null.js";
-import { credentialsPrefix } from "../user-credentials/user-credentials.constants.js";
+
 import { cryptoV2, generateApiSecret } from "../../lib/crypto-v2.js";
 import { ulid } from "ulid";
+import { credentialsPrefix } from "../user-websites/user-websites.constants.js";
 
 const ddbClient = new DynamoDBClient({
   region: apiConfig.region,
