@@ -80,6 +80,6 @@ export const rotateApiKeyApi = async ({
   // Return the new API secret (only time it's shown)
   return {
     ...updateResult.Attributes,
-    apiSecret: `${credentialsPrefix}${id}${newApiSecret}`,
+    apiKey: `${credentialsPrefix}${id}${newApiSecret}`,
   };
 };
