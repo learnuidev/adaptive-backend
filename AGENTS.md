@@ -38,9 +38,10 @@ All the source code is defined in `/src` directory. Breakdown of subdirectories:
 - `/src/constants`: All the constant values used in the application (API config, table names)
 - `/src/functions`: Lambda functions organized by domain:
   - `/analytics`: Analytics endpoints (events, features, cohorts, journeys, notes)
+  - `/api-keys`: API key management (create, list, get, rotate, delete)
   - `/auth`: Authorization and authentication handlers
   - `/user`: User management functions
-  - `/user-credentials`: User credential management
+  - `/user-websites`: User website management (add, list, get, update, delete)
 - `/src/lib`: Contains third-party libraries and utilities:
   - `clickhouse-client.ts`: Clickhouse DB client wrapper
   - `crypto-v2.ts`: Encryption/decryption utilities
@@ -53,6 +54,7 @@ All the source code is defined in `/src` directory. Breakdown of subdirectories:
 ### 2.2 Lambda Function Structure
 
 Each Lambda function follows this pattern:
+
 - `handler.ts`: Main Lambda handler with Middy middleware
 - `api.ts`: Core business logic and database operations
 - Separate schema validation using Zod
@@ -76,12 +78,14 @@ Always use kebab-case for file names and function names.
 ## 4. AWS Infrastructure
 
 The project uses Serverless Framework with these resources:
-- **DynamoDB Tables:** IdentityTableV2, EventsTableV2, FeatureTableV2, FeatureVersionTable, UserCredentialsTable, CohortTable, NotesTable, UsersTable, UserPreferenceTable
+
+- **DynamoDB Tables:** IdentityTableV2, EventsTableV2, FeatureTableV2, FeatureVersionTable, UserCredentialsTable, ApiKeysTable, CohortTable, NotesTable, UsersTable, UserPreferenceTable
 - **Cognito User Pool:** User authentication with email-based sign-up
 - **KMS Key:** For encryption/decryption operations
 - **API Gateway:** RESTful API endpoints with CORS enabled
 
 ### 4.1 Environment Variables
+
 - Region-specific configuration
 - Stage-based deployment (dev, prod)
 - Table names and resource ARNs
