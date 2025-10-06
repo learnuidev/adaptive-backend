@@ -11,7 +11,9 @@ This project uses a comprehensive documentation system with detailed guides orga
 5. **[Security & Performance](./.agents/system/security-performance.md)** - Security best practices and performance guidelines
 6. **[Development Workflow](./.agents/system/development-workflow.md)** - Build and deployment processes
 7. **[Documentation Standards](./.agents/system/documentation-standards.md)** - Documentation guidelines and conventions
-8. **[Agent Goals](./.agents/system/agent-goals.md)** - AI agent workflow and task management
+8. **[Analytics Data Model](./.agents/system/analytics-data-model.md)** - ClickHouse event and identity table schemas
+9. **[Building Analytics Services](./.agents/system/building_a_analytics_service.md)** - Step-by-step guide for creating new analytics functions
+10. **[Agent Goals](./.agents/system/agent-goals.md)** - AI agent workflow and task management
 
 ## Quick Reference
 
