@@ -1,119 +1,22 @@
-import dotenv from "dotenv";
-import { createClient } from "@clickhouse/client";
-
-dotenv.config();
+import { testClient } from "./test-client.mjs";
 
 const formatDateForClickHouse = (date) => {
   return date.toISOString().replace("T", " ").replace("Z", "").slice(0, 23);
 };
 
-// Mock ClickHouse client for testing
-const mockClickHouseClient = {
-  query: async ({ query, format }) => {
-    console.log("Mock Query:", query.substring(0, 100) + "...");
-    
-    // Return mock data based on the query pattern
-    if (query.includes("GROUP BY visitor_id, session_id")) {
-      // Mock live users data
-      return {
-        json: async () => [
-          {
-            visitor_id: "visitor_123",
-            session_id: "session_456",
-            identity_id: "identity_789",
-            email: "test@example.com",
-            last_activity: "2025-01-20 10:30:00.000",
-            session_start: "2025-01-20 10:15:00.000",
-            event_count: 5,
-            last_page: "https://example.com/dashboard",
-            last_event_name: "pageview",
-            country: "US",
-            city: "New York",
-            browser_name: "Chrome",
-            os_name: "macOS",
-            device_model: "MacBook Pro",
-            event_types: ["pageview", "click", "scroll"],
-            pages_visited: ["https://example.com/home", "https://example.com/dashboard"],
-          },
-          {
-            visitor_id: "visitor_456",
-            session_id: "session_789",
-            identity_id: "",
-            email: "",
-            last_activity: "2025-01-20 10:25:00.000",
-            session_start: "2025-01-20 10:20:00.000",
-            event_count: 3,
-            last_page: "https://example.com/about",
-            last_event_name: "click",
-            country: "CA",
-            city: "Toronto",
-            browser_name: "Safari",
-            os_name: "iOS",
-            device_model: "iPhone",
-            event_types: ["pageview", "click"],
-            pages_visited: ["https://example.com/home", "https://example.com/about"],
-          },
-        ]
-      };
-    }
-    
-    if (query.includes("total_live_visitors")) {
-      // Mock summary data
-      return {
-        json: async () => [
-          {
-            total_live_visitors: 2,
-            total_active_sessions: 2,
-            total_events: 8,
-            total_identified_users: 1,
-            total_countries: 2,
-            total_cities: 2,
-            avg_events_per_session: 4,
-            max_events_in_session: 5,
-          }
-        ]
-      };
-    }
-    
-    if (query.includes("GROUP BY country, region, city")) {
-      // Mock geography data
-      return {
-        json: async () => [
-          {
-            country: "US",
-            region: "NY",
-            city: "New York",
-            visitor_count: 1,
-            session_count: 1,
-            event_count: 5,
-          },
-          {
-            country: "CA",
-            region: "ON",
-            city: "Toronto",
-            visitor_count: 1,
-            session_count: 1,
-            event_count: 3,
-          },
-        ]
-      };
-    }
-    
-    // Default mock response
-    return {
-      json: async () => []
-    };
-  }
-};
-
 // Test function
 async function testGetLiveUsers() {
-  console.log("🧪 Testing getLiveUsers function...\n");
-  
-  // Test the ClickHouse query directly with mock data
+  console.log(
+    "🧪 Testing getLiveUsers function with real ClickHouse client...\n"
+  );
+
   try {
     // Test 1: Get live users query
     console.log("📊 Test 1: Testing live users query");
+    const now = new Date();
+    const thresholdTime = new Date(now.getTime() - 30 * 60 * 1000); // 30 minutes ago
+    const thresholdString = formatDateForClickHouse(thresholdTime);
+
     const query = `
       SELECT 
         visitor_id,
@@ -133,16 +36,32 @@ async function testGetLiveUsers() {
         groupArray(DISTINCT event_name) as event_types,
         groupArray(DISTINCT href) as pages_visited
       FROM event
-      WHERE website_id = 'test-website-id'
-        AND created_at >= '2025-01-20 09:30:00.000'
+      WHERE website_id = '01K66XSK34CXMV0TT8ATS953W0'
+        AND created_at >= '${thresholdString}'
       GROUP BY visitor_id, session_id, identity_id, email
       ORDER BY last_activity DESC
+      LIMIT 100
     `;
-    
-    console.log("✅ Query structure validated");
-    
+
+    const liveUsersResult = await testClient.query({
+      query,
+      format: "JSONEachRow",
+    });
+
+    const liveUsers = await liveUsersResult.json();
+    console.log(
+      `✅ Live users query executed successfully. Found ${liveUsers.length} live users`
+    );
+
+    if (liveUsers.length > 0) {
+      console.log(
+        "Sample live user data:",
+        JSON.stringify(liveUsers[0], null, 2)
+      );
+    }
+
     // Test 2: Summary query
-    console.log("📈 Test 2: Testing summary query");
+    console.log("\n📈 Test 2: Testing summary query");
     const summaryQuery = `
       SELECT 
         count(DISTINCT visitor_id) as total_live_visitors,
@@ -162,16 +81,25 @@ async function testGetLiveUsers() {
           city,
           count(*) as event_count
         FROM event
-        WHERE website_id = 'test-website-id'
-          AND created_at >= '2025-01-20 09:30:00.000'
+        WHERE website_id = '01K66XSK34CXMV0TT8ATS953W0'
+          AND created_at >= '${thresholdString}'
         GROUP BY visitor_id, session_id, identity_id, country, city
       )
     `;
-    
-    console.log("✅ Summary query structure validated");
-    
+
+    const summaryResult = await testClient.query({
+      query: summaryQuery,
+      format: "JSONEachRow",
+    });
+
+    const summary = await summaryResult.json();
+    console.log("✅ Summary query executed successfully");
+    if (summary.length > 0) {
+      console.log("Summary data:", JSON.stringify(summary[0], null, 2));
+    }
+
     // Test 3: Geography query
-    console.log("🌍 Test 3: Testing geography query");
+    console.log("\n🌍 Test 3: Testing geography query");
     const geographyQuery = `
       SELECT 
         country,
@@ -181,62 +109,62 @@ async function testGetLiveUsers() {
         count(DISTINCT session_id) as session_count,
         count(*) as event_count
       FROM event
-      WHERE website_id = 'test-website-id'
-        AND created_at >= '2025-01-20 09:30:00.000'
+      WHERE website_id = '01K66XSK34CXMV0TT8ATS953W0'
+        AND created_at >= '${thresholdString}'
       GROUP BY country, region, city
       ORDER BY visitor_count DESC
+      LIMIT 20
     `;
-    
-    console.log("✅ Geography query structure validated");
-    
-    // Test 4: Mock data processing
-    console.log("🔧 Test 4: Testing data processing logic");
-    const now = new Date();
-    const thresholdTime = new Date(now.getTime() - 30 * 60 * 1000);
-    const thresholdString = formatDateForClickHouse(thresholdTime);
-    
-    const mockUsers = [
-      {
-        visitor_id: "visitor_123",
-        session_id: "session_456",
-        identity_id: "identity_789",
-        email: "test@example.com",
-        last_activity: "2025-01-20 10:30:00.000",
-        session_start: "2025-01-20 10:15:00.000",
-        event_count: 5,
-        last_page: "https://example.com/dashboard",
-        last_event_name: "pageview",
-        country: "US",
-        city: "New York",
-        browser_name: "Chrome",
-        os_name: "macOS",
-        device_model: "MacBook Pro",
-        event_types: ["pageview", "click", "scroll"],
-        pages_visited: ["https://example.com/home", "https://example.com/dashboard"],
-      }
-    ];
-    
-    // Test data transformation logic
-    const processedUsers = mockUsers.map((user) => ({
-      ...user,
-      session_duration_minutes: Math.floor(
-        (new Date(user.last_activity).getTime() - new Date(user.session_start).getTime()) / (1000 * 60)
-      ),
-      is_active: true,
-      time_since_last_activity_minutes: Math.floor(
-        (now.getTime() - new Date(user.last_activity).getTime()) / (1000 * 60)
-      ),
-    }));
-    
-    console.log("✅ Data processing logic validated:", JSON.stringify(processedUsers[0], null, 2));
-    
-    console.log("\n🎉 All tests completed successfully!");
-    
+
+    const geographyResult = await testClient.query({
+      query: geographyQuery,
+      format: "JSONEachRow",
+    });
+
+    const geography = await geographyResult.json();
+    console.log(
+      `✅ Geography query executed successfully. Found ${geography.length} locations`
+    );
+
+    if (geography.length > 0) {
+      console.log(
+        "Sample geography data:",
+        JSON.stringify(geography[0], null, 2)
+      );
+    }
+
+    // Test 4: Data processing logic
+    console.log("\n🔧 Test 4: Testing data processing logic");
+    if (liveUsers.length > 0) {
+      const processedUsers = liveUsers.map((user) => ({
+        ...user,
+        session_duration_minutes: Math.floor(
+          (new Date(user.last_activity).getTime() -
+            new Date(user.session_start).getTime()) /
+            (1000 * 60)
+        ),
+        is_active: true,
+        time_since_last_activity_minutes: Math.floor(
+          (now.getTime() - new Date(user.last_activity).getTime()) / (1000 * 60)
+        ),
+      }));
+
+      console.log("✅ Data processing logic validated");
+      console.log(
+        "Sample processed user:",
+        JSON.stringify(processedUsers[0], null, 2)
+      );
+    } else {
+      console.log("ℹ️ No live users found to test data processing logic");
+    }
+
+    console.log(
+      "\n🎉 All tests completed successfully with real ClickHouse client!"
+    );
   } catch (error) {
     console.error("❌ Test failed with error:", error);
+    console.error("Error details:", error.message);
   }
-  
-  
 }
 
 // Run the test

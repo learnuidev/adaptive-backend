@@ -188,71 +188,55 @@ export const handler = middy(async (event: any) => {
 
 ## Step 4: Create Test File
 
-Create a test file in `__tests/<function-name>.mjs` to test against mock data.
+Create a test file in `__tests/<function-name>.mjs` to test against real ClickHouse data.
 
 ### Test Structure
 
 ```javascript
-import { clickhouse } from "../src/adaptive-research/clickhouse.js";
-import { buildDateRange } from "../src/adaptive-research/utils.js";
+import { testClient } from "./test-client.mjs";
 
-// Mock ClickHouse client for testing
-const mockClickHouseClient = {
-  query: async ({ query, format }) => {
-    console.log("Mock Query:", query);
-    
-    // Return mock data based on the query
-    if (query.includes("your specific query pattern")) {
-      return {
-        json: async () => [
-          {
-            // Mock data structure matching your query result
-            total: 100,
-            date: "2025-01-01",
-            // other fields
-          }
-        ]
-      };
-    }
-    
-    // Default mock response
-    return {
-      json: async () => []
-    };
-  }
+const formatDateForClickHouse = (date) => {
+  return date.toISOString().replace("T", " ").replace("Z", "").slice(0, 23);
 };
 
 // Test function
 async function testYourAnalyticsFunction() {
-  console.log("Testing analytics function...");
-  
-  const client = clickhouse({
-    url: "mock-url",
-    username: "mock-user", 
-    password: "mock-pass"
-  });
-  
-  // Override client with mock
-  client.client = mockClickHouseClient;
+  console.log("Testing analytics function with real ClickHouse client...");
   
   try {
-    const result = await client.getAnalyticsData(
-      mockClickHouseClient,
-      "test-website-id",
-      "week"
-    );
+    const now = new Date();
+    const thresholdTime = new Date(now.getTime() - 30 * 60 * 1000); // 30 minutes ago
+    const thresholdString = formatDateForClickHouse(thresholdTime);
     
-    console.log("Test Result:", JSON.stringify(result, null, 2));
+    const query = `
+      SELECT 
+        -- Your SELECT columns here
+        COUNT(*) as total
+      FROM event
+      WHERE website_id = '01K66XSK34CXMV0TT8ATS953W0'
+        AND created_at >= '${thresholdString}'
+      GROUP BY -- Your grouping columns
+      ORDER BY -- Your ordering
+    `;
+    
+    const result = await testClient.query({
+      query,
+      format: "JSONEachRow",
+    });
+    
+    const data = await result.json();
+    console.log("Test Result:", JSON.stringify(data, null, 2));
     
     // Add assertions
-    if (Array.isArray(result) && result.length > 0) {
+    if (Array.isArray(data) && data.length > 0) {
       console.log("✅ Test passed - data returned");
     } else {
-      console.log("❌ Test failed - no data returned");
+      console.log("ℹ️ No data returned - this may be expected");
     }
     
   } catch (error) {
     console.error("❌ Test failed with error:", error);
+    console.error("Error details:", error.message);
   }
 }
 
@@ -263,12 +247,19 @@ testYourAnalyticsFunction();
 ### Running Tests
 
 ```bash
-# Run your specific test
+# Run your specific test with real ClickHouse data
 node __tests/your-function-name.mjs
 
 # Run all tests
 npm run test
 ```
+
+### Important Notes
+
+- Tests now use real ClickHouse data via `testClient` instead of mock data
+- Ensure your environment variables are properly configured in `test-client.mjs`
+- Use real website IDs for meaningful test results
+- Tests may return no data if there are no recent events for the specified website ID
 
 ## Best Practices
 
@@ -288,9 +279,10 @@ npm run test
 - Consider data volume when writing queries
 
 ### 4. Testing
-- Test with realistic mock data
+- Test with real ClickHouse data using `testClient` from `./test-client.mjs`
+- Use actual website IDs like `01K66XSK34CXMV0TT8ATS953W0` for meaningful tests
 - Cover edge cases and error scenarios
-- Validate query structure and results
+- Validate query structure and results against real data
 
 ### 5. Documentation
 - Document function parameters and return types
