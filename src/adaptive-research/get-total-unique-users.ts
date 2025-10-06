@@ -40,7 +40,6 @@ const sample_clickhouse_event = {
 type HourlyRecord = { hour: string; total: number };
 type DailyRecord = { day: string; total: number };
 type MonthlyRecord = { month: number; total: number };
-type TotalRecord = { total: number };
 
 type CurrentPrevious<T> = {
   current: T[];
@@ -49,20 +48,16 @@ type CurrentPrevious<T> = {
 
 // Discriminated union mapping period to return type
 type PeriodResultMap = {
-  last24h: CurrentPrevious<HourlyRecord>;
-  week: CurrentPrevious<DailyRecord>;
-  wtd: CurrentPrevious<DailyRecord>;
-  day: CurrentPrevious<DailyRecord>;
-  yesterday: CurrentPrevious<DailyRecord>;
   today: CurrentPrevious<DailyRecord>;
-  month: CurrentPrevious<DailyRecord>;
-  mtd: CurrentPrevious<DailyRecord>;
+  yesterday: CurrentPrevious<DailyRecord>;
+  last24h: CurrentPrevious<HourlyRecord>;
   last7d: CurrentPrevious<DailyRecord>;
   last30d: CurrentPrevious<DailyRecord>;
   last12m: CurrentPrevious<DailyRecord>;
+  wtd: CurrentPrevious<DailyRecord>;
+  mtd: CurrentPrevious<DailyRecord>;
   ytd: CurrentPrevious<MonthlyRecord>;
-  year: CurrentPrevious<MonthlyRecord>;
-  all: CurrentPrevious<TotalRecord>;
+  all: CurrentPrevious<MonthlyRecord>;
   custom: CurrentPrevious<DailyRecord>;
 };
 
@@ -78,6 +73,7 @@ export async function getTotalUniqueUsers<P extends FilterPeriod>({
   period: P;
   from: string;
   to: string;
+  frequency?: "hourly" | "daily" | "weekly" | "monthly";
 }): Promise<PeriodResultMap[P]> {
   const { startStart, startEnd, previousStartStart, previousStartEnd } =
     buildDateRange({ period, from, to });
@@ -88,6 +84,7 @@ export async function getTotalUniqueUsers<P extends FilterPeriod>({
   // Determine grouping based on period
   if (period === "last24h" || period === "today" || period === "yesterday") {
     // Group by hour for last 24 hours, today, and yesterday
+    // can only be hour
     currentQuery = `
       SELECT toStartOfHour(created_at) as hour, COUNT(DISTINCT email) as total
       FROM event
@@ -106,8 +103,8 @@ export async function getTotalUniqueUsers<P extends FilterPeriod>({
       GROUP BY hour
       ORDER BY hour ASC
     `;
-  } else if (period === "week" || period === "wtd" || period === "day") {
-    // Group by day for week, wtd, day
+  } else if (["last7d", "wtd", "mtd", "last7d", "last30d"]?.includes(period)) {
+    // Group by day for week, wtd, day, yesterday, today
     currentQuery = `
       SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
       FROM event
@@ -126,33 +123,7 @@ export async function getTotalUniqueUsers<P extends FilterPeriod>({
       GROUP BY day
       ORDER BY day ASC
     `;
-  } else if (
-    period === "month" ||
-    period === "mtd" ||
-    period === "last7d" ||
-    period === "last30d" ||
-    period === "last12m"
-  ) {
-    // Group by day for month, mtd, last7d, last30d, last12m
-    currentQuery = `
-      SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
-      FROM event
-      WHERE website_id = '${websiteId}'
-        AND created_at >= '${startStart}'
-        AND created_at <= '${startEnd}'
-      GROUP BY day
-      ORDER BY day ASC
-    `;
-    previousQuery = `
-      SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
-      FROM event
-      WHERE website_id = '${websiteId}'
-        AND created_at >= '${previousStartStart}'
-        AND created_at <= '${previousStartEnd}'
-      GROUP BY day
-      ORDER BY day ASC
-    `;
-  } else if (period === "ytd" || period === "year") {
+  } else if (period === "ytd" || period === "all" || period === "last12m") {
     // Group by month for year or ytd
     currentQuery = `
       SELECT toYYYYMM(created_at) as month, COUNT(DISTINCT email) as total
@@ -171,19 +142,6 @@ export async function getTotalUniqueUsers<P extends FilterPeriod>({
         AND created_at <= '${previousStartEnd}'
       GROUP BY month
       ORDER BY month ASC
-    `;
-  } else if (period === "all") {
-    // No grouping for all time
-    currentQuery = `
-      SELECT COUNT(DISTINCT email) as total
-      FROM event
-      WHERE website_id = '${websiteId}'
-    `;
-    previousQuery = `
-      SELECT COUNT(DISTINCT email) as total
-      FROM event
-      WHERE website_id = '${websiteId}'
-        AND created_at <= '${previousStartEnd}'
     `;
   } else if (period === "custom") {
     // Custom period
@@ -206,20 +164,24 @@ export async function getTotalUniqueUsers<P extends FilterPeriod>({
       ORDER BY day ASC
     `;
   } else {
-    // Default to total count for other periods
+    // Custom period
     currentQuery = `
-      SELECT COUNT(DISTINCT email) as total
+      SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
         AND created_at >= '${startStart}'
         AND created_at <= '${startEnd}'
+      GROUP BY day
+      ORDER BY day ASC
     `;
     previousQuery = `
-      SELECT COUNT(DISTINCT email) as total
+      SELECT toDate(created_at) as day, COUNT(DISTINCT email) as total
       FROM event
       WHERE website_id = '${websiteId}'
         AND created_at >= '${previousStartStart}'
         AND created_at <= '${previousStartEnd}'
+      GROUP BY day
+      ORDER BY day ASC
     `;
   }
 
