@@ -30,7 +30,10 @@ export const getLiveUsersByWebsiteId = async (
       any(href) as last_page,
       any(event_name) as last_event_name,
       any(country) as country,
+      any(region) as region,
       any(city) as city,
+      any(latitude) as latitude,
+      any(longitude) as longitude,
       any(browser_name) as browser_name,
       any(os_name) as os_name,
       any(device_model) as device_model,
@@ -174,7 +177,10 @@ export interface LiveUser {
   last_page: string;
   last_event_name: string;
   country: string;
+  region: string;
   city: string;
+  latitude: number;
+  longitude: number;
   browser_name: string;
   os_name: string;
   device_model: string;
