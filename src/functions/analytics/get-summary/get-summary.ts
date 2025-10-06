@@ -9,7 +9,12 @@ export const handler = middy(async (event) => {
 
     console.log("yoo");
 
-    const summary = await getSummaryApi({ websiteId, period, from, to });
+    const summary = await getSummaryApi({
+      websiteId,
+      period,
+      from: new Date(from),
+      to: new Date(to),
+    });
     const response = {
       statusCode: 200,
       body: JSON.stringify(summary),
