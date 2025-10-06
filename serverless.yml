@@ -366,6 +366,18 @@ functions:
             name: CognitoAuthorizer
             type: COGNITO_USER_POOLS
             arn: !GetAtt CognitoUserPool.Arn
+  get-live-users:
+    timeout: 30
+    handler: dist/functions/analytics/get-live-users/get-live-users.handler
+    events:
+      - http:
+          path: /v1/analytics/get-live-users
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
   list-events-by-email:
     timeout: 30
     handler: dist/functions/analytics/list-events-by-email/list-events-by-email.handler

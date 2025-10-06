@@ -16,6 +16,12 @@ import {
   mapDDBEvent,
 } from "./events.js";
 
+import {
+  getLiveUsersByWebsiteId,
+  getLiveUserSummaryByWebsiteId,
+  getLiveUsersByGeography,
+} from "./get-live-users-by-website-id.js";
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -58,6 +64,10 @@ export const clickhouse = (params: any) => {
     getTotalViewsByWebsiteId,
     getTotalVisitorsByGeo,
     getFunnelData,
+    // Live User Functions
+    getLiveUsersByWebsiteId,
+    getLiveUserSummaryByWebsiteId,
+    getLiveUsersByGeography,
   };
 };
 
