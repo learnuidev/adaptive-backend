@@ -386,10 +386,10 @@ functions:
           path: /v0/analytics/get-live-users
           method: post
           cors: true
-          authorizer:
-            name: CognitoAuthorizer
-            type: COGNITO_USER_POOLS
-            arn: !GetAtt CognitoUserPool.Arn
+          # authorizer:
+          #   name: CognitoAuthorizer
+          #   type: COGNITO_USER_POOLS
+          #   arn: !GetAtt CognitoUserPool.Arn
   list-events-by-email:
     timeout: 30
     handler: dist/functions/analytics/list-events-by-email/list-events-by-email.handler
