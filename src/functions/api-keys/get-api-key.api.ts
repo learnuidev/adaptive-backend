@@ -15,12 +15,12 @@ const dynamodb = DynamoDBDocumentClient.from(ddbClient);
 
 export const getApiKeyApi = async ({
   id,
-  userId,
+  // userId,
 }: {
   id: string;
-  userId: string;
+  // userId: string;
 }) => {
-  console.log(`=== Getting API key with id: ${id}, userId: ${userId} ===`);
+  // console.log(`=== Getting API key with id: ${id}, userId: ${userId} ===`);
 
   const crypto = cryptoV2({ keyArn: apiConfig.kmsArn || "" });
 
@@ -39,10 +39,10 @@ export const getApiKeyApi = async ({
   }
 
   // Verify that the user owns this API key
-  if (result.Item.userId !== userId) {
-    console.log(`=== User ${userId} does not own API key ${id} ===`);
-    return null;
-  }
+  // if (result.Item.userId !== userId) {
+  //   console.log(`=== User ${userId} does not own API key ${id} ===`);
+  //   return null;
+  // }
 
   console.log(`=== Successfully retrieved API key ${id} ===`);
 
