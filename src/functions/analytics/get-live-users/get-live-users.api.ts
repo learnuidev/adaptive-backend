@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { clickhouseClient } from "../../../lib/clickhouse-client.js";
 
+// Filter schema for event attributes
+const EventAttributeFilter = z.object({
+  key: z.string().min(1, "Filter key is required"),
+  operator: z.enum(["eq", "ne", "contains", "startsWith", "endsWith", "gt", "gte", "lt", "lte", "in", "nin"]),
+  value: z.union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number())]),
+});
+
 // Input validation schema
 const GetLiveUsersInput = z.object({
   websiteId: z.string().min(1, "Website ID is required"),
@@ -8,6 +15,7 @@ const GetLiveUsersInput = z.object({
   includeSummary: z.boolean().optional().default(true),
   includeGeography: z.boolean().optional().default(false),
   limit: z.number().int().min(1).max(1000).optional().default(100),
+  filters: z.array(EventAttributeFilter).optional().default([]),
 });
 
 export const getLiveUsersApi = async (input: any) => {
@@ -20,14 +28,16 @@ export const getLiveUsersApi = async (input: any) => {
     includeSummary,
     includeGeography,
     limit,
+    filters,
   } = validatedInput;
 
   try {
-    // Get live users
+    // Get live users with filters
     const liveUsers = await clickhouseClient.getLiveUsersByWebsiteId(
       clickhouseClient.client,
       websiteId,
-      timeWindowMinutes
+      timeWindowMinutes,
+      filters
     );
 
     // Apply limit
