@@ -4,8 +4,26 @@ import { clickhouseClient } from "../../../lib/clickhouse-client.js";
 // Filter schema for event attributes
 const EventAttributeFilter = z.object({
   key: z.string().min(1, "Filter key is required"),
-  operator: z.enum(["eq", "ne", "contains", "startsWith", "endsWith", "gt", "gte", "lt", "lte", "in", "nin"]),
-  value: z.union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number())]),
+  operator: z.enum([
+    "eq",
+    "ne",
+    "contains",
+    "startsWith",
+    "endsWith",
+    "gt",
+    "gte",
+    "lt",
+    "lte",
+    "in",
+    "nin",
+  ]),
+  value: z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.array(z.string()),
+    z.array(z.number()),
+  ]),
 });
 
 // Input validation schema
@@ -61,7 +79,8 @@ export const getLiveUsersApi = async (input: any) => {
       const summary = await clickhouseClient.getLiveUserSummaryByWebsiteId(
         clickhouseClient.client,
         websiteId,
-        timeWindowMinutes
+        timeWindowMinutes,
+        filters
       );
       response.summary = summary;
     }
@@ -71,7 +90,8 @@ export const getLiveUsersApi = async (input: any) => {
       const geography = await clickhouseClient.getLiveUsersByGeography(
         clickhouseClient.client,
         websiteId,
-        timeWindowMinutes
+        timeWindowMinutes,
+        filters
       );
       response.geography = geography;
     }

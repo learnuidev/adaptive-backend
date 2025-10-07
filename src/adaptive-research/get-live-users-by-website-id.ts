@@ -221,17 +221,22 @@ export const getLiveUsersByWebsiteId = async (
  * @param clickHouseClient - ClickHouse client instance
  * @param websiteId - Website identifier
  * @param timeWindowMinutes - Time window in minutes to consider a user "live" (default: 30)
+ * @param filters - Array of filters to apply to event attributes (optional)
  * @returns Promise<LiveUserSummary> - Summary of live user statistics
  */
 export const getLiveUserSummaryByWebsiteId = async (
   clickHouseClient: any,
   websiteId: string,
-  timeWindowMinutes: number = 30
+  timeWindowMinutes: number = 30,
+  filters: any[] = []
 ) => {
   // Calculate the timestamp threshold
   const now = new Date();
   const thresholdTime = new Date(now.getTime() - timeWindowMinutes * 60 * 1000);
   const thresholdString = formatDateForClickHouse(thresholdTime);
+
+  // Build WHERE conditions from filters
+  const filterConditions = buildFilterConditions(filters);
 
   const query = `
     SELECT 
@@ -254,6 +259,7 @@ export const getLiveUserSummaryByWebsiteId = async (
       FROM event
       WHERE website_id = '${websiteId}'
         AND created_at >= '${thresholdString}'
+        ${filterConditions ? `AND ${filterConditions}` : ""}
       GROUP BY visitor_id, session_id, identity_id, country, city
     )
   `;
@@ -283,18 +289,23 @@ export const getLiveUserSummaryByWebsiteId = async (
  * @param clickHouseClient - ClickHouse client instance
  * @param websiteId - Website identifier
  * @param timeWindowMinutes - Time window in minutes to consider a user "live" (default: 30)
+ * @param filters - Array of filters to apply to event attributes (optional)
  * @returns Promise<GeographicBreakdown[]> - Array of geographic breakdown
  */
 export const getLiveUsersByGeography = async (
   clickHouseClient: any,
   websiteId: string,
-  timeWindowMinutes: number = 30
+  timeWindowMinutes: number = 30,
+  filters: any[] = []
 ) => {
   // Calculate the timestamp threshold
   const thresholdTime = new Date(
     new Date().getTime() - timeWindowMinutes * 60 * 1000
   );
   const thresholdString = formatDateForClickHouse(thresholdTime);
+
+  // Build WHERE conditions from filters
+  const filterConditions = buildFilterConditions(filters);
 
   const query = `
     SELECT 
@@ -307,6 +318,7 @@ export const getLiveUsersByGeography = async (
     FROM event
     WHERE website_id = '${websiteId}'
       AND created_at >= '${thresholdString}'
+      ${filterConditions ? `AND ${filterConditions}` : ""}
     GROUP BY country, region, city
     ORDER BY visitor_count DESC
   `;
