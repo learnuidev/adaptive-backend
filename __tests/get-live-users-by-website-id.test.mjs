@@ -160,6 +160,7 @@ const getLiveUsersByWebsiteId = async (
 
   console.log("filter conditions", filterConditions);
 
+  // Use a subquery to apply filters before aggregation
   const query = `
     SELECT 
       visitor_id,
@@ -181,10 +182,13 @@ const getLiveUsersByWebsiteId = async (
       any(device_model) as device_model,
       groupArray(DISTINCT event_name) as event_types,
       groupArray(DISTINCT href) as pages_visited
-    FROM event
-    WHERE website_id = '${websiteId}'
-      AND created_at >= '${thresholdString}'
-      ${filterConditions ? `AND ${filterConditions}` : ""}
+    FROM (
+      SELECT *
+      FROM event
+      WHERE website_id = '${websiteId}'
+        AND created_at >= '${thresholdString}'
+        ${filterConditions ? `AND ${filterConditions}` : ""}
+    )
     GROUP BY visitor_id, session_id, identity_id, email
     ORDER BY last_activity DESC
   `;
@@ -216,3 +220,8 @@ getLiveUsersByWebsiteId(testClient, "01K66XSK34CXMV0TT8ATS953W0", 30, [
 ]).then((resp) => {
   console.log("yoo", resp);
 });
+// getLiveUsersByWebsiteId(testClient, "01K66XSK34CXMV0TT8ATS953W0", 30, []).then(
+//   (resp) => {
+//     console.log("yoo", resp);
+//   }
+// );

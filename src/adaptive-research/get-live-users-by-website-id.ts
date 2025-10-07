@@ -7,16 +7,16 @@ import { formatDateForClickHouse } from "./utils.js";
  */
 function buildFilterConditions(filters: any[]): string {
   if (!filters || filters.length === 0) {
-    return '';
+    return "";
   }
 
   const conditions: string[] = [];
 
   for (const filter of filters) {
     const { key, operator, value } = filter;
-    
+
     // Handle metadata filters (key starts with 'metadata.')
-    if (key.startsWith('metadata.')) {
+    if (key.startsWith("metadata.")) {
       const metadataKey = key.substring(9); // Remove 'metadata.' prefix
       conditions.push(buildMetadataCondition(metadataKey, operator, value));
     } else {
@@ -24,37 +24,41 @@ function buildFilterConditions(filters: any[]): string {
     }
   }
 
-  return conditions.join(' AND ');
+  return conditions.join(" AND ");
 }
 
 /**
  * Build condition for standard event attributes
  */
-function buildStandardCondition(key: string, operator: string, value: any): string {
+function buildStandardCondition(
+  key: string,
+  operator: string,
+  value: any
+): string {
   const column = escapeColumnName(key);
-  
+
   switch (operator) {
-    case 'eq':
+    case "eq":
       return `${column} = ${escapeValue(value)}`;
-    case 'ne':
+    case "ne":
       return `${column} != ${escapeValue(value)}`;
-    case 'contains':
+    case "contains":
       return `like(${column}, ${escapeValue(`%${value}%`)})`;
-    case 'startsWith':
+    case "startsWith":
       return `like(${column}, ${escapeValue(`${value}%`)})`;
-    case 'endsWith':
+    case "endsWith":
       return `like(${column}, ${escapeValue(`%${value}`)})`;
-    case 'gt':
+    case "gt":
       return `${column} > ${escapeValue(value)}`;
-    case 'gte':
+    case "gte":
       return `${column} >= ${escapeValue(value)}`;
-    case 'lt':
+    case "lt":
       return `${column} < ${escapeValue(value)}`;
-    case 'lte':
+    case "lte":
       return `${column} <= ${escapeValue(value)}`;
-    case 'in':
+    case "in":
       return `${column} IN (${escapeArrayValue(value)})`;
-    case 'nin':
+    case "nin":
       return `${column} NOT IN (${escapeArrayValue(value)})`;
     default:
       throw new Error(`Unsupported operator: ${operator}`);
@@ -64,29 +68,33 @@ function buildStandardCondition(key: string, operator: string, value: any): stri
 /**
  * Build condition for metadata attributes
  */
-function buildMetadataCondition(key: string, operator: string, value: any): string {
+function buildMetadataCondition(
+  key: string,
+  operator: string,
+  value: any
+): string {
   switch (operator) {
-    case 'eq':
+    case "eq":
       return `mapContains(metadata, ${escapeValue(key)}) AND metadata[${escapeValue(key)}] = ${escapeValue(value)}`;
-    case 'ne':
+    case "ne":
       return `NOT mapContains(metadata, ${escapeValue(key)}) OR metadata[${escapeValue(key)}] != ${escapeValue(value)}`;
-    case 'contains':
+    case "contains":
       return `mapContains(metadata, ${escapeValue(key)}) AND like(metadata[${escapeValue(key)}], ${escapeValue(`%${value}%`)})`;
-    case 'startsWith':
+    case "startsWith":
       return `mapContains(metadata, ${escapeValue(key)}) AND like(metadata[${escapeValue(key)}], ${escapeValue(`${value}%`)})`;
-    case 'endsWith':
+    case "endsWith":
       return `mapContains(metadata, ${escapeValue(key)}) AND like(metadata[${escapeValue(key)}], ${escapeValue(`%${value}`)})`;
-    case 'gt':
+    case "gt":
       return `mapContains(metadata, ${escapeValue(key)}) AND toFloat64OrNull(metadata[${escapeValue(key)}]) > ${escapeValue(value)}`;
-    case 'gte':
+    case "gte":
       return `mapContains(metadata, ${escapeValue(key)}) AND toFloat64OrNull(metadata[${escapeValue(key)}]) >= ${escapeValue(value)}`;
-    case 'lt':
+    case "lt":
       return `mapContains(metadata, ${escapeValue(key)}) AND toFloat64OrNull(metadata[${escapeValue(key)}]) < ${escapeValue(value)}`;
-    case 'lte':
+    case "lte":
       return `mapContains(metadata, ${escapeValue(key)}) AND toFloat64OrNull(metadata[${escapeValue(key)}]) <= ${escapeValue(value)}`;
-    case 'in':
+    case "in":
       return `mapContains(metadata, ${escapeValue(key)}) AND metadata[${escapeValue(key)}] IN (${escapeArrayValue(value)})`;
-    case 'nin':
+    case "nin":
       return `NOT mapContains(metadata, ${escapeValue(key)}) OR metadata[${escapeValue(key)}] NOT IN (${escapeArrayValue(value)})`;
     default:
       throw new Error(`Unsupported operator: ${operator}`);
@@ -108,15 +116,15 @@ function escapeColumnName(column: string): string {
  * Escape values for SQL
  */
 function escapeValue(value: any): string {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     // Escape single quotes and wrap in quotes
     return `'${value.replace(/'/g, "\\'")}'`;
   }
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     return value.toString();
   }
-  if (typeof value === 'boolean') {
-    return value ? '1' : '0';
+  if (typeof value === "boolean") {
+    return value ? "1" : "0";
   }
   throw new Error(`Unsupported value type: ${typeof value}`);
 }
@@ -126,9 +134,9 @@ function escapeValue(value: any): string {
  */
 function escapeArrayValue(value: any[]): string {
   if (!Array.isArray(value)) {
-    throw new Error('Value must be an array for IN/NIN operations');
+    throw new Error("Value must be an array for IN/NIN operations");
   }
-  return value.map(v => escapeValue(v)).join(', ');
+  return value.map((v) => escapeValue(v)).join(", ");
 }
 
 /**
@@ -153,7 +161,7 @@ export const getLiveUsersByWebsiteId = async (
 
   // Build WHERE conditions from filters
   const filterConditions = buildFilterConditions(filters);
-  
+
   const query = `
     SELECT 
       visitor_id,
@@ -175,10 +183,13 @@ export const getLiveUsersByWebsiteId = async (
       any(device_model) as device_model,
       groupArray(DISTINCT event_name) as event_types,
       groupArray(DISTINCT href) as pages_visited
-    FROM event
-    WHERE website_id = '${websiteId}'
-      AND created_at >= '${thresholdString}'
-      ${filterConditions ? `AND ${filterConditions}` : ''}
+    FROM (
+      SELECT *
+      FROM event
+      WHERE website_id = '${websiteId}'
+        AND created_at >= '${thresholdString}'
+        ${filterConditions ? `AND ${filterConditions}` : ""}
+    )
     GROUP BY visitor_id, session_id, identity_id, email
     ORDER BY last_activity DESC
   `;
@@ -194,7 +205,9 @@ export const getLiveUsersByWebsiteId = async (
   return users.map((user: any) => ({
     ...user,
     session_duration_minutes: Math.floor(
-      (new Date(user.last_activity).getTime() - new Date(user.session_start).getTime()) / (1000 * 60)
+      (new Date(user.last_activity).getTime() -
+        new Date(user.session_start).getTime()) /
+        (1000 * 60)
     ),
     is_active: true, // All returned users are active by definition
     time_since_last_activity_minutes: Math.floor(
@@ -251,16 +264,18 @@ export const getLiveUserSummaryByWebsiteId = async (
   });
 
   const result = await resp.json();
-  return result[0] || {
-    total_live_visitors: 0,
-    total_active_sessions: 0,
-    total_events: 0,
-    total_identified_users: 0,
-    total_countries: 0,
-    total_cities: 0,
-    avg_events_per_session: 0,
-    max_events_in_session: 0,
-  };
+  return (
+    result[0] || {
+      total_live_visitors: 0,
+      total_active_sessions: 0,
+      total_events: 0,
+      total_identified_users: 0,
+      total_countries: 0,
+      total_cities: 0,
+      avg_events_per_session: 0,
+      max_events_in_session: 0,
+    }
+  );
 };
 
 /**
@@ -276,7 +291,9 @@ export const getLiveUsersByGeography = async (
   timeWindowMinutes: number = 30
 ) => {
   // Calculate the timestamp threshold
-  const thresholdTime = new Date(new Date().getTime() - timeWindowMinutes * 60 * 1000);
+  const thresholdTime = new Date(
+    new Date().getTime() - timeWindowMinutes * 60 * 1000
+  );
   const thresholdString = formatDateForClickHouse(thresholdTime);
 
   const query = `
