@@ -11,8 +11,11 @@ import { sendInvitationEmail } from "./invitation-utils.js";
 import { CreateInvitationRequest, TeamInvitation } from "adaptive.fyi";
 import { InvitationStatus } from "./team-invitationts.types.js";
 import { tableNames } from "../../constants/table-names.js";
+import { apiConfig } from "../../constants/api-config.js";
 
-const client = new DynamoDBClient({});
+const client = new DynamoDBClient({
+  region: apiConfig.region,
+});
 const docClient = DynamoDBDocumentClient.from(client);
 
 // const TABLE_NAME = tableNames.teamInvitationTable;

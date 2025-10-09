@@ -6,9 +6,11 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { ListInvitationsQuery, TeamInvitation } from "adaptive.fyi";
 import { tableNames } from "../../constants/table-names.js";
-// import { ListInvitationsQuery, TeamInvitation } from "./team-invitations.types.js";
+import { apiConfig } from "../../constants/api-config.js";
 
-const client = new DynamoDBClient({});
+const client = new DynamoDBClient({
+  region: apiConfig.region,
+});
 const docClient = DynamoDBDocumentClient.from(client);
 
 export const listTeamInvitationsApi = async (
@@ -88,8 +90,8 @@ export const listTeamInvitationsApi = async (
     }
 
     // Apply pagination
-    const startIndex = query.offset;
-    const endIndex = startIndex + query.limit;
+    const startIndex = query.offset || 0;
+    const endIndex = startIndex + (query.limit || 0);
     const paginatedInvitations = invitations.slice(startIndex, endIndex);
 
     return {
