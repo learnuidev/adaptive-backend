@@ -39,11 +39,12 @@
   "dependencies": {
     "@aws-crypto/client-node": "^4.0.1",
     "@aws-sdk/client-dynamodb": "^3.896.0",
+    "@aws-sdk/client-ses": "^3.906.0",
     "@aws-sdk/lib-dynamodb": "^3.896.0",
     "@clickhouse/client": "^1.12.1",
     "@middy/core": "^4.6.5",
     "@middy/http-cors": "^4.6.5",
-    "adaptive.fyi": "^2025.10.0-2.16.48",
+    "adaptive.fyi": "^2025.10.0-9.2.38",
     "date-fns": "^2.30.0",
     "dotenv": "^16.5.0",
     "geoip-lite": "^1.4.10",

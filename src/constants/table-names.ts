@@ -13,6 +13,8 @@ export const tableNames = {
   cohortTable: process.env.COHORT_TABLE,
   notesTable: process.env.NOTES_TABLE,
   apiKeysTable: process.env.API_KEYS_TABLE,
+  teamInvitationTable: process.env.TEAM_INVITATIONS_TABLE,
+  teamMembersTable: process.env.TEAM_MEMBERS_TABLE,
 };
 
 export default {

@@ -28,13 +28,5 @@ export const listUserWebsitesApi = async (userId: string) => {
     return [];
   }
 
-  return await Promise.all(
-    items.map(async (item) => {
-      const { plaintext } = await crypto.decrypt(item?.apiSecret);
-      return {
-        ...item,
-        apiSecret: `${credentialsPrefix}${item?.apiKey}${plaintext}`,
-      };
-    })
-  );
+  return items;
 };
