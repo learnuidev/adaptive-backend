@@ -1,10 +1,8 @@
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { Resend } from "resend";
 import { TeamInvitation } from "adaptive.fyi";
 import { apiConfig } from "../../constants/api-config.js";
 
-const sesClient = new SESClient({
-  region: apiConfig.region,
-});
+const resend = new Resend(apiConfig.resendApiKey);
 
 export interface EmailTemplate {
   toAddress: string;
@@ -205,45 +203,25 @@ This is an automated email from Adaptive Analytics. If you didn't expect this in
   ): Promise<void> {
     const emailContent = this.generateInvitationEmail(invitation);
 
-    const params = {
-      Source: this.fromEmail,
-      Destination: {
-        ToAddresses: [emailContent.toAddress],
-      },
-      Message: {
-        Subject: {
-          Data: emailContent.subject,
-          Charset: "UTF-8",
-        },
-        Body: {
-          Html: {
-            Data: emailContent.htmlBody,
-            Charset: "UTF-8",
-          },
-          Text: {
-            Data: emailContent.textBody,
-            Charset: "UTF-8",
-          },
-        },
-      },
-    };
-
     try {
-      const command = new SendEmailCommand(params);
-      const result = await sesClient.send(command);
+      const result = await resend.emails.send({
+        from: this.fromEmail,
+        to: [emailContent.toAddress],
+        subject: emailContent.subject,
+        html: emailContent.htmlBody,
+        text: emailContent.textBody,
+      });
 
       console.log(`Invitation email sent successfully to ${invitation.email}`);
-      console.log(`Message ID: ${result.MessageId}`);
+      console.log(`Message ID: ${result.data?.id}`);
     } catch (error: any) {
       console.error("Failed to send invitation email:", error);
 
       // Provide more specific error information
-      if (error.name === "MessageRejected") {
-        throw new Error(`Email rejected: ${error.message}`);
-      } else if (error.name === "MailFromDomainNotVerified") {
-        throw new Error("Sender email domain not verified in SES");
-      } else if (error.name === "ConfigurationSetDoesNotExist") {
-        throw new Error("SES configuration set not found");
+      if (error.message.includes("invalid_api_key")) {
+        throw new Error("Invalid Resend API key");
+      } else if (error.message.includes("from_domain_not_verified")) {
+        throw new Error("Sender email domain not verified in Resend");
       } else {
         throw new Error(`Failed to send email: ${error.message}`);
       }
@@ -280,32 +258,14 @@ Status: ${status.toUpperCase()}
 ${status === "accepted" ? "They now have access to the website with the assigned role." : ""}
     `;
 
-    const params = {
-      Source: this.fromEmail,
-      Destination: {
-        ToAddresses: [invitation.invitedBy],
-      },
-      Message: {
-        Subject: {
-          Data: subject,
-          Charset: "UTF-8",
-        },
-        Body: {
-          Html: {
-            Data: htmlBody,
-            Charset: "UTF-8",
-          },
-          Text: {
-            Data: textBody,
-            Charset: "UTF-8",
-          },
-        },
-      },
-    };
-
     try {
-      const command = new SendEmailCommand(params);
-      await sesClient.send(command);
+      await resend.emails.send({
+        from: this.fromEmail,
+        to: [invitation.invitedBy],
+        subject: subject,
+        html: htmlBody,
+        text: textBody,
+      });
 
       console.log(
         `Invitation status update email sent to ${invitation.invitedBy}`

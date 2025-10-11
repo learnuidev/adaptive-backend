@@ -39,7 +39,6 @@
   "dependencies": {
     "@aws-crypto/client-node": "^4.0.1",
     "@aws-sdk/client-dynamodb": "^3.896.0",
-    "@aws-sdk/client-ses": "^3.906.0",
     "@aws-sdk/lib-dynamodb": "^3.896.0",
     "@clickhouse/client": "^1.12.1",
     "@middy/core": "^4.6.5",
@@ -49,6 +48,7 @@
     "dotenv": "^16.5.0",
     "geoip-lite": "^1.4.10",
     "lodash": "^4.17.21",
+    "resend": "^6.1.2",
     "ua-parser-js": "^2.0.5",
     "ulid": "^2.3.0",
     "uuid": "^3.4.0",

@@ -11,6 +11,7 @@ const apiConfig = {
   urlEndpoint: process.env.ADAPTIVE_URL_ENDPOINT || urlEndpoint,
   fromEmailAddress: process.env.FROM_EMAIL_ADDRESS || "learnuidev@gmail.com",
   frontendUrl: process.env.FRONTEND_URL,
+  resendApiKey: process.env.RESEND_API_KEY,
 };
 
 export { apiConfig };

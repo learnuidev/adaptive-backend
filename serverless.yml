@@ -36,6 +36,7 @@ provider:
     TEAM_INVITATIONS_TABLE: !Ref TeamInvitationsTable
     TEAM_MEMBERS_TABLE: !Ref TeamMembersTable
     ADAPTIVE_KMS_ARN: !GetAtt AdaptiveKMSKey.Arn
+    IDENTITY_TABLE: !Ref IdentityTableV2
     REGION: ${self:provider.region}
     STAGE: ${self:provider.stage}
     LOG_LEVEL: ${self:custom.logLevel.${self:provider.stage}, self:custom.logLevel.default}
@@ -65,10 +66,7 @@ provider:
         - cloudformation:DescribeStackResource
         - cloudformation:DescribeStacks
       Resource: "*"
-      # Email
-    - Effect: Allow
-      Action: ses:SendEmail
-      Resource: "*"
+      
     - Effect: Allow
       Action: ssm:GetParameters
       Resource: "*"
