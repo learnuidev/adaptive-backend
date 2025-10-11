@@ -1,9 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { createTeamInvitationApi } from "./create-team-invitation.api.js";
+import { createTeamApi, CreateTeamRequestSchema } from "./create-team.api.js";
 
 import middy from "@middy/core";
 import httpCors from "@middy/http-cors";
-import { CreateInvitationRequestSchema } from "adaptive.fyi";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -17,10 +16,17 @@ export const handler = middy(
 
       // Extract user info from Cognito authorizer context
       const userClaims = event.requestContext?.authorizer?.claims;
-      const inviterUserId = userClaims?.sub; // Cognito User ID
+      if (!userClaims) {
+        return {
+          statusCode: 401,
+          body: JSON.stringify({ error: "User authentication required" }),
+        };
+      }
+
+      const ownerUserId = userClaims.sub; // Cognito User ID
 
       const body = JSON.parse(event.body);
-      const validationResult = CreateInvitationRequestSchema.safeParse(body);
+      const validationResult = CreateTeamRequestSchema.safeParse(body);
 
       if (!validationResult.success) {
         return {
@@ -32,22 +38,22 @@ export const handler = middy(
         };
       }
 
-      const invitation = await createTeamInvitationApi(validationResult.data, inviterUserId);
+      const team = await createTeamApi(validationResult.data, ownerUserId);
 
       return {
         statusCode: 201,
         body: JSON.stringify({
           success: true,
-          data: invitation,
+          data: team,
         }),
       };
     } catch (error: any) {
-      console.error("Error creating team invitation:", error);
+      console.error("Error creating team:", error);
 
       return {
         statusCode: 500,
         body: JSON.stringify({
-          error: "Failed to create team invitation",
+          error: "Failed to create team",
           message: error.message,
         }),
       };

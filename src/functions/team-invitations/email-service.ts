@@ -23,8 +23,13 @@ export class InvitationEmailService {
   /**
    * Generate invitation email content
    */
-  private generateInvitationEmail(invitation: TeamInvitation): EmailTemplate {
-    const acceptUrl = `${apiConfig.frontendUrl || "https://adaptive.fyi"}/team`;
+  private generateInvitationEmail(
+    invitation: TeamInvitation & { token?: string }
+  ): EmailTemplate {
+    // Use secure token if available, otherwise fall back to basic URL
+    const token = (invitation as any).token;
+    const acceptUrl = `${apiConfig.frontendUrl}/team/${invitation?.websiteId}?token=${token}`;
+
     const expiryDate = new Date(invitation.expiresAt || "").toLocaleDateString(
       "en-US",
       {
@@ -195,7 +200,9 @@ This is an automated email from Adaptive Analytics. If you didn't expect this in
   /**
    * Send invitation email
    */
-  async sendInvitationEmail(invitation: TeamInvitation): Promise<void> {
+  async sendInvitationEmail(
+    invitation: TeamInvitation & { token?: string }
+  ): Promise<void> {
     const emailContent = this.generateInvitationEmail(invitation);
 
     const params = {

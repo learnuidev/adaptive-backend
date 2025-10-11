@@ -24,7 +24,7 @@ const docClient = DynamoDBDocumentClient.from(client);
  * Convert an accepted invitation to a team member
  */
 export const createTeamMemberFromInvitation = async (
-  invitation: TeamInvitation
+  invitation: TeamInvitation & { acceptedBy?: string }
 ): Promise<TeamMember> => {
   const teamMember: TeamMember = {
     id: ulid(),
@@ -134,7 +134,7 @@ export const updateTeamMemberRole = async (
  * Send invitation email using the email service
  */
 export const sendInvitationEmail = async (
-  invitation: TeamInvitation
+  invitation: TeamInvitation & { token?: string }
 ): Promise<void> => {
   await emailService.sendInvitationEmail(invitation);
 };

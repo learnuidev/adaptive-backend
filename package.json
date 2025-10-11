@@ -44,7 +44,7 @@
     "@clickhouse/client": "^1.12.1",
     "@middy/core": "^4.6.5",
     "@middy/http-cors": "^4.6.5",
-    "adaptive.fyi": "^2025.10.0-9.2.56",
+    "adaptive.fyi": "^2025.10.1-0.23.47",
     "date-fns": "^2.30.0",
     "dotenv": "^16.5.0",
     "geoip-lite": "^1.4.10",

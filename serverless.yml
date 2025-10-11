@@ -539,6 +539,20 @@ functions:
               type: COGNITO_USER_POOLS
               arn: !GetAtt CognitoUserPool.Arn
     # ============================== Notes Routes End =================================
+  # ============================== Team Routes Start ====================
+  create-team:
+    timeout: 30
+    handler: dist/functions/teams/create-team.handler
+    events:
+      - http:
+          path: /v1/teams
+          method: post
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+  # ============================== Team Routes End ====================
   # ============================== Team Invitations Routes Start ====================
   create-team-invitation:
     timeout: 30
@@ -571,6 +585,27 @@ functions:
       - http:
           path: /v1/team-invitations/status
           method: put
+          cors: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: !GetAtt CognitoUserPool.Arn
+  verify-invitation-token:
+    timeout: 30
+    handler: dist/functions/team-invitations/verify-invitation-token.handler
+    events:
+      - http:
+          path: /v1/team-invitations/verify
+          method: post
+          cors: true
+          # Note: This endpoint is public - users can access before authentication
+  accept-invitation:
+    timeout: 30
+    handler: dist/functions/team-invitations/accept-invitation.handler
+    events:
+      - http:
+          path: /v1/team-invitations/accept
+          method: post
           cors: true
           authorizer:
             name: CognitoAuthorizer
