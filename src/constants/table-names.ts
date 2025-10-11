@@ -9,7 +9,7 @@ export const tableNames = {
   featureTable: process.env.FEATURE_TABLE,
   featureVersionTable: process.env.FEATURE_VERSION_TABLE,
   identityTable: process.env.IDENTITY_TABLE,
-  userCredentialsTable: process.env.USER_CREDENTIALS_TABLE,
+  userCredentialsTable: process.env.USER_CREDENTIALS_TABLE || "",
   cohortTable: process.env.COHORT_TABLE,
   notesTable: process.env.NOTES_TABLE,
   apiKeysTable: process.env.API_KEYS_TABLE,
