@@ -97,7 +97,7 @@ export const getLiveUsersApi = async (input: any) => {
     }
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in getLiveUsersApi:", error);
     throw new Error(`Failed to fetch live users: ${error.message}`);
   }

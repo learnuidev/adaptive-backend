@@ -6,7 +6,7 @@ export const handler = middy(async (event: any) => {
   try {
     const body = JSON.parse(event.body || "{}");
     const result = await getLiveUsersApi(body);
-    
+
     return {
       statusCode: 200,
       headers: {
@@ -14,11 +14,11 @@ export const handler = middy(async (event: any) => {
       },
       body: JSON.stringify(result),
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in getLiveUsers handler:", error);
-    
+
     // Handle validation errors
-    if (error.name === 'ZodError') {
+    if (error.name === "ZodError") {
       return {
         statusCode: 400,
         headers: {
@@ -30,7 +30,7 @@ export const handler = middy(async (event: any) => {
         }),
       };
     }
-    
+
     // Handle other errors
     return {
       statusCode: 500,
