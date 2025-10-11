@@ -3,6 +3,7 @@ import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { z } from "zod";
 import { tableNames } from "../../constants/table-names.js";
 import { apiConfig } from "../../constants/api-config.js";
+import { TeamMember } from "adaptive.fyi";
 
 const ddbClient = new DynamoDBClient({ region: apiConfig.region });
 const dynamodb = DynamoDBDocumentClient.from(ddbClient);
@@ -14,20 +15,6 @@ export const ListTeamMembersByWebsiteIdRequestSchema = z.object({
 export type ListTeamMembersByWebsiteIdRequest = z.infer<
   typeof ListTeamMembersByWebsiteIdRequestSchema
 >;
-
-export const TeamMemberSchema = z.object({
-  id: z.string(),
-  userId: z.string(),
-  email: z.string().optional(),
-  websiteId: z.string(),
-  role: z.string(),
-  addedBy: z.string(),
-  addedAt: z.string(),
-  lastActiveAt: z.string(),
-  status: z.string(),
-});
-
-export type TeamMember = z.infer<typeof TeamMemberSchema>;
 
 export const listTeamMembersByWebsiteIdApi = async (
   request: ListTeamMembersByWebsiteIdRequest
